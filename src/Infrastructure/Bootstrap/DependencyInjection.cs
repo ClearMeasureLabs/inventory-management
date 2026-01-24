@@ -1,5 +1,4 @@
-﻿using Application;
-using Application.Features.Containers;
+﻿using Application.Features.Containers;
 using Application.Features.Containers.CreateContainer;
 using Application.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -22,9 +21,9 @@ public static class DependencyInjection
     {
         builder
             .SetBasePath(basePath)
-            .AddJsonFile("config\\local.config.json", optional: false, reloadOnChange: true)
-            .AddEnvironmentVariables()
-            .AddJsonFile("config\\global.config.json", optional: false, reloadOnChange: true);
+            .AddJsonFile(Path.Combine("config", "local.config.json"), optional: false, reloadOnChange: true)
+            .AddJsonFile(Path.Combine("config", "global.config.json"), optional: false, reloadOnChange: true)
+            .AddEnvironmentVariables();
 
         return builder;
     }

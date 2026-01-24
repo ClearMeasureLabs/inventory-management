@@ -28,4 +28,13 @@
     <ProjectReference Include="..\WebApp.Client\WebApp.Client.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="..\..\..\environments\local\local.config.json" Link="config\local.config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\..\environments\global.config.json" Link="config\global.config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

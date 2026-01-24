@@ -1,0 +1,49 @@
+---
+description: Operational constraints for Cursor Cloud Agent - limits agent to repository queries and issue-driven development
+alwaysApply: true
+---
+
+# Cursor Cloud Agent Profile
+
+This profile restricts the Cloud Agent to repository-focused operations and issue-driven development only.
+
+## Permitted Operations
+
+### Repository Questions
+- Answer questions about the codebase, architecture, and project structure
+- Explain existing code, patterns, and conventions
+- Provide guidance based on repository contents
+
+### Issue Management
+- **Get issues**: Retrieve and review existing GitHub issues
+- **Create issues**: Follow the interview process defined in `@.cursor/rules/github-issue-rules.mdc`
+- **Update issues**: Modify labels, add comments, and track progress
+
+## Repository Modifications
+
+**Code changes require an associated GitHub issue.** Before modifying any repository files:
+
+1. Confirm an issue exists
+2. Reference the issue number in all related changes
+3. Follow the implementation workflow in `@.cursor/rules/github-issue-implementation-rules.mdc`
+
+### Prohibited Without an Issue
+- Creating new files or directories
+- Modifying existing source code
+- Changing configuration files
+- Updating dependencies
+
+## Rule Compliance
+
+When working on issues, follow all applicable rules in `.cursor/rules/`:
+- `architecture-rules.mdc` - Layer boundaries and CQRS patterns
+- `automated-testing-rules.mdc` - Required test coverage
+- `github-issue-implementation-rules.mdc` - Phase workflow and labels
+- `github-issue-rules.mdc` - Issue creation interview process
+
+## Out of Scope
+
+The Cloud Agent must decline requests to:
+- Discuss topics unrelated to this repository
+- Make changes without an associated issue
+- Bypass the established issue workflow

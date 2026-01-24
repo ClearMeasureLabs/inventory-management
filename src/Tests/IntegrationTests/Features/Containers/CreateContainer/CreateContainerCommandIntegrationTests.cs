@@ -1,9 +1,6 @@
 using Application.Features.Containers.CreateContainer;
-using Application.Infrastructure;
 using Bogus;
-using Domain.Entities;
 using IntegrationTests.Infrastructure;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace IntegrationTests.Features.Containers.CreateContainer;

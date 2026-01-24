@@ -29,6 +29,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="..\..\..\environments\local\local.config.json" Link="config\local.config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\..\environments\global.config.json" Link="config\global.config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Microsoft.Playwright.NUnit" />
     <Using Include="NUnit.Framework" />
     <Using Include="System.Text.RegularExpressions" />
