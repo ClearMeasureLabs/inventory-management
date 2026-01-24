@@ -124,5 +124,141 @@ public class ViewContainersTests
         await page.CloseAsync();
     }
 
+    [Test]
+    public async Task AddContainerButton_WhenClicked_ShouldOpenModal()
+    {
+        // Arrange
+        var page = await _browser.NewPageAsync();
+        await page.GotoAsync(_baseUrl);
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        // Act
+        var addButton = page.Locator("button:has-text('Add Container')");
+        await addButton.ClickAsync();
+
+        // Assert
+        var modal = page.Locator("#addContainerModal");
+        await Expect(modal).ToBeVisibleAsync();
+
+        var modalTitle = page.Locator("#addContainerModalLabel");
+        await Expect(modalTitle).ToContainTextAsync("Add Container");
+
+        await page.CloseAsync();
+    }
+
+    [Test]
+    public async Task AddContainerModal_ShouldDisplayNameInput()
+    {
+        // Arrange
+        var page = await _browser.NewPageAsync();
+        await page.GotoAsync(_baseUrl);
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        // Act
+        var addButton = page.Locator("button:has-text('Add Container')");
+        await addButton.ClickAsync();
+
+        // Assert
+        var nameInput = page.Locator("#containerName");
+        await Expect(nameInput).ToBeVisibleAsync();
+
+        var nameLabel = page.Locator("label[for='containerName']");
+        await Expect(nameLabel).ToContainTextAsync("Name");
+
+        await page.CloseAsync();
+    }
+
+    [Test]
+    public async Task AddContainerModal_WithValidName_ShouldCreateContainerAndClose()
+    {
+        // Arrange
+        var page = await _browser.NewPageAsync();
+        await page.GotoAsync(_baseUrl);
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        var containerName = $"Test Container {Guid.NewGuid():N}";
+
+        // Act - Open modal and fill form
+        var addButton = page.Locator("button:has-text('Add Container')");
+        await addButton.ClickAsync();
+
+        var nameInput = page.Locator("#containerName");
+        await nameInput.FillAsync(containerName);
+
+        var createButton = page.Locator("button[type='submit']:has-text('Create')");
+        await createButton.ClickAsync();
+
+        // Wait for modal to close
+        await page.WaitForTimeoutAsync(1000);
+
+        // Assert - Modal should be hidden and container should appear in list
+        var modal = page.Locator("#addContainerModal");
+        await Expect(modal).ToBeHiddenAsync();
+
+        var containerRow = page.Locator($"td:has-text('{containerName}')");
+        await Expect(containerRow).ToBeVisibleAsync();
+
+        await page.CloseAsync();
+    }
+
+    [Test]
+    public async Task AddContainerModal_WithEmptyName_ShouldDisplayError()
+    {
+        // Arrange
+        var page = await _browser.NewPageAsync();
+        await page.GotoAsync(_baseUrl);
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        // Act - Open modal and submit without filling name
+        var addButton = page.Locator("button:has-text('Add Container')");
+        await addButton.ClickAsync();
+
+        var createButton = page.Locator("button[type='submit']:has-text('Create')");
+        await createButton.ClickAsync();
+
+        // Wait for error to appear
+        await page.WaitForTimeoutAsync(500);
+
+        // Assert - Error message should be displayed
+        var errorAlert = page.Locator(".alert-danger");
+        await Expect(errorAlert).ToBeVisibleAsync();
+        await Expect(errorAlert).ToContainTextAsync("Name is required");
+
+        await page.CloseAsync();
+    }
+
+    [Test]
+    public async Task AddContainerModal_AfterSuccess_ShouldShowNewContainerInList()
+    {
+        // Arrange
+        var page = await _browser.NewPageAsync();
+        await page.GotoAsync(_baseUrl);
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        var containerName = $"New Container {Guid.NewGuid():N}";
+
+        // Act - Create a container
+        var addButton = page.Locator("button:has-text('Add Container')");
+        await addButton.ClickAsync();
+
+        var nameInput = page.Locator("#containerName");
+        await nameInput.FillAsync(containerName);
+
+        var createButton = page.Locator("button[type='submit']:has-text('Create')");
+        await createButton.ClickAsync();
+
+        // Wait for the page to update
+        await page.WaitForTimeoutAsync(1000);
+
+        // Assert - The table should now be visible with the new container
+        var table = page.Locator("table.table-striped");
+        await Expect(table).ToBeVisibleAsync();
+
+        var containerCell = page.Locator($"td:has-text('{containerName}')");
+        await Expect(containerCell).ToBeVisibleAsync();
+
+        await page.CloseAsync();
+    }
+
     private static ILocatorAssertions Expect(ILocator locator) => Assertions.Expect(locator);
 }

@@ -361,12 +361,12 @@ public class CreateContainerCommandHandlerTests
     }
 
     [Test]
-    public void HandleAsync_WithEmptyDescription_ShouldThrowValidationException()
+    public void HandleAsync_WithNameExceedingMaxLength_ShouldThrowValidationException()
     {
         // Arrange
         var command = new CreateContainerCommand
         {
-            Name = _faker.Commerce.ProductName(),
+            Name = new string('a', 201),
             Description = string.Empty
         };
 
@@ -374,44 +374,64 @@ public class CreateContainerCommandHandlerTests
         var exception = Should.Throw<ValidationException>(async () =>
             await _handler.HandleAsync(command, CancellationToken.None));
 
-        exception.Errors.ShouldContainKey("Description");
-        exception.Errors["Description"].ShouldContain("Description is required");
-    }
-
-    [Test]
-    public void HandleAsync_WithWhitespaceDescription_ShouldThrowValidationException()
-    {
-        // Arrange
-        var command = new CreateContainerCommand
-        {
-            Name = _faker.Commerce.ProductName(),
-            Description = "   "
-        };
-
-        // Act & Assert
-        var exception = Should.Throw<ValidationException>(async () =>
-            await _handler.HandleAsync(command, CancellationToken.None));
-
-        exception.Errors.ShouldContainKey("Description");
-    }
-
-    [Test]
-    public void HandleAsync_WithBothFieldsEmpty_ShouldThrowValidationExceptionWithMultipleErrors()
-    {
-        // Arrange
-        var command = new CreateContainerCommand
-        {
-            Name = string.Empty,
-            Description = string.Empty
-        };
-
-        // Act & Assert
-        var exception = Should.Throw<ValidationException>(async () =>
-            await _handler.HandleAsync(command, CancellationToken.None));
-
-        exception.Errors.Count.ShouldBe(2);
         exception.Errors.ShouldContainKey("Name");
-        exception.Errors.ShouldContainKey("Description");
+        exception.Errors["Name"].ShouldContain("Name must not exceed 200 characters");
+    }
+
+    [Test]
+    public async Task HandleAsync_WithNameAtMaxLength_ShouldSucceed()
+    {
+        // Arrange
+        var command = new CreateContainerCommand
+        {
+            Name = new string('a', 200),
+            Description = string.Empty
+        };
+
+        // Act
+        var result = await _handler.HandleAsync(command, CancellationToken.None);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Name.ShouldBe(command.Name);
+    }
+
+    [Test]
+    public async Task HandleAsync_WithEmptyDescription_ShouldSucceed()
+    {
+        // Arrange
+        var command = new CreateContainerCommand
+        {
+            Name = _faker.Commerce.ProductName(),
+            Description = string.Empty
+        };
+
+        // Act
+        var result = await _handler.HandleAsync(command, CancellationToken.None);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Name.ShouldBe(command.Name);
+    }
+
+    [Test]
+    public async Task HandleAsync_WithValidNameOnly_ShouldCreateContainer()
+    {
+        // Arrange
+        var command = new CreateContainerCommand
+        {
+            Name = _faker.Commerce.ProductName()
+        };
+
+        // Act
+        var result = await _handler.HandleAsync(command, CancellationToken.None);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Name.ShouldBe(command.Name);
+        _containersDbSetMock.Verify(
+            db => db.AddAsync(It.Is<Container>(c => c.Name == command.Name), It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Test]

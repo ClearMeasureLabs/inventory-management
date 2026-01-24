@@ -55,4 +55,26 @@ public class CreateContainerCommandIntegrationTests
         result.Name.ShouldBe(command.Name);
         result.Description.ShouldBe(command.Description);
     }
+
+    [Test]
+    public async Task HandleAsync_WithValidNameOnly_ShouldSucceedWithoutErrors()
+    {
+        // Arrange
+        using var scope = _serviceProvider.CreateScope();
+        var handler = scope.ServiceProvider.GetRequiredService<ICreateContainerCommandHandler>();
+
+        var command = new CreateContainerCommand
+        {
+            Name = _faker.Commerce.ProductName()
+        };
+
+        // Act
+        var result = await handler.HandleAsync(command, CancellationToken.None);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.ContainerId.ShouldBeGreaterThan(0);
+        result.Name.ShouldBe(command.Name);
+        result.Description.ShouldBe(string.Empty);
+    }
 }
