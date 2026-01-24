@@ -7,7 +7,7 @@ namespace AcceptanceTests;
 public class ViewContainersTests
 {
     private TestEnvironment _testEnvironment = null!;
-    private WebAppFixture _webAppFixture = null!;
+    private PlaywrightServerFixture _serverFixture = null!;
     private IPlaywright _playwright = null!;
     private IBrowser _browser = null!;
     private string _baseUrl = null!;
@@ -19,10 +19,10 @@ public class ViewContainersTests
         _testEnvironment = new TestEnvironment();
         await _testEnvironment.InitializeAsync();
 
-        // Create web application with test containers
-        _webAppFixture = new WebAppFixture(_testEnvironment);
-        var httpClient = _webAppFixture.CreateClient();
-        _baseUrl = httpClient.BaseAddress!.ToString().TrimEnd('/');
+        // Create and start the Kestrel server for Playwright tests
+        _serverFixture = new PlaywrightServerFixture(_testEnvironment);
+        await _serverFixture.StartAsync();
+        _baseUrl = _serverFixture.ServerAddress;
 
         // Initialize Playwright for UI tests
         _playwright = await Playwright.CreateAsync();
@@ -38,7 +38,7 @@ public class ViewContainersTests
         await _browser.DisposeAsync();
         _playwright.Dispose();
 
-        _webAppFixture?.Dispose();
+        await _serverFixture.DisposeAsync();
         await _testEnvironment.DisposeAsync();
     }
 
