@@ -131,6 +131,9 @@ public class ViewContainersTests
         var page = await _browser.NewPageAsync();
         await page.GotoAsync(_baseUrl);
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        
+        // Wait for Blazor SignalR connection to be ready
+        await page.WaitForTimeoutAsync(1000);
 
         // Act
         var addButton = page.Locator("button:has-text('Add Container')");
@@ -138,7 +141,7 @@ public class ViewContainersTests
 
         // Assert
         var modal = page.Locator("#addContainerModal");
-        await Expect(modal).ToBeVisibleAsync();
+        await Expect(modal).ToBeVisibleAsync(new() { Timeout = 10000 });
 
         var modalTitle = page.Locator("#addContainerModalLabel");
         await Expect(modalTitle).ToContainTextAsync("Add Container");
@@ -153,10 +156,17 @@ public class ViewContainersTests
         var page = await _browser.NewPageAsync();
         await page.GotoAsync(_baseUrl);
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        
+        // Wait for Blazor SignalR connection to be ready
+        await page.WaitForTimeoutAsync(1000);
 
         // Act
         var addButton = page.Locator("button:has-text('Add Container')");
         await addButton.ClickAsync();
+
+        // Wait for modal to appear
+        var modal = page.Locator("#addContainerModal");
+        await Expect(modal).ToBeVisibleAsync(new() { Timeout = 10000 });
 
         // Assert
         var nameInput = page.Locator("#containerName");
@@ -175,6 +185,9 @@ public class ViewContainersTests
         var page = await _browser.NewPageAsync();
         await page.GotoAsync(_baseUrl);
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        
+        // Wait for Blazor SignalR connection to be ready
+        await page.WaitForTimeoutAsync(1000);
 
         var containerName = $"Test Container {Guid.NewGuid():N}";
 
@@ -182,21 +195,22 @@ public class ViewContainersTests
         var addButton = page.Locator("button:has-text('Add Container')");
         await addButton.ClickAsync();
 
+        // Wait for modal to be visible
+        var modal = page.Locator("#addContainerModal");
+        await Expect(modal).ToBeVisibleAsync(new() { Timeout = 10000 });
+
         var nameInput = page.Locator("#containerName");
         await nameInput.FillAsync(containerName);
 
-        var createButton = page.Locator("button[type='submit']:has-text('Create')");
+        var createButton = page.Locator("button.btn-primary:has-text('Create')");
         await createButton.ClickAsync();
 
-        // Wait for modal to close
-        await page.WaitForTimeoutAsync(1000);
-
-        // Assert - Modal should be hidden and container should appear in list
-        var modal = page.Locator("#addContainerModal");
-        await Expect(modal).ToBeHiddenAsync();
-
+        // Wait for the container to appear in the list (indicates success)
         var containerRow = page.Locator($"td:has-text('{containerName}')");
-        await Expect(containerRow).ToBeVisibleAsync();
+        await Expect(containerRow).ToBeVisibleAsync(new() { Timeout = 15000 });
+
+        // Assert - Modal should be hidden after success
+        await Expect(modal).ToBeHiddenAsync(new() { Timeout = 5000 });
 
         await page.CloseAsync();
     }
@@ -208,20 +222,24 @@ public class ViewContainersTests
         var page = await _browser.NewPageAsync();
         await page.GotoAsync(_baseUrl);
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        
+        // Wait for Blazor SignalR connection to be ready
+        await page.WaitForTimeoutAsync(1000);
 
         // Act - Open modal and submit without filling name
         var addButton = page.Locator("button:has-text('Add Container')");
         await addButton.ClickAsync();
 
-        var createButton = page.Locator("button[type='submit']:has-text('Create')");
-        await createButton.ClickAsync();
+        // Wait for modal to be visible
+        var modal = page.Locator("#addContainerModal");
+        await Expect(modal).ToBeVisibleAsync(new() { Timeout = 10000 });
 
-        // Wait for error to appear
-        await page.WaitForTimeoutAsync(500);
+        var createButton = page.Locator("button.btn-primary:has-text('Create')");
+        await createButton.ClickAsync();
 
         // Assert - Error message should be displayed
         var errorAlert = page.Locator(".alert-danger");
-        await Expect(errorAlert).ToBeVisibleAsync();
+        await Expect(errorAlert).ToBeVisibleAsync(new() { Timeout = 10000 });
         await Expect(errorAlert).ToContainTextAsync("Name is required");
 
         await page.CloseAsync();
@@ -234,6 +252,9 @@ public class ViewContainersTests
         var page = await _browser.NewPageAsync();
         await page.GotoAsync(_baseUrl);
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        
+        // Wait for Blazor SignalR connection to be ready
+        await page.WaitForTimeoutAsync(1000);
 
         var containerName = $"New Container {Guid.NewGuid():N}";
 
@@ -241,21 +262,23 @@ public class ViewContainersTests
         var addButton = page.Locator("button:has-text('Add Container')");
         await addButton.ClickAsync();
 
+        // Wait for modal to be visible
+        var modal = page.Locator("#addContainerModal");
+        await Expect(modal).ToBeVisibleAsync(new() { Timeout = 10000 });
+
         var nameInput = page.Locator("#containerName");
         await nameInput.FillAsync(containerName);
 
-        var createButton = page.Locator("button[type='submit']:has-text('Create')");
+        var createButton = page.Locator("button.btn-primary:has-text('Create')");
         await createButton.ClickAsync();
 
-        // Wait for the page to update
-        await page.WaitForTimeoutAsync(1000);
+        // Wait for the container cell to appear (indicates success)
+        var containerCell = page.Locator($"td:has-text('{containerName}')");
+        await Expect(containerCell).ToBeVisibleAsync(new() { Timeout = 15000 });
 
         // Assert - The table should now be visible with the new container
         var table = page.Locator("table.table-striped");
         await Expect(table).ToBeVisibleAsync();
-
-        var containerCell = page.Locator($"td:has-text('{containerName}')");
-        await Expect(containerCell).ToBeVisibleAsync();
 
         await page.CloseAsync();
     }

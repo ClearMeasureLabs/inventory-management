@@ -2,7 +2,6 @@
 @using Application.Features.Containers
 @using Application.Features.Containers.CreateContainer
 @inject IContainers Containers
-@inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
 
 <PageTitle>Ivan</PageTitle>
@@ -51,14 +50,15 @@ else
 }
 
 <!-- Add Container Modal -->
-<div class="modal fade" id="addContainerModal" tabindex="-1" aria-labelledby="addContainerModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addContainerModalLabel">Add Container</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <EditForm Model="_createCommand" OnValidSubmit="HandleSubmit" FormName="addContainerForm">
+@if (_showModal)
+{
+    <div class="modal fade show" id="addContainerModal" tabindex="-1" aria-labelledby="addContainerModalLabel" style="display: block;" aria-modal="true" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addContainerModalLabel">Add Container</h5>
+                    <button type="button" class="btn-close" @onclick="HideModal" aria-label="Close"></button>
+                </div>
                 <div class="modal-body">
                     @if (!string.IsNullOrEmpty(_errorMessage))
                     {
@@ -68,12 +68,12 @@ else
                     }
                     <div class="mb-3">
                         <label for="containerName" class="form-label">Name</label>
-                        <InputText id="containerName" class="form-control" @bind-Value="_createCommand.Name" placeholder="Enter container name" />
+                        <input type="text" id="containerName" class="form-control" @bind="_containerName" @bind:event="oninput" placeholder="Enter container name" />
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary" disabled="@_isSubmitting">
+                    <button type="button" class="btn btn-secondary" @onclick="HideModal">Cancel</button>
+                    <button type="button" class="btn btn-primary" @onclick="HandleCreate" disabled="@_isSubmitting">
                         @if (_isSubmitting)
                         {
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -85,40 +85,48 @@ else
                         }
                     </button>
                 </div>
-            </EditForm>
+            </div>
         </div>
     </div>
-</div>
+    <div class="modal-backdrop fade show"></div>
+}
 
 @code {
     private IEnumerable<ContainerDto>? _containers;
-    private CreateContainerCommand _createCommand = new();
+    private string _containerName = string.Empty;
     private string? _errorMessage;
     private bool _isSubmitting;
+    private bool _showModal;
 
     protected override async Task OnInitializedAsync()
     {
         _containers = await Containers.GetAllAsync(CancellationToken.None);
     }
 
-    private async Task ShowAddModal()
+    private void ShowAddModal()
     {
-        _createCommand = new CreateContainerCommand();
+        _containerName = string.Empty;
         _errorMessage = null;
-        await JSRuntime.InvokeVoidAsync("eval", "new bootstrap.Modal(document.getElementById('addContainerModal')).show()");
+        _showModal = true;
     }
 
-    private async Task HandleSubmit()
+    private void HideModal()
+    {
+        _showModal = false;
+    }
+
+    private async Task HandleCreate()
     {
         _isSubmitting = true;
         _errorMessage = null;
 
         try
         {
-            await Containers.CreateAsync(_createCommand, CancellationToken.None);
+            var command = new CreateContainerCommand { Name = _containerName };
+            await Containers.CreateAsync(command, CancellationToken.None);
             _containers = await Containers.GetAllAsync(CancellationToken.None);
-            await JSRuntime.InvokeVoidAsync("eval", "bootstrap.Modal.getInstance(document.getElementById('addContainerModal')).hide()");
-            _createCommand = new CreateContainerCommand();
+            HideModal();
+            _containerName = string.Empty;
         }
         catch (Application.Exceptions.ValidationException ex)
         {
