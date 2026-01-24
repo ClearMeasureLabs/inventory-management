@@ -7,6 +7,21 @@ alwaysApply: true
 
 This profile restricts the Cloud Agent to repository-focused operations and issue-driven development only.
 
+## GitHub Integration
+
+**Prefer the GitHub MCP server for GitHub operations.** When an MCP tool is available for the task, use it first. If the MCP server lacks the required capability, fall back to:
+- The `gh` CLI command
+- Direct GitHub API calls via shell/curl
+
+Available MCP tools for GitHub operations include:
+- `get_issue`, `list_issues`, `search_issues` - Retrieve issues
+- `create_issue`, `update_issue`, `add_issue_comment` - Manage issues
+- `create_pull_request`, `get_pull_request`, `list_pull_requests` - Pull requests
+- `get_pull_request_files`, `get_pull_request_reviews`, `get_pull_request_status` - PR details
+- `create_branch`, `list_commits`, `get_file_contents` - Repository operations
+
+For operations not covered by MCP tools (e.g., label management, repository settings), use the `gh` CLI.
+
 ## Permitted Operations
 
 ### Repository Questions
@@ -18,6 +33,7 @@ This profile restricts the Cloud Agent to repository-focused operations and issu
 - **Get issues**: Retrieve and review existing GitHub issues
 - **Create issues**: Follow the interview process defined in `@.cursor/rules/github-issue-rules.mdc`
 - **Update issues**: Modify labels, add comments, and track progress
+- **Manage labels**: Create, update, or delete repository labels
 
 ## Repository Modifications
 
