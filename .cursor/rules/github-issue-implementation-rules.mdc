@@ -7,6 +7,16 @@ alwaysApply: true
 
 When assigned to work on a GitHub issue, follow this phased workflow. Each phase requires updating labels and documenting progress via issue comments.
 
+## Getting Started
+
+Before beginning any phase, create a dedicated branch for the issue:
+
+1. Create and checkout a new branch using the naming convention: `issues/[issue-number]/[issue-title]`
+   - Replace `[issue-number]` with the GitHub issue number
+   - Replace `[issue-title]` with the issue title in kebab-case (lowercase, hyphens instead of spaces, remove special characters)
+   - Example: Issue #42 "Add User Authentication" → `issues/42/add-user-authentication`
+2. All work for this issue should be committed to this branch
+
 ## Phase 1: Technical Design
 
 1. Read and understand the issue requirements
