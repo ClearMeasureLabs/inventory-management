@@ -1,5 +1,6 @@
-﻿using Application.Features.Containers;
+using Application.Features.Containers;
 using Application.Features.Containers.CreateContainer;
+using Application.Features.Containers.GetAllContainers;
 using Application.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -73,6 +74,7 @@ public static class DependencyInjection
 
         // Application services
         services.AddScoped<ICreateContainerCommandHandler, CreateContainerCommandHandler>();
+        services.AddScoped<IGetAllContainersQueryHandler, GetAllContainersQueryHandler>();
         services.AddScoped<IContainers, Containers>();
         services.AddScoped<IApplication, Application.Application>();
     }
