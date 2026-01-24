@@ -41,7 +41,7 @@ namespace SQLServer.Migrations
 
                     b.HasKey("ContainerId");
 
-                    b.ToTable("Containers");
+                    b.ToTable("Containers", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.ContainerItem", b =>
@@ -64,7 +64,7 @@ namespace SQLServer.Migrations
 
                     b.HasIndex("ItemId");
 
-                    b.ToTable("ContainerItems");
+                    b.ToTable("ContainerItems", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Item", b =>
@@ -92,7 +92,7 @@ namespace SQLServer.Migrations
 
                     b.HasKey("ItemId");
 
-                    b.ToTable("Items");
+                    b.ToTable("Items", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.ContainerItem", b =>
