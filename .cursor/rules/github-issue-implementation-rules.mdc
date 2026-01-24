@@ -52,9 +52,12 @@ When assigned to work on a GitHub issue, follow this phased workflow. Each phase
 1. Update issue labels: remove all existing labels, add `Development`
 2. Implement the Technical Design changes
 3. Implement the Test Design tests
-4. Verify all changes by running `scripts/build_and_test.ps1`
-5. Fix any build errors or test failures before proceeding
-6. Commit changes and open a pull request referencing the issue
+4. Run `scripts/build_and_test.ps1` to verify all changes
+5. If the script fails to execute for any reason (missing dependencies, Docker issues, environment problems, etc.), diagnose and fix the issue, then re-run the script
+6. If any tests fail, fix the code or tests until all tests pass
+7. Repeat steps 4-6 until the script completes successfully with all tests passing
+8. **Prerequisite for PR:** All tests must execute and pass — do not open a pull request until `scripts/build_and_test.ps1` completes with zero failures
+9. Commit changes and open a pull request referencing the issue
 
 ## Phase 4: Validation Handoff
 
