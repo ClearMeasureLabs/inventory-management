@@ -1,35 +1,40 @@
 $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
 
-Write-Host "Installing development tools..." -ForegroundColor Cyan
-
-# EF Core Tools
-Write-Host "`n[1/3] EF Core tools..." -ForegroundColor Yellow
-dotnet tool update --global dotnet-ef | Out-Null
-if ($LASTEXITCODE -ne 0) { Write-Error "Failed to install EF Core tools."; exit 1 }
-Write-Host "  EF Core tools ready." -ForegroundColor Green
-
-# Build AcceptanceTests (required for Playwright script)
-Write-Host "`n[2/3] Building AcceptanceTests..." -ForegroundColor Yellow
-dotnet build "$repoRoot/src/Tests/AcceptanceTests/AcceptanceTests.csproj" --verbosity quiet
-if ($LASTEXITCODE -ne 0) { Write-Error "Failed to build AcceptanceTests."; exit 1 }
-Write-Host "  AcceptanceTests built." -ForegroundColor Green
-
-# Playwright browsers
-Write-Host "`n[3/3] Playwright browsers..." -ForegroundColor Yellow
-& "$repoRoot/src/Tests/AcceptanceTests/bin/Debug/net10.0/playwright.ps1" install chromium
-if ($LASTEXITCODE -ne 0) { Write-Warning "Playwright installation may have issues." }
-else { Write-Host "  Playwright browsers ready." -ForegroundColor Green }
-
-# Verify Docker (required for Testcontainers)
-Write-Host "`nVerifying prerequisites..." -ForegroundColor Yellow
-$docker = Get-Command docker -ErrorAction SilentlyContinue
-if (-not $docker) {
-    Write-Warning "Docker not found. Install Docker Desktop to run acceptance tests."
-} else {
-    Write-Host "  Docker found." -ForegroundColor Green
+# .NET SDK
+if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
+    Write-Error ".NET SDK not found. Install from https://dot.net/download"
+    exit 1
 }
 
-Write-Host "`nDone! You can now run:" -ForegroundColor Cyan
-Write-Host "  .\build_and_test.ps1" -ForegroundColor Gray
-Write-Host "  .\add_migration.ps1 -MigrationName <name>" -ForegroundColor Gray
+# Docker
+if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
+    Write-Error "Docker not found. Install Docker Desktop from https://docker.com/products/docker-desktop"
+    exit 1
+}
+
+# GitHub CLI
+if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
+    if ($IsWindows) {
+        winget install --id GitHub.cli -e --silent
+    } elseif ($IsLinux) {
+        Write-Host "Installing GitHub CLI..."
+        & bash -c "(type -p wget >/dev/null || (sudo apt update && sudo apt-get install wget -y)) && sudo mkdir -p -m 755 /etc/apt/keyrings && wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null && sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg && echo 'deb [arch=`$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main' | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null && sudo apt update && sudo apt install gh -y"
+    } elseif ($IsMacOS) {
+        brew install gh
+    }
+    
+    # Verify installation
+    if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
+        Write-Error "GitHub CLI installation failed. Install manually from https://cli.github.com"
+        exit 1
+    }
+}
+
+# EF Core Tools
+dotnet tool update --global dotnet-ef | Out-Null
+
+# Build AcceptanceTests and install Playwright
+dotnet build "$repoRoot/src/Tests/AcceptanceTests/AcceptanceTests.csproj" --verbosity quiet
+$playwrightScript = Join-Path $repoRoot "src/Tests/AcceptanceTests/bin/Debug/net10.0/playwright.ps1"
+& pwsh $playwrightScript install chromium
