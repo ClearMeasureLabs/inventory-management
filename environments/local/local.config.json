@@ -1,0 +1,25 @@
+{
+  "Environment": "Local",
+  "SqlServer": {
+    "Host": "localhost",
+    "Port": "1433",
+    "User": "sa",
+    "Password": "S0KZ1fGYhJWmQw2I7MVO86"
+  },
+  "RabbitMQ": {
+    "Host": "localhost",
+    "Port": "5672",
+    "ManagementPort": "15672",
+    "User": "admin",
+    "Password": "OXK96iH74Uu20Q8WqhZcDw"
+  },
+  "Redis": {
+    "Host": "localhost",
+    "Port": "6379",
+    "User": "default"
+  },
+  "RedisInsight": {
+    "Host": "localhost",
+    "Port": "5540"
+  }
+}

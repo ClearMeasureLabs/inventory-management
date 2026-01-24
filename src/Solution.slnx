@@ -1,0 +1,21 @@
+<Solution>
+  <Folder Name="/Core/">
+    <Project Path="Core/Application/Application.csproj" Id="d06adca6-0030-4fca-91b3-ed48434e175b" />
+    <Project Path="Core/Domain/Domain.csproj" Id="07727dd5-2392-4110-ae84-13f3131f9304" />
+  </Folder>
+  <Folder Name="/Infrastructure/">
+    <Project Path="Infrastructure/Bootstrap/Bootstrap.csproj" />
+    <Project Path="Infrastructure/RabbitMQ/RabbitMQ.csproj" />
+    <Project Path="Infrastructure/Redis/Redis.csproj" />
+    <Project Path="Infrastructure/SQLServer/SQLServer.csproj" />
+  </Folder>
+  <Folder Name="/Presentation/">
+    <Project Path="Presentation/WebApp.Client/WebApp.Client.csproj" />
+    <Project Path="Presentation/WebApp/WebApp.csproj" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/AcceptanceTests/AcceptanceTests.csproj" />
+    <Project Path="Tests/IntegrationTests/IntegrationTests.csproj" />
+    <Project Path="Tests/UnitTests/UnitTests.csproj" />
+  </Folder>
+</Solution>

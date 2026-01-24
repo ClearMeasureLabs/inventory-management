@@ -1,0 +1,10 @@
+{
+  "Project": {
+    "Name": "Ivan",
+    "Publisher": "Clear Measure",
+    "Version": "0.0.0"
+  },
+  "SqlServer": {
+    "Database": "ivan_db"
+  }
+}
