@@ -18,6 +18,17 @@ public class ContainersController : ControllerBase
     }
 
     /// <summary>
+    /// Gets all containers
+    /// </summary>
+    [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<ContainerDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAllContainers(CancellationToken cancellationToken)
+    {
+        var result = await _containers.GetAllAsync(cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
     /// Creates a new container
     /// </summary>
     [HttpPost]
@@ -28,7 +39,7 @@ public class ContainersController : ControllerBase
         try
         {
             var result = await _containers.CreateAsync(command, cancellationToken);
-            return CreatedAtAction(nameof(CreateContainer), new { id = result.ContainerId }, result);
+            return CreatedAtAction(nameof(GetAllContainers), new { id = result.ContainerId }, result);
         }
         catch (ValidationException ex)
         {
