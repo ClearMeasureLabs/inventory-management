@@ -1,6 +1,5 @@
 using System.Text.Json;
 using AcceptanceTests.Infrastructure;
-using Microsoft.Playwright;
 
 namespace AcceptanceTests;
 
@@ -10,37 +9,25 @@ public class HealthCheckTests
     private TestEnvironment _testEnvironment = null!;
     private WebAppFixture _webAppFixture = null!;
     private HttpClient _httpClient = null!;
-    private IPlaywright _playwright = null!;
-    private IBrowser _browser = null!;
 
     [OneTimeSetUp]
     public async Task OneTimeSetUp()
     {
-        // Initialize test containers
+        // Initialize test containers (SQL Server, Redis, RabbitMQ)
         _testEnvironment = new TestEnvironment();
         await _testEnvironment.InitializeAsync();
 
-        // Create web application with test containers
+        // Create and start containerized web application
         _webAppFixture = new WebAppFixture(_testEnvironment);
+        await _webAppFixture.StartAsync();
         _httpClient = _webAppFixture.CreateClient();
-
-        // Initialize Playwright for UI tests
-        _playwright = await Playwright.CreateAsync();
-        _browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
-        {
-            Headless = true
-        });
     }
 
     [OneTimeTearDown]
     public async Task OneTimeTearDown()
     {
-        _httpClient?.Dispose();
-        _webAppFixture?.Dispose();
+        await _webAppFixture.DisposeAsync();
         await _testEnvironment.DisposeAsync();
-
-        await _browser.DisposeAsync();
-        _playwright.Dispose();
     }
 
     [Test]

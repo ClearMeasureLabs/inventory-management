@@ -19,7 +19,7 @@ public class ViewContainersTests
         _testEnvironment = new TestEnvironment();
         await _testEnvironment.InitializeAsync();
 
-        // Create and start the Kestrel server for Playwright tests
+        // Create and start the containerized WebApp for Playwright tests
         _serverFixture = new PlaywrightServerFixture(_testEnvironment);
         await _serverFixture.StartAsync();
         _baseUrl = _serverFixture.ServerAddress;
