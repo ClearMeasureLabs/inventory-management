@@ -1,6 +1,6 @@
 using Domain.Entities;
 
-namespace Application.Features.ContainerItems;
+namespace Application.DTOs;
 
 public class ContainerItemDto
 {

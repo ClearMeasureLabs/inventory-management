@@ -1,4 +1,4 @@
-﻿using Application.Infrastructure;
+using Application.Infrastructure;
 using Domain.Entities;
 using StackExchange.Redis;
 using System.Text.Json;
@@ -8,9 +8,7 @@ namespace Redis;
 
 public class RedisCache : ICache
 {
-    private readonly IConnectionMultiplexer _connectionMultiplexer;
     private readonly IDatabase _database;
-    private bool _disposed;
     private static readonly JsonSerializerOptions _jsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -19,13 +17,13 @@ public class RedisCache : ICache
 
     public RedisCache(IConnectionMultiplexer connectionMultiplexer)
     {
-        _connectionMultiplexer = connectionMultiplexer;
         _database = connectionMultiplexer.GetDatabase();
     }
 
     public void Dispose()
     {
-        _connectionMultiplexer.Dispose();
+        // Do not dispose the IConnectionMultiplexer here - it's a singleton
+        // managed by the DI container and shared across all scopes
         GC.SuppressFinalize(this);
     }
 

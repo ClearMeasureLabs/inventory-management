@@ -1,0 +1,45 @@
+---
+description: Automated testing requirements for all code changes
+alwaysApply: true
+---
+
+# Automated Testing Requirements
+
+All code changes require automated tests that pass before committing. Verify by running `scripts/build_and_test.ps1`.
+
+## Unit Tests
+
+Verify isolated behavior using mocks. Each test should cover one of these categories:
+
+1. **Dependencies called** - Verify expected dependencies are invoked with correct parameters
+2. **Business logic executed** - Validate correct data transformations and processing
+3. **State changes persisted** - Confirm state is saved in the correct order
+4. **Return values correct** - Assert expected DTOs/responses are returned
+5. **Exceptions thrown** - Verify validation errors and edge cases throw appropriate exceptions
+
+## Integration Tests
+
+Verify components work together with real infrastructure (via Testcontainers):
+
+1. **Happy path succeeds** - Valid inputs produce expected results without errors
+
+## Acceptance Tests
+
+Verify end-to-end user experience using Playwright:
+
+1. **Happy path UX** - Expected user workflows complete successfully
+2. **Expected error handling** - Validation errors display user-friendly messages
+3. **Unexpected error handling** - System errors are handled gracefully without exposing internals
+
+## When New Tests Are Required
+
+- **New functionality**: All three test types required
+- **Modified functionality**: New integration/acceptance tests only if user experience changes
+- **Bug fixes**: Add regression tests at the appropriate level
+
+## Guidelines
+
+- Use existing tests in `src/Tests/` as reference templates
+- Follow Arrange-Act-Assert pattern
+- Use `#region` blocks to organize unit tests by category
+- Use Bogus for generating test data

@@ -1,0 +1,36 @@
+---
+description: Sequential interview process for creating GitHub issues
+alwaysApply: true
+---
+
+# Creating GitHub Issues
+
+Conduct a sequential interview—one question at a time. Do not ask for all requirements upfront.
+
+## Interview Steps
+
+| Step | Question | Condition |
+|------|----------|-----------|
+| 1 | Description of the change | Always |
+| 2 | UX requirements (or "N/A" if backend-only) | Always |
+| 3 | Requires authorized user/client? | Always |
+| 4 | Required roles (RBAC) | Only if Step 3 = Yes |
+| 5 | Resource ownership rules | Only if Step 3 = Yes |
+| 6 | Validation rules | Always |
+
+**Note:** If multiple answers provided at once, acknowledge and skip to next unanswered item.
+
+## Conceptual Definition Phase
+
+After completing the interview, generate a non-technical Markdown summary. Avoid implementation details. Request confirmation before creating the issue.
+
+**Label:** Add the `Conceptual-Definition` label to the issue.
+
+```markdown
+# Conceptual Definition
+**Goal:** [Summary of Goal]
+**UX:** [UX Requirements]
+**Authorization:** [Roles / Rules / "None (Public)"]
+**Validation:** [Validation Rules]
+**Acceptance Criteria:** [Derived from conversation]
+```

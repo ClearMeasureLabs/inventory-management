@@ -1,0 +1,64 @@
+---
+description: Architecture patterns and constraints for maintaining clean architecture with CQRS
+alwaysApply: true
+---
+
+# Architecture Rules
+
+Maintain the established clean/onion architecture with CQRS. All changes must respect layer boundaries and dependency rules.
+
+## Layer Structure and Dependencies
+
+Dependencies point inward—outer layers depend on inner layers, never the reverse.
+
+```
+Presentation (WebApp) → Infrastructure → Application → Domain
+```
+
+| Layer | Location | Depends On | Contains |
+|-------|----------|------------|----------|
+| Domain | `Core/Domain/` | Nothing | Entities only |
+| Application | `Core/Application/` | Domain | Features, DTOs, Interfaces (`IRepository`, `ICache`, `IEventHub`) |
+| Infrastructure | `Infrastructure/` | Application | Implementations (SQLServer, Redis, RabbitMQ, Bootstrap) |
+| Presentation | `Presentation/` | Infrastructure/Bootstrap | Controllers, Blazor components |
+
+## CQRS Request Flow
+
+Follow this flow for all features:
+
+```
+WebAPI Request → Command/Query → Handler → Response DTO → WebAPI Response
+```
+
+### Feature Organization
+
+Organize features by domain concept under `Application/Features/`:
+
+```
+Features/{Entity}/
+├── {Entity}s.cs                    # Facade aggregating operations
+├── I{Entity}s.cs                   # Facade interface
+└── {Action}{Entity}/
+    ├── {Action}{Entity}Command.cs           # Request object
+    ├── {Action}{Entity}CommandHandler.cs    # Handler implementation
+    ├── I{Action}{Entity}CommandHandler.cs   # Handler interface
+    └── {Entity}{Action}Event.cs             # Domain event (if applicable)
+```
+
+### Handler Responsibilities
+
+Handlers orchestrate the operation:
+1. Validate the command (throw `ValidationException` for invalid input)
+2. Create or modify domain entities
+3. Persist via `IRepository`
+4. Cache via `ICache`
+5. Publish events via `IEventHub`
+6. Return a DTO (never a domain entity)
+
+## Approval Required
+
+Do not make these changes without explicit user consent:
+
+- **NuGet packages**: Do not add or upgrade packages
+- **SDK versions**: Do not modify target framework or SDK versions
+- **New projects**: Do not add new `.csproj` projects to the solution

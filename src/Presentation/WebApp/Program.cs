@@ -60,3 +60,6 @@ app.MapRazorComponents<App>()
     .AddAdditionalAssemblies(typeof(WebApp.Client._Imports).Assembly);
 
 app.Run();
+
+// Partial class declaration for WebApplicationFactory integration testing
+public partial class Program { }

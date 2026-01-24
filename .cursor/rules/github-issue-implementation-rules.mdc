@@ -1,0 +1,63 @@
+---
+description: Workflow for implementing GitHub issues through design, development, and validation phases
+alwaysApply: true
+---
+
+# Issue Implementation Workflow
+
+When assigned to work on a GitHub issue, follow this phased workflow. Each phase requires updating labels and documenting progress via issue comments.
+
+## Phase 1: Technical Design
+
+1. Read and understand the issue requirements
+2. Update issue labels: remove all existing labels, add `Technical-Design`
+3. Explore the codebase to understand relevant components and dependencies
+4. Formulate an implementation plan focused on architecture and code changes (exclude test considerations)
+5. Add the Technical Design as a comment to the issue using this format:
+
+```markdown
+## Technical Design
+
+**Affected Components:** [List of files/modules to modify or create]
+
+**Implementation Steps:**
+1. [Step with specific file and change description]
+2. [Continue for all steps...]
+
+**Dependencies:** [Any new packages or infrastructure required]
+```
+
+## Phase 2: Test Design
+
+1. Update issue labels: remove all existing labels, add `Test-Design`
+2. Review the issue requirements, Technical Design comment, and `@.cursor/rules/automated-testing.mdc`
+3. Formulate a test plan covering required unit, integration, and acceptance tests
+4. Add the Test Design as a comment to the issue using this format:
+
+```markdown
+## Test Design
+
+**Unit Tests:**
+- [Test description and category from automated-testing.mdc]
+
+**Integration Tests:**
+- [Test description covering component interactions]
+
+**Acceptance Tests:**
+- [Test description covering user workflows]
+```
+
+## Phase 3: Development
+
+1. Update issue labels: remove all existing labels, add `Development`
+2. Implement the Technical Design changes
+3. Implement the Test Design tests
+4. Verify all changes by running `scripts/build_and_test.ps1`
+5. Fix any build errors or test failures before proceeding
+6. Commit changes and open a pull request referencing the issue
+
+## Phase 4: Validation Handoff
+
+1. Update issue labels: remove all existing labels, add `Functional-Validation`
+
+**Note:** Do not close the issue. The `Functional-Validation` label signals that manual review and testing are required before closure.

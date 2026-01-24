@@ -14,4 +14,9 @@
     <ProjectReference Include="..\Domain\Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\ContainerItems\" />
+    <Folder Include="Features\Items\" />
+  </ItemGroup>
+
 </Project>
