@@ -4,6 +4,7 @@ using Microsoft.Playwright;
 namespace AcceptanceTests;
 
 [TestFixture]
+[Order(1)] // Run before AddContainerTests to ensure empty database state
 public class ViewContainersTests
 {
     private PlaywrightServerFixture _serverFixture = null!;

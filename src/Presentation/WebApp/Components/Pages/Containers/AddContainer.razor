@@ -1,9 +1,9 @@
 @page "/containers/add"
 @using Application.Features.Containers
 @using Application.Features.Containers.CreateContainer
+@using Microsoft.AspNetCore.Components.Forms
 @inject IContainers Containers
 @inject NavigationManager NavigationManager
-@rendermode InteractiveServer
 
 <PageTitle>Add Container</PageTitle>
 
@@ -11,34 +11,19 @@
 
 <div class="row">
     <div class="col-md-6">
-        <EditForm Model="_command" OnValidSubmit="HandleSubmit" FormName="AddContainerForm">
-            <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" />
-
+        <EditForm Model="_command" OnValidSubmit="HandleSubmit" FormName="AddContainerForm" method="post">
             <div class="mb-3">
                 <label for="name" class="form-label">Name</label>
-                <InputText id="name" class="form-control" @bind-Value="_command.Name" />
-                <ValidationMessage For="@(() => _command.Name)" class="text-danger" />
+                <InputText id="name" class="form-control" @bind-Value="_command!.Name" />
             </div>
 
             <div class="mb-3">
                 <label for="description" class="form-label">Description</label>
-                <InputText id="description" class="form-control" @bind-Value="_command.Description" />
-                <ValidationMessage For="@(() => _command.Description)" class="text-danger" />
+                <InputText id="description" class="form-control" @bind-Value="_command!.Description" />
             </div>
 
             <div class="mb-3">
-                <button type="submit" class="btn btn-primary" disabled="@_isSubmitting">
-                    @if (_isSubmitting)
-                    {
-                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        <span>Creating...</span>
-                    }
-                    else
-                    {
-                        <span>Create Container</span>
-                    }
-                </button>
+                <button type="submit" class="btn btn-primary">Create Container</button>
                 <a href="/" class="btn btn-secondary ms-2">Cancel</a>
             </div>
         </EditForm>
@@ -46,21 +31,19 @@
 </div>
 
 @code {
-    private CreateContainerCommand _command = new();
-    private bool _isSubmitting;
+    [SupplyParameterFromForm]
+    private CreateContainerCommand? _command { get; set; }
+
+    protected override void OnInitialized()
+    {
+        _command ??= new CreateContainerCommand();
+    }
 
     private async Task HandleSubmit()
     {
-        _isSubmitting = true;
-
-        try
-        {
-            await Containers.CreateAsync(_command, CancellationToken.None);
-            NavigationManager.NavigateTo("/");
-        }
-        finally
-        {
-            _isSubmitting = false;
-        }
+        if (_command is null) return;
+        
+        await Containers.CreateAsync(_command, CancellationToken.None);
+        NavigationManager.NavigateTo("/");
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.Playwright;
 namespace AcceptanceTests;
 
 [TestFixture]
+[Order(2)] // Run after ViewContainersTests since this creates containers
 public class AddContainerTests
 {
     private PlaywrightServerFixture _serverFixture = null!;
@@ -116,23 +117,23 @@ public class AddContainerTests
 
         var containerName = $"Test Container {Guid.NewGuid():N}";
 
-        // Act
+        // Act - Fill form fields (using Static SSR form - no SignalR needed)
         await page.FillAsync("#name", containerName);
         await page.FillAsync("#description", "Test Description");
 
+        // Submit form - this triggers a traditional HTTP POST with page navigation
         var submitButton = page.Locator("button[type='submit']:has-text('Create Container')");
         await submitButton.ClickAsync();
 
-        // Wait for redirect
-        await page.WaitForURLAsync(_baseUrl + "/", new() { Timeout = 30000 });
-
-        // Assert - should be on home page
-        await Assertions.Expect(page).ToHaveURLAsync(_baseUrl + "/");
-
-        // Wait for the page to load and show the container
+        // Wait for navigation to complete (form POST redirects to home page)
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-        
-        // Wait for spinner to disappear
+
+        // Assert - should be on home page (not on /containers/add anymore)
+        await Assertions.Expect(page).Not.ToHaveURLAsync(
+            new System.Text.RegularExpressions.Regex(@".*/containers/add"), 
+            new() { Timeout = 30000 });
+
+        // Wait for spinner to disappear (indicating data has loaded)
         var spinner = page.Locator(".spinner-border");
         await spinner.WaitForAsync(new() { State = WaitForSelectorState.Hidden, Timeout = 30000 });
 
