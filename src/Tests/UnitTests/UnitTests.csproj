@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Application\Application.csproj" />
+    <ProjectReference Include="..\..\Presentation\WebApp\WebApp.csproj" />
   </ItemGroup>
 
   <ItemGroup>
