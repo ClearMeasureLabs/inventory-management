@@ -15,6 +15,21 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     public CustomWebApplicationFactory(TestEnvironment testEnvironment)
     {
         _testEnvironment = testEnvironment;
+        
+        // Set environment variables before WebApplicationFactory starts the host
+        // These take precedence over JSON configuration files
+        Environment.SetEnvironmentVariable("SqlServer__Host", _testEnvironment.SqlHost);
+        Environment.SetEnvironmentVariable("SqlServer__Port", _testEnvironment.SqlPort.ToString());
+        Environment.SetEnvironmentVariable("SqlServer__User", "sa");
+        Environment.SetEnvironmentVariable("SqlServer__Password", _testEnvironment.SqlPassword);
+        Environment.SetEnvironmentVariable("SqlServer__Database", "ivan_acceptance_db");
+        Environment.SetEnvironmentVariable("Redis__Host", _testEnvironment.RedisHost);
+        Environment.SetEnvironmentVariable("Redis__Port", _testEnvironment.RedisPort.ToString());
+        Environment.SetEnvironmentVariable("Redis__User", "default");
+        Environment.SetEnvironmentVariable("RabbitMQ__Host", _testEnvironment.RabbitMqHost);
+        Environment.SetEnvironmentVariable("RabbitMQ__Port", _testEnvironment.RabbitMqPort.ToString());
+        Environment.SetEnvironmentVariable("RabbitMQ__User", _testEnvironment.RabbitMqUser);
+        Environment.SetEnvironmentVariable("RabbitMQ__Password", _testEnvironment.RabbitMqPassword);
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)

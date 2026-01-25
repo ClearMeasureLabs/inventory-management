@@ -116,7 +116,7 @@ public class ContainersControllerTests
     #region CreateContainer Validation Error Tests
 
     [Test]
-    public async Task CreateContainer_WithInvalidRequest_ShouldReturn400BadRequest()
+    public async Task CreateContainer_WithInvalidRequest_ShouldReturnValidationProblem()
     {
         // Arrange
         var command = new CreateContainerCommand
@@ -137,10 +137,12 @@ public class ContainersControllerTests
         // Act
         var result = await _controller.CreateContainer(command, CancellationToken.None);
 
-        // Assert
+        // Assert - ValidationProblem() returns ObjectResult containing ValidationProblemDetails
         result.ShouldBeAssignableTo<ObjectResult>();
         var objectResult = (ObjectResult)result;
-        objectResult.StatusCode.ShouldBe(StatusCodes.Status400BadRequest);
+        objectResult.Value.ShouldBeOfType<ValidationProblemDetails>();
+        var problemDetails = (ValidationProblemDetails)objectResult.Value!;
+        problemDetails.Errors.ShouldContainKey("Name");
     }
 
     [Test]

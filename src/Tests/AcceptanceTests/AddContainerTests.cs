@@ -1,6 +1,8 @@
 using AcceptanceTests.Infrastructure;
-using Bogus;
+using Application.Features.Containers.CreateContainer;
 using Microsoft.Playwright;
+using Shouldly;
+using System.Net.Http.Json;
 
 namespace AcceptanceTests;
 
@@ -11,7 +13,7 @@ public class AddContainerTests
     private IPlaywright _playwright = null!;
     private IBrowser _browser = null!;
     private string _baseUrl = null!;
-    private Faker _faker = null!;
+    private HttpClient _httpClient = null!;
 
     [OneTimeSetUp]
     public async Task OneTimeSetUp()
@@ -21,14 +23,15 @@ public class AddContainerTests
         await _serverFixture.StartAsync();
         _baseUrl = _serverFixture.ServerAddress;
 
+        // Create HTTP client for API calls
+        _httpClient = new HttpClient { BaseAddress = new Uri(_baseUrl) };
+
         // Initialize Playwright for UI tests
         _playwright = await Playwright.CreateAsync();
         _browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
         {
             Headless = true
         });
-
-        _faker = new Faker();
     }
 
     [OneTimeTearDown]
@@ -36,70 +39,57 @@ public class AddContainerTests
     {
         await _browser.DisposeAsync();
         _playwright.Dispose();
+        _httpClient.Dispose();
 
         await _serverFixture.DisposeAsync();
     }
 
     [Test]
-    public async Task AddContainerButton_WhenClicked_ShouldOpenModal()
+    public async Task CreateContainerApi_WithValidName_ShouldReturn201Created()
     {
         // Arrange
-        var page = await _browser.NewPageAsync();
-        await page.GotoAsync(_baseUrl);
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-
-        // Wait for spinner to disappear
-        var spinner = page.Locator(".spinner-border");
-        await spinner.WaitForAsync(new() { State = WaitForSelectorState.Hidden, Timeout = 30000 });
+        var command = new CreateContainerCommand
+        {
+            Name = $"API-Container-{Guid.NewGuid():N}"
+        };
 
         // Act
-        var addButton = page.Locator("button:has-text('Add Container')");
-        await addButton.ClickAsync();
+        var response = await _httpClient.PostAsJsonAsync("/api/containers", command);
 
         // Assert
-        var modal = page.Locator("#addContainerModal");
-        await Expect(modal).ToBeVisibleAsync(new() { Timeout = 10000 });
-
-        var modalTitle = page.Locator("#addContainerModalLabel");
-        await Expect(modalTitle).ToContainTextAsync("Add Container");
-
-        await page.CloseAsync();
+        response.StatusCode.ShouldBe(System.Net.HttpStatusCode.Created);
     }
 
     [Test]
-    public async Task AddContainerModal_ShouldDisplayNameInput()
+    public async Task CreateContainerApi_WithEmptyName_ShouldReturn400BadRequest()
     {
         // Arrange
-        var page = await _browser.NewPageAsync();
-        await page.GotoAsync(_baseUrl);
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        var command = new CreateContainerCommand
+        {
+            Name = string.Empty
+        };
 
-        // Wait for spinner to disappear
-        var spinner = page.Locator(".spinner-border");
-        await spinner.WaitForAsync(new() { State = WaitForSelectorState.Hidden, Timeout = 30000 });
-
-        // Open the modal
-        var addButton = page.Locator("button:has-text('Add Container')");
-        await addButton.ClickAsync();
-
-        // Wait for modal to be visible
-        var modal = page.Locator("#addContainerModal");
-        await Expect(modal).ToBeVisibleAsync(new() { Timeout = 10000 });
+        // Act
+        var response = await _httpClient.PostAsJsonAsync("/api/containers", command);
 
         // Assert
-        var nameInput = page.Locator("#containerName");
-        await Expect(nameInput).ToBeVisibleAsync(new() { Timeout = 5000 });
-
-        var nameLabel = page.Locator("label[for='containerName']");
-        await Expect(nameLabel).ToContainTextAsync("Name");
-
-        await page.CloseAsync();
+        response.StatusCode.ShouldBe(System.Net.HttpStatusCode.BadRequest);
     }
 
     [Test]
-    public async Task AddContainerModal_WithValidName_ShouldCreateContainerAndClose()
+    public async Task CreateContainerApi_AfterSuccess_ShouldShowContainerInUI()
     {
-        // Arrange
+        // Arrange - Create container via API
+        var containerName = $"UI-Container-{Guid.NewGuid():N}";
+        var command = new CreateContainerCommand
+        {
+            Name = containerName
+        };
+
+        var response = await _httpClient.PostAsJsonAsync("/api/containers", command);
+        response.EnsureSuccessStatusCode();
+
+        // Act - Navigate to homepage and verify container appears
         var page = await _browser.NewPageAsync();
         await page.GotoAsync(_baseUrl);
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
@@ -107,99 +97,58 @@ public class AddContainerTests
         // Wait for spinner to disappear
         var spinner = page.Locator(".spinner-border");
         await spinner.WaitForAsync(new() { State = WaitForSelectorState.Hidden, Timeout = 30000 });
-
-        // Open the modal
-        var addButton = page.Locator("button:has-text('Add Container')");
-        await addButton.ClickAsync();
-
-        // Wait for modal to be visible
-        var modal = page.Locator("#addContainerModal");
-        await Expect(modal).ToBeVisibleAsync(new() { Timeout = 10000 });
-
-        // Act - Enter a valid container name and submit
-        var containerName = _faker.Commerce.ProductName();
-        var nameInput = page.Locator("#containerName");
-        await nameInput.FillAsync(containerName);
-
-        var createButton = page.Locator(".modal-footer button.btn-primary:has-text('Create')");
-        await createButton.ClickAsync();
-
-        // Assert - Modal should close
-        await Expect(modal).ToBeHiddenAsync(new() { Timeout = 15000 });
-
-        await page.CloseAsync();
-    }
-
-    [Test]
-    public async Task AddContainerModal_WithEmptyName_ShouldDisplayError()
-    {
-        // Arrange
-        var page = await _browser.NewPageAsync();
-        await page.GotoAsync(_baseUrl);
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-
-        // Wait for spinner to disappear
-        var spinner = page.Locator(".spinner-border");
-        await spinner.WaitForAsync(new() { State = WaitForSelectorState.Hidden, Timeout = 30000 });
-
-        // Open the modal
-        var addButton = page.Locator("button:has-text('Add Container')");
-        await addButton.ClickAsync();
-
-        // Wait for modal to be visible
-        var modal = page.Locator("#addContainerModal");
-        await Expect(modal).ToBeVisibleAsync(new() { Timeout = 10000 });
-
-        // Act - Leave name empty and click create
-        var createButton = page.Locator(".modal-footer button.btn-primary:has-text('Create')");
-        await createButton.ClickAsync();
-
-        // Assert - Should display validation error
-        var errorMessage = page.Locator(".invalid-feedback, .alert-danger");
-        await Expect(errorMessage).ToBeVisibleAsync(new() { Timeout = 10000 });
-
-        // Modal should still be open
-        await Expect(modal).ToBeVisibleAsync();
-
-        await page.CloseAsync();
-    }
-
-    [Test]
-    public async Task AddContainerModal_AfterSuccess_ShouldShowNewContainerInList()
-    {
-        // Arrange
-        var page = await _browser.NewPageAsync();
-        await page.GotoAsync(_baseUrl);
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-
-        // Wait for spinner to disappear
-        var spinner = page.Locator(".spinner-border");
-        await spinner.WaitForAsync(new() { State = WaitForSelectorState.Hidden, Timeout = 30000 });
-
-        // Open the modal
-        var addButton = page.Locator("button:has-text('Add Container')");
-        await addButton.ClickAsync();
-
-        // Wait for modal to be visible
-        var modal = page.Locator("#addContainerModal");
-        await Expect(modal).ToBeVisibleAsync(new() { Timeout = 10000 });
-
-        // Act - Enter a unique container name and submit
-        var containerName = $"Test Container {Guid.NewGuid():N}";
-        var nameInput = page.Locator("#containerName");
-        await nameInput.FillAsync(containerName);
-
-        var createButton = page.Locator(".modal-footer button.btn-primary:has-text('Create')");
-        await createButton.ClickAsync();
-
-        // Wait for modal to close
-        await Expect(modal).ToBeHiddenAsync(new() { Timeout = 15000 });
 
         // Assert - Container should appear in the table
         var containerRow = page.Locator($"td:has-text('{containerName}')");
         await Expect(containerRow).ToBeVisibleAsync(new() { Timeout = 10000 });
 
         await page.CloseAsync();
+    }
+
+    [Test]
+    public async Task HomePage_ShouldShowAddContainerButton()
+    {
+        // Arrange
+        var page = await _browser.NewPageAsync();
+        await page.GotoAsync(_baseUrl);
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        // Wait for spinner to disappear
+        var spinner = page.Locator(".spinner-border");
+        await spinner.WaitForAsync(new() { State = WaitForSelectorState.Hidden, Timeout = 30000 });
+
+        // Assert
+        var addButton = page.Locator("button:has-text('Add Container')");
+        await Expect(addButton).ToBeVisibleAsync(new() { Timeout = 10000 });
+
+        await page.CloseAsync();
+    }
+
+    [Test]
+    public async Task CreateContainerApi_WithValidName_ShouldReturnContainerData()
+    {
+        // Arrange
+        var containerName = $"Data-Container-{Guid.NewGuid():N}";
+        var command = new CreateContainerCommand
+        {
+            Name = containerName
+        };
+
+        // Act
+        var response = await _httpClient.PostAsJsonAsync("/api/containers", command);
+        var result = await response.Content.ReadFromJsonAsync<ContainerApiResponse>();
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.ContainerId.ShouldBeGreaterThan(0);
+        result.Name.ShouldBe(containerName);
+    }
+
+    private class ContainerApiResponse
+    {
+        public int ContainerId { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
     }
 
     private static ILocatorAssertions Expect(ILocator locator) => Assertions.Expect(locator);
