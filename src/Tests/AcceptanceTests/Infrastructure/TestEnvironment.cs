@@ -1,5 +1,6 @@
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
+using DotNet.Testcontainers.Images;
 using DotNet.Testcontainers.Networks;
 using Testcontainers.MsSql;
 using Testcontainers.RabbitMq;
@@ -13,6 +14,7 @@ public class TestEnvironment : IAsyncDisposable
     private MsSqlContainer? _sqlContainer;
     private RabbitMqContainer? _rabbitMqContainer;
     private RedisContainer? _redisContainer;
+    private IFutureDockerImage? _webAppImage;
     private IContainer? _webAppContainer;
 
     // Network alias names for container-to-container communication
@@ -104,13 +106,21 @@ public class TestEnvironment : IAsyncDisposable
         var repoRoot = FindRepositoryRoot(currentDir) 
             ?? throw new DirectoryNotFoundException($"Could not find repository root from {currentDir}");
 
-        // Build and start the WebApp container
+        // Disable BuildKit to use the legacy builder (works around vfs storage driver issues)
+        Environment.SetEnvironmentVariable("DOCKER_BUILDKIT", "0");
+
+        // Build the Docker image from Dockerfile
+        _webAppImage = new ImageFromDockerfileBuilder()
+            .WithDockerfileDirectory(repoRoot)
+            .WithDockerfile("src/Presentation/WebApp/Dockerfile")
+            .WithDeleteIfExists(true)
+            .Build();
+
+        await _webAppImage.CreateAsync();
+
+        // Create and start the WebApp container
         _webAppContainer = new ContainerBuilder()
-            .WithImage(new ImageFromDockerfileBuilder()
-                .WithDockerfileDirectory(repoRoot)
-                .WithDockerfile("src/Presentation/WebApp/Dockerfile")
-                .WithDeleteIfExists(true)
-                .Build())
+            .WithImage(_webAppImage)
             .WithNetwork(_network)
             .WithNetworkAliases(WebAppAlias)
             .WithPortBinding(8080, true)
@@ -132,7 +142,11 @@ public class TestEnvironment : IAsyncDisposable
             .WithEnvironment("RabbitMQ__User", RabbitMqUser)
             .WithEnvironment("RabbitMQ__Password", RabbitMqPassword)
             .WithWaitStrategy(Wait.ForUnixContainer()
-                .UntilHttpRequestIsSucceeded(r => r.ForPath("/Health").ForPort(8080)))
+                .UntilHttpRequestIsSucceeded(r => r
+                    .ForPath("/Health")
+                    .ForPort(8080)
+                    .ForStatusCode(System.Net.HttpStatusCode.OK))
+                .WithTimeout(TimeSpan.FromMinutes(3)))
             .Build();
 
         await _webAppContainer.StartAsync();
@@ -159,6 +173,9 @@ public class TestEnvironment : IAsyncDisposable
     {
         if (_webAppContainer != null)
             await _webAppContainer.DisposeAsync();
+
+        if (_webAppImage != null)
+            await _webAppImage.DisposeAsync();
 
         if (_sqlContainer != null)
             await _sqlContainer.DisposeAsync();

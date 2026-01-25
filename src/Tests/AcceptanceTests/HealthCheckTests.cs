@@ -26,6 +26,7 @@ public class HealthCheckTests
     [OneTimeTearDown]
     public async Task OneTimeTearDown()
     {
+        _httpClient?.Dispose();
         await _webAppFixture.DisposeAsync();
         await _testEnvironment.DisposeAsync();
     }

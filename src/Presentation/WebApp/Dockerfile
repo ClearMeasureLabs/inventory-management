@@ -22,19 +22,49 @@ COPY src/Core/ Core/
 COPY src/Infrastructure/ Infrastructure/
 COPY src/Presentation/ Presentation/
 
-# Copy config files to the location expected by the app
-COPY environments/global.config.json Presentation/WebApp/config/global.config.json
-COPY environments/local/local.config.json Presentation/WebApp/config/local.config.json
+# Copy config files to the location expected by the csproj relative paths
+# Bootstrap.csproj references ../../../environments/ from /src/Infrastructure/Bootstrap/
+# So we need /environments/ at the root level
+COPY environments/ /environments/
 
 # Build and publish
-RUN dotnet publish Presentation/WebApp/WebApp.csproj -c Release -o /app/publish --no-restore
+RUN dotnet publish Presentation/WebApp/WebApp.csproj -c Release -o /app/publish
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
+# Install curl for health checks and wait script
+RUN apt-get update && apt-get install -y --no-install-recommends curl netcat-openbsd && rm -rf /var/lib/apt/lists/*
+
 # Copy published output
 COPY --from=build /app/publish .
+
+# Create startup script that waits for dependencies
+RUN echo '#!/bin/bash\n\
+set -e\n\
+\n\
+echo "Waiting for SQL Server..."\n\
+until nc -z ${SqlServer__Host:-sqlserver} ${SqlServer__Port:-1433} 2>/dev/null; do\n\
+  sleep 1\n\
+done\n\
+echo "SQL Server is ready"\n\
+\n\
+echo "Waiting for Redis..."\n\
+until nc -z ${Redis__Host:-redis} ${Redis__Port:-6379} 2>/dev/null; do\n\
+  sleep 1\n\
+done\n\
+echo "Redis is ready"\n\
+\n\
+echo "Waiting for RabbitMQ..."\n\
+until nc -z ${RabbitMQ__Host:-rabbitmq} ${RabbitMQ__Port:-5672} 2>/dev/null; do\n\
+  sleep 1\n\
+done\n\
+echo "RabbitMQ is ready"\n\
+\n\
+echo "Starting WebApp..."\n\
+exec dotnet WebApp.dll\n\
+' > /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
 # Expose port 8080 (default for non-root ASP.NET containers)
 EXPOSE 8080
@@ -43,4 +73,4 @@ EXPOSE 8080
 ENV ASPNETCORE_URLS=http://+:8080
 ENV ASPNETCORE_ENVIRONMENT=Development
 
-ENTRYPOINT ["dotnet", "WebApp.dll"]
+ENTRYPOINT ["/bin/bash", "/app/entrypoint.sh"]
