@@ -1,32 +1,33 @@
 using System.Text.Json;
-using AcceptanceTests.Infrastructure;
 
 namespace AcceptanceTests;
 
 [TestFixture]
 public class HealthCheckTests
 {
-    private WebAppFixture _webAppFixture = null!;
+    private HttpClient _httpClient = null!;
 
     [OneTimeSetUp]
     public void OneTimeSetUp()
     {
-        // Use shared WebApplicationFactory from global fixture
-        _webAppFixture = new WebAppFixture(GlobalTestFixture.WebApplicationFactory);
+        // Use API server address from global fixture
+        _httpClient = new HttpClient
+        {
+            BaseAddress = new Uri(GlobalTestFixture.ApiServerAddress)
+        };
     }
 
     [OneTimeTearDown]
     public void OneTimeTearDown()
     {
-        _webAppFixture?.Dispose();
+        _httpClient?.Dispose();
     }
 
     [Test]
     public async Task HealthEndpoint_AllDependenciesHealthy()
     {
         // Act
-        var client = _webAppFixture.CreateClient();
-        var response = await client.GetAsync("/Health");
+        var response = await _httpClient.GetAsync("/Health");
         var content = await response.Content.ReadAsStringAsync();
         var healthResponse = JsonSerializer.Deserialize<JsonElement>(content);
 
