@@ -1,24 +1,26 @@
 # Ivan - Inventory Management System
 
-An inventory management system built with .NET 10, following clean architecture principles with CQRS.
+An inventory management system built with .NET 10 and Angular, following clean architecture principles with CQRS.
 
 ## Overview
 
 Ivan is a full-stack inventory management application that tracks containers and items. The system is built using:
 
-- **Backend**: ASP.NET Core Web API with Blazor Server
-- **Frontend**: Blazor WebAssembly
+- **Backend**: ASP.NET Core Web API
+- **Frontend**: Angular 19 with Bootstrap 5
 - **Database**: SQL Server with Entity Framework Core
 - **Caching**: Redis
 - **Messaging**: RabbitMQ
-- **Testing**: NUnit, Playwright, Testcontainers
+- **Testing**: NUnit, Jasmine/Karma, Testcontainers
 
 ## Getting Started
 
 ### Prerequisites
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
+- [Node.js 18+](https://nodejs.org/) (with npm)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- [Google Chrome](https://www.google.com/chrome/) (for Angular tests)
 - PowerShell
 
 ### Initial Setup
@@ -36,7 +38,7 @@ Ivan is a full-stack inventory management application that tracks containers and
    .\scripts\install_tools.ps1
    ```
 
-   This installs EF Core tools and Playwright browsers.
+   This installs EF Core tools and Angular dependencies.
 
 3. **Start infrastructure services**
 
@@ -55,9 +57,22 @@ Ivan is a full-stack inventory management application that tracks containers and
 
 ### Running the Application
 
+**Backend API:**
+
 ```powershell
-dotnet run --project src\Presentation\WebApp
+dotnet run --project src\Presentation\WebAPI
 ```
+
+The API will be available at `http://localhost:5000`.
+
+**Frontend (Angular):**
+
+```powershell
+cd src\Presentation\webapp
+npm start
+```
+
+The Angular app will be available at `http://localhost:4200`.
 
 ### Adding Database Migrations
 
@@ -73,8 +88,8 @@ Migrations are generated in `src/Infrastructure/SQLServer/Migrations/`. The migr
 
 | Script | Description |
 |--------|-------------|
-| `scripts\install_tools.ps1` | Install EF Core tools and Playwright browsers |
-| `scripts\build_and_test.ps1` | Build solution and run all tests |
+| `scripts\install_tools.ps1` | Install EF Core tools and Angular dependencies |
+| `scripts\build_and_test.ps1` | Build Angular app, build solution, and run all tests |
 | `scripts\add_migration.ps1 -MigrationName <name>` | Add a new EF Core migration |
 | `environments\local\provision.ps1` | Start local infrastructure via Docker |
 
@@ -109,14 +124,15 @@ src/
 │   └── RabbitMQ/         # Event hub implementation
 │
 ├── Presentation/
-│   ├── WebApp/           # ASP.NET Core + Blazor Server
-│   └── WebApp.Client/    # Blazor WebAssembly
+│   ├── WebAPI/           # ASP.NET Core Web API
+│   └── webapp/           # Angular application
 │
 └── Tests/
-    ├── UnitTests/        # Isolated unit tests with mocks
-    ├── IntegrationTests/ # Component tests with Testcontainers
-    └── AcceptanceTests/  # End-to-end tests with Playwright
+    ├── UnitTests/        # Isolated unit tests with mocks (NUnit)
+    └── IntegrationTests/ # Component tests with Testcontainers (NUnit)
 ```
+
+The Angular application includes its own component tests using Jasmine/Karma.
 
 ### Dependency Flow
 
@@ -146,6 +162,13 @@ Application/Features/{Entity}/
 API Request → Command/Query → Handler → DTO → API Response
 ```
 
+### API and Frontend Communication
+
+The Angular frontend communicates with the .NET WebAPI via HTTP:
+
+- **Development**: Angular uses the API URL configured in `src/environments/environment.ts`
+- **Production**: Configure the API URL in `src/environments/environment.prod.ts`
+
 ### Configuration
 
 Configuration is layered by environment:
@@ -158,3 +181,55 @@ environments/
     ├── docker-compose.yml  # Infrastructure services
     └── init-db.sql         # Database initialization
 ```
+
+### Angular Application
+
+The Angular app is located at `src/Presentation/webapp/` and uses:
+
+- **Angular 19** with standalone components
+- **Bootstrap 5** for styling
+- **RxJS** for reactive programming
+- **Jasmine/Karma** for component testing
+
+Key directories:
+- `src/app/components/` - UI components (nav, home, modals)
+- `src/app/services/` - HTTP services for API communication
+- `src/app/models/` - TypeScript interfaces for API contracts
+- `src/environments/` - Environment-specific configuration
+
+## Testing
+
+The project uses a layered testing strategy:
+
+### Unit Tests (.NET)
+
+Located in `src/Tests/UnitTests/`. Test isolated behavior using mocks.
+
+```powershell
+dotnet test src/Tests/UnitTests
+```
+
+### Integration Tests (.NET)
+
+Located in `src/Tests/IntegrationTests/`. Test components with real infrastructure using Testcontainers.
+
+```powershell
+dotnet test src/Tests/IntegrationTests
+```
+
+### Angular Component Tests
+
+Located alongside components in `src/Presentation/webapp/src/app/`. Test UI components with Jasmine/Karma.
+
+```powershell
+cd src/Presentation/webapp
+npm test -- --watch=false --browsers=ChromeHeadless
+```
+
+### Run All Tests
+
+```powershell
+.\scripts\build_and_test.ps1
+```
+
+This runs all test suites: .NET unit tests, .NET integration tests, and Angular component tests.

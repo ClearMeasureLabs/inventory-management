@@ -18,6 +18,9 @@ namespace Bootstrap;
 
 public static class DependencyInjection
 {
+    private const int MaxRetries = 15;
+    private static readonly TimeSpan RetryDelay = TimeSpan.FromSeconds(5);
+
     public static IConfigurationBuilder GetConfiguration(this IConfigurationBuilder builder, string basePath)
     {
         builder
@@ -46,27 +49,19 @@ public static class DependencyInjection
         services.AddDbContext<InventoryDbContext>(options => options.UseSqlServer(sqlConfig.GetConnectionString()));
         services.AddScoped<IRepository, SQLServerRepository>();
 
-        // Redis Cache
+        // Redis Cache - with retry logic
         var redisConfig = new RedisConfig();
         configuration.GetSection("Redis").Bind(redisConfig);
 
-        var redisConnection = await StackExchange.Redis.ConnectionMultiplexer.ConnectAsync(redisConfig.GetConnectionString());
+        var redisConnection = await ConnectToRedisWithRetryAsync(redisConfig);
         services.AddSingleton<StackExchange.Redis.IConnectionMultiplexer>(redisConnection);
         services.AddScoped<ICache, RedisCache>();
 
-        // RabbitMQ Event Hub
+        // RabbitMQ Event Hub - with retry logic
         var rabbitConfig = new RabbitMQConfig();
         configuration.GetSection("RabbitMQ").Bind(rabbitConfig);
 
-        var factory = new ConnectionFactory
-        {
-            HostName = rabbitConfig.Host,
-            Port = int.Parse(rabbitConfig.Port),
-            UserName = rabbitConfig.User,
-            Password = rabbitConfig.Password
-        };
-
-        var rabbitConnection = await factory.CreateConnectionAsync();
+        var rabbitConnection = await ConnectToRabbitMqWithRetryAsync(rabbitConfig);
         var rabbitChannel = await rabbitConnection.CreateChannelAsync();
         services.AddSingleton(rabbitConnection);
         services.AddSingleton(rabbitChannel);
@@ -77,6 +72,60 @@ public static class DependencyInjection
         services.AddScoped<IGetAllContainersQueryHandler, GetAllContainersQueryHandler>();
         services.AddScoped<IContainers, Containers>();
         services.AddScoped<IApplication, Application.Application>();
+    }
+
+    private static async Task<StackExchange.Redis.IConnectionMultiplexer> ConnectToRedisWithRetryAsync(RedisConfig config)
+    {
+        var connectionString = config.GetConnectionString();
+        
+        for (int attempt = 1; attempt <= MaxRetries; attempt++)
+        {
+            try
+            {
+                Console.WriteLine($"Connecting to Redis (attempt {attempt}/{MaxRetries})...");
+                var connection = await StackExchange.Redis.ConnectionMultiplexer.ConnectAsync(connectionString);
+                Console.WriteLine("Successfully connected to Redis.");
+                return connection;
+            }
+            catch (Exception ex) when (attempt < MaxRetries)
+            {
+                Console.WriteLine($"Redis connection failed: {ex.Message}. Retrying in {RetryDelay.TotalSeconds}s...");
+                await Task.Delay(RetryDelay);
+            }
+        }
+
+        // Final attempt - let it throw
+        return await StackExchange.Redis.ConnectionMultiplexer.ConnectAsync(connectionString);
+    }
+
+    private static async Task<IConnection> ConnectToRabbitMqWithRetryAsync(RabbitMQConfig config)
+    {
+        var factory = new ConnectionFactory
+        {
+            HostName = config.Host,
+            Port = int.Parse(config.Port),
+            UserName = config.User,
+            Password = config.Password
+        };
+
+        for (int attempt = 1; attempt <= MaxRetries; attempt++)
+        {
+            try
+            {
+                Console.WriteLine($"Connecting to RabbitMQ (attempt {attempt}/{MaxRetries})...");
+                var connection = await factory.CreateConnectionAsync();
+                Console.WriteLine("Successfully connected to RabbitMQ.");
+                return connection;
+            }
+            catch (Exception ex) when (attempt < MaxRetries)
+            {
+                Console.WriteLine($"RabbitMQ connection failed: {ex.Message}. Retrying in {RetryDelay.TotalSeconds}s...");
+                await Task.Delay(RetryDelay);
+            }
+        }
+
+        // Final attempt - let it throw
+        return await factory.CreateConnectionAsync();
     }
 
     public static IServiceCollection AddAllHealthChecks(this IServiceCollection services, IConfiguration configuration)
@@ -160,5 +209,3 @@ public static class DependencyInjection
             });
     }
 }
-
-

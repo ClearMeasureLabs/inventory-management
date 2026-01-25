@@ -10,11 +10,9 @@
     <Project Path="Infrastructure/SQLServer/SQLServer.csproj" />
   </Folder>
   <Folder Name="/Presentation/">
-    <Project Path="Presentation/WebApp.Client/WebApp.Client.csproj" />
-    <Project Path="Presentation/WebApp/WebApp.csproj" />
+    <Project Path="Presentation/WebAPI/WebAPI.csproj" />
   </Folder>
   <Folder Name="/Tests/">
-    <Project Path="Tests/AcceptanceTests/AcceptanceTests.csproj" />
     <Project Path="Tests/IntegrationTests/IntegrationTests.csproj" />
     <Project Path="Tests/UnitTests/UnitTests.csproj" />
   </Folder>

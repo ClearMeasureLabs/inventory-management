@@ -7,9 +7,9 @@ alwaysApply: true
 
 All code changes require automated tests that pass before committing. Verify by running `scripts/build_and_test.ps1`.
 
-## Unit Tests
+## Unit Tests (.NET)
 
-Verify isolated behavior using mocks. Each test should cover one of these categories:
+Located in `src/Tests/UnitTests/`. Verify isolated behavior using mocks. Each test should cover one of these categories:
 
 1. **Dependencies called** - Verify expected dependencies are invoked with correct parameters
 2. **Business logic executed** - Validate correct data transformations and processing
@@ -17,29 +17,56 @@ Verify isolated behavior using mocks. Each test should cover one of these catego
 4. **Return values correct** - Assert expected DTOs/responses are returned
 5. **Exceptions thrown** - Verify validation errors and edge cases throw appropriate exceptions
 
-## Integration Tests
+## Integration Tests (.NET)
 
-Verify components work together with real infrastructure (via Testcontainers):
+Located in `src/Tests/IntegrationTests/`. Verify components work together with real infrastructure (via Testcontainers):
 
 1. **Happy path succeeds** - Valid inputs produce expected results without errors
 
-## Acceptance Tests
+## Angular Component Tests
 
-Verify end-to-end user experience using Playwright:
+Located alongside components in `src/Presentation/webapp/src/app/`. Verify UI behavior using Jasmine/Karma:
 
-1. **Happy path UX** - Expected user workflows complete successfully
-2. **Expected error handling** - Validation errors display user-friendly messages
-3. **Unexpected error handling** - System errors are handled gracefully without exposing internals
+1. **Component renders** - Components display correctly with expected elements
+2. **User interactions** - Button clicks, form submissions trigger expected behavior
+3. **API integration** - Services call correct endpoints with proper parameters
+4. **Error handling** - Validation errors and API errors display appropriately
+5. **State management** - Component state updates correctly after actions
 
 ## When New Tests Are Required
 
-- **New functionality**: All three test types required
-- **Modified functionality**: New integration/acceptance tests only if user experience changes
+- **New backend functionality**: Unit tests and integration tests required
+- **New UI components**: Angular component tests required
+- **Modified functionality**: Update existing tests or add new ones as needed
 - **Bug fixes**: Add regression tests at the appropriate level
 
 ## Guidelines
 
+### .NET Tests
 - Use existing tests in `src/Tests/` as reference templates
 - Follow Arrange-Act-Assert pattern
 - Use `#region` blocks to organize unit tests by category
 - Use Bogus for generating test data
+
+### Angular Tests
+- Create spec files alongside components: `component-name.component.spec.ts`
+- Use `HttpTestingController` to mock API calls
+- Use `fakeAsync` and `tick` for async operations
+- Test both success and error scenarios
+
+## Running Tests
+
+```powershell
+# Run all tests
+.\scripts\build_and_test.ps1
+
+# Run .NET unit tests only
+dotnet test src/Tests/UnitTests
+
+# Run .NET integration tests only
+dotnet test src/Tests/IntegrationTests
+
+# Run Angular tests only
+cd src/Presentation/webapp
+npm test -- --watch=false --browsers=ChromeHeadless
+```
