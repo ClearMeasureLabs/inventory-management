@@ -13,6 +13,18 @@ if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
     exit 1
 }
 
+# Node.js
+if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+    Write-Error "Node.js not found. Install from https://nodejs.org"
+    exit 1
+}
+
+# npm
+if (-not (Get-Command npm -ErrorAction SilentlyContinue)) {
+    Write-Error "npm not found. Install Node.js from https://nodejs.org"
+    exit 1
+}
+
 # GitHub CLI
 if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
     if ($IsWindows) {
@@ -33,6 +45,12 @@ if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
 
 # EF Core Tools
 dotnet tool update --global dotnet-ef | Out-Null
+
+# Install Angular dependencies
+Write-Host "Installing Angular dependencies..."
+Push-Location "$repoRoot/src/Presentation/webapp"
+npm ci
+Pop-Location
 
 # Build AcceptanceTests and install Playwright
 dotnet build "$repoRoot/src/Tests/AcceptanceTests/AcceptanceTests.csproj" --verbosity quiet

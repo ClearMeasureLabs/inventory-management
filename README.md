@@ -1,13 +1,13 @@
 # Ivan - Inventory Management System
 
-An inventory management system built with .NET 10, following clean architecture principles with CQRS.
+An inventory management system built with .NET 10 and Angular, following clean architecture principles with CQRS.
 
 ## Overview
 
 Ivan is a full-stack inventory management application that tracks containers and items. The system is built using:
 
-- **Backend**: ASP.NET Core Web API with Blazor Server
-- **Frontend**: Blazor WebAssembly
+- **Backend**: ASP.NET Core Web API
+- **Frontend**: Angular with Bootstrap 5
 - **Database**: SQL Server with Entity Framework Core
 - **Caching**: Redis
 - **Messaging**: RabbitMQ
@@ -18,6 +18,7 @@ Ivan is a full-stack inventory management application that tracks containers and
 ### Prerequisites
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
+- [Node.js 18+](https://nodejs.org/) (with npm)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - PowerShell
 
@@ -36,7 +37,7 @@ Ivan is a full-stack inventory management application that tracks containers and
    .\scripts\install_tools.ps1
    ```
 
-   This installs EF Core tools and Playwright browsers.
+   This installs EF Core tools, Playwright browsers, and Angular dependencies.
 
 3. **Start infrastructure services**
 
@@ -55,9 +56,22 @@ Ivan is a full-stack inventory management application that tracks containers and
 
 ### Running the Application
 
+**Backend API:**
+
 ```powershell
-dotnet run --project src\Presentation\WebApp
+dotnet run --project src\Presentation\WebAPI
 ```
+
+The API will be available at `https://localhost:5001` (or the port shown in the console).
+
+**Frontend (Angular):**
+
+```powershell
+cd src\Presentation\webapp
+npm start
+```
+
+The Angular app will be available at `http://localhost:4200`.
 
 ### Adding Database Migrations
 
@@ -73,8 +87,8 @@ Migrations are generated in `src/Infrastructure/SQLServer/Migrations/`. The migr
 
 | Script | Description |
 |--------|-------------|
-| `scripts\install_tools.ps1` | Install EF Core tools and Playwright browsers |
-| `scripts\build_and_test.ps1` | Build solution and run all tests |
+| `scripts\install_tools.ps1` | Install EF Core tools, Playwright browsers, and Angular dependencies |
+| `scripts\build_and_test.ps1` | Build Angular app, build solution, and run all tests |
 | `scripts\add_migration.ps1 -MigrationName <name>` | Add a new EF Core migration |
 | `environments\local\provision.ps1` | Start local infrastructure via Docker |
 
@@ -109,8 +123,8 @@ src/
 │   └── RabbitMQ/         # Event hub implementation
 │
 ├── Presentation/
-│   ├── WebApp/           # ASP.NET Core + Blazor Server
-│   └── WebApp.Client/    # Blazor WebAssembly
+│   ├── WebAPI/           # ASP.NET Core Web API
+│   └── webapp/           # Angular application
 │
 └── Tests/
     ├── UnitTests/        # Isolated unit tests with mocks
@@ -146,6 +160,13 @@ Application/Features/{Entity}/
 API Request → Command/Query → Handler → DTO → API Response
 ```
 
+### API and Frontend Communication
+
+The Angular frontend communicates with the .NET WebAPI via HTTP:
+
+- **Development**: Angular dev server proxies requests or uses CORS
+- **Production**: Both can be served from the same origin or configured separately
+
 ### Configuration
 
 Configuration is layered by environment:
@@ -158,3 +179,17 @@ environments/
     ├── docker-compose.yml  # Infrastructure services
     └── init-db.sql         # Database initialization
 ```
+
+### Angular Application
+
+The Angular app is located at `src/Presentation/webapp/` and uses:
+
+- **Angular 19** with standalone components
+- **Bootstrap 5** for styling
+- **RxJS** for reactive programming
+
+Key directories:
+- `src/app/components/` - UI components (nav, home, modals)
+- `src/app/services/` - HTTP services for API communication
+- `src/app/models/` - TypeScript interfaces for API contracts
+- `src/environments/` - Environment-specific configuration

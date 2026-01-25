@@ -2,6 +2,16 @@ $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
 
 Write-Host "******************************************************"
+Write-Host "BUILDING ANGULAR APP"
+Write-Host "******************************************************"
+Push-Location "$repoRoot/src/Presentation/webapp"
+npm ci
+if ($LASTEXITCODE -ne 0) { Pop-Location; exit 1 }
+npm run build
+if ($LASTEXITCODE -ne 0) { Pop-Location; exit 1 }
+Pop-Location
+
+Write-Host "`n******************************************************"
 Write-Host "BUILDING SOLUTION"
 Write-Host "******************************************************"
 dotnet build "$repoRoot/src/Solution.slnx"
