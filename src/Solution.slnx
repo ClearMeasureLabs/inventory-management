@@ -13,7 +13,6 @@
     <Project Path="Presentation/WebAPI/WebAPI.csproj" />
   </Folder>
   <Folder Name="/Tests/">
-    <Project Path="Tests/AcceptanceTests/AcceptanceTests.csproj" />
     <Project Path="Tests/IntegrationTests/IntegrationTests.csproj" />
     <Project Path="Tests/UnitTests/UnitTests.csproj" />
   </Folder>

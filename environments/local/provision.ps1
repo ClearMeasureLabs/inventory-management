@@ -1,4 +1,4 @@
-﻿# Read global configuration for project name
+# Read global configuration for project name
 $globalConfig = Get-Content -Path "../global.config.json" -Raw | ConvertFrom-Json
 $projectName = $globalConfig.Project.Name.ToLower().Replace(" ", "_")
 
@@ -16,5 +16,5 @@ $env:RABBITMQ_MANAGEMENT_PORT = $localConfig.RabbitMQ.ManagementPort
 $env:REDIS_PORT = $localConfig.Redis.Port
 $env:REDIS_INSIGHT_PORT = $localConfig.RedisInsight.Port
 
-# Run docker-compose with the project name
-docker-compose -p $projectName up -d
+# Run docker compose with the project name
+docker compose -p $projectName up -d

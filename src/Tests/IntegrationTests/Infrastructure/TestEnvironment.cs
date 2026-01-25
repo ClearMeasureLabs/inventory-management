@@ -1,5 +1,7 @@
 using DotNet.Testcontainers.Builders;
-using Testcontainers.MsSql;
+using DotNet.Testcontainers.Containers;
+using Docker.DotNet;
+using Docker.DotNet.Models;
 using Testcontainers.RabbitMq;
 using Testcontainers.Redis;
 
@@ -7,9 +9,10 @@ namespace IntegrationTests.Infrastructure;
 
 public class TestEnvironment : IAsyncDisposable
 {
-    private MsSqlContainer? _sqlContainer;
+    private string? _sqlContainerId;
     private RabbitMqContainer? _rabbitMqContainer;
     private RedisContainer? _redisContainer;
+    private DockerClient? _dockerClient;
 
     public string SqlHost { get; private set; } = string.Empty;
     public int SqlPort { get; private set; }
@@ -25,11 +28,10 @@ public class TestEnvironment : IAsyncDisposable
 
     public async Task InitializeAsync()
     {
-        _sqlContainer = new MsSqlBuilder()
-            .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
-            .WithPassword("Test@Password123!")
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(1433))
-            .Build();
+        _dockerClient = new DockerClientConfiguration().CreateClient();
+
+        // Start SQL Server using Docker.DotNet directly to set user=0:0
+        await StartSqlServerAsync();
 
         _rabbitMqContainer = new RabbitMqBuilder()
             .WithImage("rabbitmq:management")
@@ -44,14 +46,9 @@ public class TestEnvironment : IAsyncDisposable
             .Build();
 
         await Task.WhenAll(
-            _sqlContainer.StartAsync(),
             _rabbitMqContainer.StartAsync(),
             _redisContainer.StartAsync()
         );
-
-        SqlHost = _sqlContainer.Hostname;
-        SqlPort = _sqlContainer.GetMappedPublicPort(1433);
-        SqlPassword = "Test@Password123!";
 
         RedisHost = _redisContainer.Hostname;
         RedisPort = _redisContainer.GetMappedPublicPort(6379);
@@ -60,6 +57,94 @@ public class TestEnvironment : IAsyncDisposable
         RabbitMqPort = _rabbitMqContainer.GetMappedPublicPort(5672);
         RabbitMqUser = "guest";
         RabbitMqPassword = "guest";
+    }
+
+    private async Task StartSqlServerAsync()
+    {
+        const string imageName = "mcr.microsoft.com/mssql/server:2022-latest";
+        SqlPassword = "Test@Password123!";
+
+        // Pull image if needed
+        try
+        {
+            await _dockerClient!.Images.CreateImageAsync(
+                new ImagesCreateParameters { FromImage = imageName },
+                null,
+                new Progress<JSONMessage>());
+        }
+        catch
+        {
+            // Image might already exist
+        }
+
+        // Create container with user=0:0 (root)
+        var createResponse = await _dockerClient!.Containers.CreateContainerAsync(new CreateContainerParameters
+        {
+            Image = imageName,
+            User = "0:0",
+            Env = new List<string>
+            {
+                "ACCEPT_EULA=Y",
+                $"MSSQL_SA_PASSWORD={SqlPassword}"
+            },
+            HostConfig = new HostConfig
+            {
+                PortBindings = new Dictionary<string, IList<PortBinding>>
+                {
+                    { "1433/tcp", new List<PortBinding> { new PortBinding { HostPort = "0" } } }
+                },
+                AutoRemove = true
+            },
+            ExposedPorts = new Dictionary<string, EmptyStruct>
+            {
+                { "1433/tcp", default }
+            }
+        });
+
+        _sqlContainerId = createResponse.ID;
+
+        // Start container
+        await _dockerClient.Containers.StartContainerAsync(_sqlContainerId, null);
+
+        // Get the mapped port
+        var inspectResponse = await _dockerClient.Containers.InspectContainerAsync(_sqlContainerId);
+        var portBinding = inspectResponse.NetworkSettings.Ports["1433/tcp"].First();
+        SqlPort = int.Parse(portBinding.HostPort);
+        SqlHost = "localhost";
+
+        // Wait for SQL Server to be ready
+        await WaitForSqlServerAsync();
+    }
+
+    private async Task WaitForSqlServerAsync()
+    {
+        var maxAttempts = 60;
+        var delay = TimeSpan.FromSeconds(2);
+
+        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                // Try connecting to SQL Server port
+                using var tcpClient = new System.Net.Sockets.TcpClient();
+                await tcpClient.ConnectAsync(SqlHost, SqlPort);
+                
+                if (tcpClient.Connected)
+                {
+                    // Additional wait for SQL Server to fully initialize
+                    await Task.Delay(TimeSpan.FromSeconds(5));
+                    return;
+                }
+            }
+            catch
+            {
+                // Ignore errors during wait
+            }
+
+            await Task.Delay(delay);
+        }
+
+        throw new TimeoutException("SQL Server did not become ready in time");
     }
 
     public async ValueTask DisposeAsync()
@@ -71,7 +156,18 @@ public class TestEnvironment : IAsyncDisposable
         if (_rabbitMqContainer != null)
             await _rabbitMqContainer.DisposeAsync();
 
-        if (_sqlContainer != null)
-            await _sqlContainer.DisposeAsync();
+        if (_sqlContainerId != null && _dockerClient != null)
+        {
+            try
+            {
+                await _dockerClient.Containers.StopContainerAsync(_sqlContainerId, new ContainerStopParameters());
+            }
+            catch
+            {
+                // Container might already be stopped
+            }
+        }
+
+        _dockerClient?.Dispose();
     }
 }
