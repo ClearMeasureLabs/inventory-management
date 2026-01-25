@@ -52,8 +52,9 @@ public class GlobalTestFixture
         _webApiContainerFixture = new WebApiContainerFixture(_testEnvironment, _testEnvironment.Network);
         await _webApiContainerFixture.StartAsync();
 
-        // Start Angular app container
-        _angularContainerFixture = new AngularContainerFixture(_testEnvironment.Network);
+        // Start Angular app container - use WebAPI's external address for proxying
+        // Angular container will use host.docker.internal to reach the WebAPI via host-mapped port
+        _angularContainerFixture = new AngularContainerFixture(_webApiContainerFixture.ServerAddress, _testEnvironment.Network);
         await _angularContainerFixture.StartAsync();
     }
 

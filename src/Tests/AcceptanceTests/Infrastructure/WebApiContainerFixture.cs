@@ -28,24 +28,29 @@ public class WebApiContainerFixture : IAsyncDisposable
         // Use pre-built image (built by build_and_test.ps1)
         const string imageName = "webapi-acceptance-test:latest";
 
+        // Use host.docker.internal to access services via host-mapped ports
+        // This is more reliable than Docker network aliases in some environments
+        const string hostGateway = "host.docker.internal";
+
         // Run the container
         _container = new ContainerBuilder()
             .WithImage(imageName)
             .WithNetwork(_network)
             .WithNetworkAliases("webapi")
             .WithPortBinding(8080, true)
+            .WithExtraHost("host.docker.internal", "host-gateway")
             .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Test")
             .WithEnvironment("ASPNETCORE_URLS", "http://+:8080")
-            .WithEnvironment("SqlServer__Host", _testEnvironment.SqlContainerAlias)
-            .WithEnvironment("SqlServer__Port", "1433")
+            .WithEnvironment("SqlServer__Host", hostGateway)
+            .WithEnvironment("SqlServer__Port", _testEnvironment.SqlPort.ToString())
             .WithEnvironment("SqlServer__User", "sa")
             .WithEnvironment("SqlServer__Password", _testEnvironment.SqlPassword)
             .WithEnvironment("SqlServer__Database", "ivan_acceptance_db")
-            .WithEnvironment("Redis__Host", _testEnvironment.RedisContainerAlias)
-            .WithEnvironment("Redis__Port", "6379")
+            .WithEnvironment("Redis__Host", hostGateway)
+            .WithEnvironment("Redis__Port", _testEnvironment.RedisPort.ToString())
             .WithEnvironment("Redis__User", "default")
-            .WithEnvironment("RabbitMQ__Host", _testEnvironment.RabbitMqContainerAlias)
-            .WithEnvironment("RabbitMQ__Port", "5672")
+            .WithEnvironment("RabbitMQ__Host", hostGateway)
+            .WithEnvironment("RabbitMQ__Port", _testEnvironment.RabbitMqPort.ToString())
             .WithEnvironment("RabbitMQ__User", _testEnvironment.RabbitMqUser)
             .WithEnvironment("RabbitMQ__Password", _testEnvironment.RabbitMqPassword)
             .WithWaitStrategy(Wait.ForUnixContainer()

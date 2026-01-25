@@ -1,4 +1,5 @@
 export const environment = {
   production: false,
-  apiUrl: 'https://localhost:5000'
+  // Use empty string for relative URL - nginx will proxy /api/ requests to the backend
+  apiUrl: ''
 };

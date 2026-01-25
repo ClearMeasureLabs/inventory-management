@@ -11,12 +11,15 @@ namespace AcceptanceTests.Infrastructure;
 public class AngularContainerFixture : IAsyncDisposable
 {
     private IContainer? _container;
+    private readonly string _apiUrl;
     private readonly INetwork _network;
 
     public string ServerAddress { get; private set; } = string.Empty;
 
-    public AngularContainerFixture(INetwork network)
+    public AngularContainerFixture(string apiUrl, INetwork network)
     {
+        // Convert localhost URLs to host.docker.internal for container access
+        _apiUrl = apiUrl.Replace("localhost", "host.docker.internal");
         _network = network;
     }
 
@@ -25,12 +28,15 @@ public class AngularContainerFixture : IAsyncDisposable
         // Use pre-built image (built by build_and_test.ps1)
         const string imageName = "angular-acceptance-test:latest";
 
-        // Run the container
+        // Run the container with API_URL environment variable
+        // Add host.docker.internal to access host services
         _container = new ContainerBuilder()
             .WithImage(imageName)
             .WithNetwork(_network)
             .WithNetworkAliases("angular")
             .WithPortBinding(80, true)
+            .WithExtraHost("host.docker.internal", "host-gateway")
+            .WithEnvironment("API_URL", _apiUrl)
             .WithWaitStrategy(Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(r => r.ForPath("/").ForPort(80)))
             .Build();
 

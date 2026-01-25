@@ -22,9 +22,13 @@ RUN rm -rf ./*
 # Copy built Angular app
 COPY --from=build /app/dist/webapp/browser .
 
-# Copy custom nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy nginx config template
+COPY nginx.conf /etc/nginx/templates/default.conf.template
 
 EXPOSE 80
+
+# Use nginx's envsubst to inject API_URL at runtime
+# Default to localhost:5000 if not set
+ENV API_URL=http://localhost:5000
 
 CMD ["nginx", "-g", "daemon off;"]
