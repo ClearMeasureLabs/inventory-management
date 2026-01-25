@@ -30,6 +30,7 @@ module.exports = function (config) {
     reporters: ['progress', 'kjhtml'],
     browsers: ['Chrome'],
     restartOnFileChange: true,
+    singleRun: true,
     customLaunchers: {
       ChromeHeadless: {
         base: 'Chrome',
