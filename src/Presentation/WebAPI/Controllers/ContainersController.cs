@@ -1,0 +1,66 @@
+using Application.Features.Containers;
+using Application.Features.Containers.CreateContainer;
+using Microsoft.AspNetCore.Mvc;
+using WebAPI.Contracts;
+using ValidationException = Application.Exceptions.ValidationException;
+
+namespace WebAPI.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+[Tags("Containers")]
+public class ContainersController : ControllerBase
+{
+    private readonly IContainers _containers;
+
+    public ContainersController(IContainers containers)
+    {
+        _containers = containers;
+    }
+
+    /// <summary>
+    /// Gets all containers.
+    /// </summary>
+    [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<ContainerResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAllContainers(CancellationToken cancellationToken)
+    {
+        var containers = await _containers.GetAllAsync(cancellationToken);
+        var response = containers.Select(ContainerResponse.FromDto);
+        return Ok(response);
+    }
+
+    /// <summary>
+    /// Creates a new container.
+    /// </summary>
+    [HttpPost]
+    [ProducesResponseType(typeof(ContainerResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CreateContainer([FromBody] CreateContainerRequest request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var command = new CreateContainerCommand
+            {
+                Name = request.Name,
+                Description = request.Description
+            };
+
+            var result = await _containers.CreateAsync(command, cancellationToken);
+            var response = ContainerResponse.FromDto(result);
+            
+            return CreatedAtAction(nameof(GetAllContainers), new { id = response.ContainerId }, response);
+        }
+        catch (ValidationException ex)
+        {
+            foreach (var error in ex.Errors)
+            {
+                foreach (var message in error.Value)
+                {
+                    ModelState.AddModelError(error.Key, message);
+                }
+            }
+            return ValidationProblem(ModelState);
+        }
+    }
+}

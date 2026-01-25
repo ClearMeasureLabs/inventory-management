@@ -6,18 +6,15 @@ namespace AcceptanceTests;
 [TestFixture]
 public class ViewContainersTests
 {
-    private PlaywrightServerFixture _serverFixture = null!;
     private IPlaywright _playwright = null!;
     private IBrowser _browser = null!;
-    private string _baseUrl = null!;
+    private string _angularBaseUrl = null!;
 
     [OneTimeSetUp]
     public async Task OneTimeSetUp()
     {
-        // Use shared test environment from global fixture
-        _serverFixture = new PlaywrightServerFixture(GlobalTestFixture.TestEnvironment);
-        await _serverFixture.StartAsync();
-        _baseUrl = _serverFixture.ServerAddress;
+        // Use the Angular app URL from global fixture
+        _angularBaseUrl = GlobalTestFixture.AngularAppAddress;
 
         // Initialize Playwright for UI tests
         _playwright = await Playwright.CreateAsync();
@@ -32,8 +29,6 @@ public class ViewContainersTests
     {
         await _browser.DisposeAsync();
         _playwright.Dispose();
-
-        await _serverFixture.DisposeAsync();
     }
 
     [Test]
@@ -43,7 +38,8 @@ public class ViewContainersTests
         var page = await _browser.NewPageAsync();
 
         // Act
-        await page.GotoAsync(_baseUrl);
+        await page.GotoAsync(_angularBaseUrl);
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
         // Assert
         var navbar = page.Locator("nav.navbar");
@@ -62,12 +58,12 @@ public class ViewContainersTests
         var page = await _browser.NewPageAsync();
 
         // Act
-        await page.GotoAsync(_baseUrl);
+        await page.GotoAsync(_angularBaseUrl);
         
-        // Wait for Blazor to hydrate
+        // Wait for Angular to load
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
-        // Assert - wait for title to be set by Blazor
+        // Assert - wait for title to be set by Angular
         await Assertions.Expect(page).ToHaveTitleAsync("Ivan", new() { Timeout = 30000 });
 
         await page.CloseAsync();
@@ -80,12 +76,12 @@ public class ViewContainersTests
         var page = await _browser.NewPageAsync();
 
         // Act
-        await page.GotoAsync(_baseUrl);
+        await page.GotoAsync(_angularBaseUrl);
         
-        // Wait for Blazor to hydrate
+        // Wait for Angular to load
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
-        // Wait for spinner to disappear (indicating Blazor Server has finished loading data)
+        // Wait for spinner to disappear (indicating Angular has finished loading data)
         var spinner = page.Locator(".spinner-border");
         await spinner.WaitForAsync(new() { State = WaitForSelectorState.Hidden, Timeout = 30000 });
 
@@ -115,12 +111,12 @@ public class ViewContainersTests
         var page = await _browser.NewPageAsync();
 
         // Act
-        await page.GotoAsync(_baseUrl);
+        await page.GotoAsync(_angularBaseUrl);
         
-        // Wait for Blazor to hydrate
+        // Wait for Angular to load
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
-        // Wait for spinner to disappear (indicating Blazor Server has finished loading data)
+        // Wait for spinner to disappear (indicating Angular has finished loading data)
         var spinner = page.Locator(".spinner-border");
         await spinner.WaitForAsync(new() { State = WaitForSelectorState.Hidden, Timeout = 30000 });
 

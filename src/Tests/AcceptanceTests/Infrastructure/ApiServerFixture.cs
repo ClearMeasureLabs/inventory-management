@@ -8,17 +8,17 @@ using Microsoft.Extensions.Hosting;
 namespace AcceptanceTests.Infrastructure;
 
 /// <summary>
-/// Provides access to the WebApp server for Playwright browser tests.
-/// Starts a real Kestrel server on a dynamic port that browsers can connect to.
+/// Provides access to the WebAPI server for acceptance tests.
+/// Starts a real Kestrel server on a dynamic port that can be accessed via HTTP.
 /// </summary>
-public class PlaywrightServerFixture : IAsyncDisposable
+public class ApiServerFixture : IAsyncDisposable
 {
     private readonly TestEnvironment _testEnvironment;
     private WebApplicationFactory<Program>? _factory;
 
     public string ServerAddress { get; private set; } = string.Empty;
 
-    public PlaywrightServerFixture(TestEnvironment testEnvironment)
+    public ApiServerFixture(TestEnvironment testEnvironment)
     {
         _testEnvironment = testEnvironment;
     }

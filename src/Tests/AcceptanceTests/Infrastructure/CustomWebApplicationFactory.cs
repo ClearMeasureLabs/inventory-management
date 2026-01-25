@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 namespace AcceptanceTests.Infrastructure;
 
 /// <summary>
-/// Custom WebApplicationFactory that configures the WebApp to use
+/// Custom WebApplicationFactory that configures the WebAPI to use
 /// infrastructure containers (SQL Server, Redis, RabbitMQ) from TestEnvironment.
 /// </summary>
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>

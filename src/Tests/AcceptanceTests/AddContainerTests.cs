@@ -1,30 +1,29 @@
 using AcceptanceTests.Infrastructure;
-using Application.Features.Containers.CreateContainer;
 using Microsoft.Playwright;
 using Shouldly;
 using System.Net.Http.Json;
+using WebAPI.Contracts;
 
 namespace AcceptanceTests;
 
 [TestFixture]
 public class AddContainerTests
 {
-    private PlaywrightServerFixture _serverFixture = null!;
     private IPlaywright _playwright = null!;
     private IBrowser _browser = null!;
-    private string _baseUrl = null!;
+    private string _apiBaseUrl = null!;
+    private string _angularBaseUrl = null!;
     private HttpClient _httpClient = null!;
 
     [OneTimeSetUp]
     public async Task OneTimeSetUp()
     {
-        // Use shared test environment from global fixture
-        _serverFixture = new PlaywrightServerFixture(GlobalTestFixture.TestEnvironment);
-        await _serverFixture.StartAsync();
-        _baseUrl = _serverFixture.ServerAddress;
+        // Use the API and Angular URLs from global fixture
+        _apiBaseUrl = GlobalTestFixture.ApiServerAddress;
+        _angularBaseUrl = GlobalTestFixture.AngularAppAddress;
 
         // Create HTTP client for API calls
-        _httpClient = new HttpClient { BaseAddress = new Uri(_baseUrl) };
+        _httpClient = new HttpClient { BaseAddress = new Uri(_apiBaseUrl) };
 
         // Initialize Playwright for UI tests
         _playwright = await Playwright.CreateAsync();
@@ -40,21 +39,19 @@ public class AddContainerTests
         await _browser.DisposeAsync();
         _playwright.Dispose();
         _httpClient.Dispose();
-
-        await _serverFixture.DisposeAsync();
     }
 
     [Test]
     public async Task CreateContainerApi_WithValidName_ShouldReturn201Created()
     {
         // Arrange
-        var command = new CreateContainerCommand
+        var request = new CreateContainerRequest
         {
             Name = $"API-Container-{Guid.NewGuid():N}"
         };
 
         // Act
-        var response = await _httpClient.PostAsJsonAsync("/api/containers", command);
+        var response = await _httpClient.PostAsJsonAsync("/api/containers", request);
 
         // Assert
         response.StatusCode.ShouldBe(System.Net.HttpStatusCode.Created);
@@ -64,13 +61,13 @@ public class AddContainerTests
     public async Task CreateContainerApi_WithEmptyName_ShouldReturn400BadRequest()
     {
         // Arrange
-        var command = new CreateContainerCommand
+        var request = new CreateContainerRequest
         {
             Name = string.Empty
         };
 
         // Act
-        var response = await _httpClient.PostAsJsonAsync("/api/containers", command);
+        var response = await _httpClient.PostAsJsonAsync("/api/containers", request);
 
         // Assert
         response.StatusCode.ShouldBe(System.Net.HttpStatusCode.BadRequest);
@@ -81,17 +78,17 @@ public class AddContainerTests
     {
         // Arrange - Create container via API
         var containerName = $"UI-Container-{Guid.NewGuid():N}";
-        var command = new CreateContainerCommand
+        var request = new CreateContainerRequest
         {
             Name = containerName
         };
 
-        var response = await _httpClient.PostAsJsonAsync("/api/containers", command);
+        var response = await _httpClient.PostAsJsonAsync("/api/containers", request);
         response.EnsureSuccessStatusCode();
 
         // Act - Navigate to homepage and verify container appears
         var page = await _browser.NewPageAsync();
-        await page.GotoAsync(_baseUrl);
+        await page.GotoAsync(_angularBaseUrl);
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
         // Wait for spinner to disappear
@@ -110,7 +107,7 @@ public class AddContainerTests
     {
         // Arrange
         var page = await _browser.NewPageAsync();
-        await page.GotoAsync(_baseUrl);
+        await page.GotoAsync(_angularBaseUrl);
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
         // Wait for spinner to disappear
@@ -129,14 +126,14 @@ public class AddContainerTests
     {
         // Arrange
         var containerName = $"Data-Container-{Guid.NewGuid():N}";
-        var command = new CreateContainerCommand
+        var request = new CreateContainerRequest
         {
             Name = containerName
         };
 
         // Act
-        var response = await _httpClient.PostAsJsonAsync("/api/containers", command);
-        var result = await response.Content.ReadFromJsonAsync<ContainerApiResponse>();
+        var response = await _httpClient.PostAsJsonAsync("/api/containers", request);
+        var result = await response.Content.ReadFromJsonAsync<ContainerResponse>();
 
         // Assert
         result.ShouldNotBeNull();
@@ -144,11 +141,25 @@ public class AddContainerTests
         result.Name.ShouldBe(containerName);
     }
 
-    private class ContainerApiResponse
+    [Test]
+    public async Task GetAllContainersApi_ShouldReturnContainersList()
     {
-        public int ContainerId { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
+        // Arrange - Create a container first
+        var containerName = $"List-Container-{Guid.NewGuid():N}";
+        var createRequest = new CreateContainerRequest
+        {
+            Name = containerName
+        };
+        await _httpClient.PostAsJsonAsync("/api/containers", createRequest);
+
+        // Act
+        var response = await _httpClient.GetAsync("/api/containers");
+        var containers = await response.Content.ReadFromJsonAsync<List<ContainerResponse>>();
+
+        // Assert
+        response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
+        containers.ShouldNotBeNull();
+        containers.ShouldContain(c => c.Name == containerName);
     }
 
     private static ILocatorAssertions Expect(ILocator locator) => Assertions.Expect(locator);
