@@ -1,0 +1,66 @@
+@page "/containers/add"
+@using Application.Features.Containers
+@using Application.Features.Containers.CreateContainer
+@inject IContainers Containers
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Add Container</PageTitle>
+
+<h1>Add Container</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <EditForm Model="_command" OnValidSubmit="HandleSubmit" FormName="AddContainerForm">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+
+            <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <InputText id="name" class="form-control" @bind-Value="_command.Name" />
+                <ValidationMessage For="@(() => _command.Name)" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <InputText id="description" class="form-control" @bind-Value="_command.Description" />
+                <ValidationMessage For="@(() => _command.Description)" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary" disabled="@_isSubmitting">
+                    @if (_isSubmitting)
+                    {
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <span>Creating...</span>
+                    }
+                    else
+                    {
+                        <span>Create Container</span>
+                    }
+                </button>
+                <a href="/" class="btn btn-secondary ms-2">Cancel</a>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private CreateContainerCommand _command = new();
+    private bool _isSubmitting;
+
+    private async Task HandleSubmit()
+    {
+        _isSubmitting = true;
+
+        try
+        {
+            await Containers.CreateAsync(_command, CancellationToken.None);
+            NavigationManager.NavigateTo("/");
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+}

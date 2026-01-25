@@ -96,7 +96,7 @@ public class ViewContainersTests
         var heading = page.Locator("h1:has-text('No Containers')");
         await Expect(heading).ToBeVisibleAsync(new() { Timeout = 10000 });
 
-        var addButton = page.Locator("button:has-text('Add Container')");
+        var addButton = page.Locator("a:has-text('Add Container')");
         await Expect(addButton).ToBeVisibleAsync(new() { Timeout = 10000 });
 
         await page.CloseAsync();
@@ -120,7 +120,7 @@ public class ViewContainersTests
         await spinner.WaitForAsync(new() { State = WaitForSelectorState.Hidden, Timeout = 30000 });
 
         // Assert
-        var addButton = page.Locator("button.btn-primary:has-text('Add Container')");
+        var addButton = page.Locator("a.btn-primary:has-text('Add Container')");
         await Expect(addButton).ToBeVisibleAsync(new() { Timeout = 10000 });
 
         await page.CloseAsync();
