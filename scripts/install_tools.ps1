@@ -44,6 +44,7 @@ if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
 }
 
 # EF Core Tools
+Write-Host "Installing/updating EF Core tools..."
 dotnet tool update --global dotnet-ef | Out-Null
 
 # Install Angular dependencies
@@ -52,7 +53,4 @@ Push-Location "$repoRoot/src/Presentation/webapp"
 npm ci
 Pop-Location
 
-# Build AcceptanceTests and install Playwright
-dotnet build "$repoRoot/src/Tests/AcceptanceTests/AcceptanceTests.csproj" --verbosity quiet
-$playwrightScript = Join-Path $repoRoot "src/Tests/AcceptanceTests/bin/Debug/net10.0/playwright.ps1"
-& pwsh $playwrightScript install chromium
+Write-Host "All tools installed successfully." -ForegroundColor Green
