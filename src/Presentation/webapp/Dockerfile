@@ -22,13 +22,16 @@ RUN rm -rf ./*
 # Copy built Angular app
 COPY --from=build /app/dist/webapp/browser .
 
-# Copy nginx config template
-COPY nginx.conf /etc/nginx/templates/default.conf.template
+# Copy nginx config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy custom entrypoint script
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
 EXPOSE 80
 
-# Use nginx's envsubst to inject API_URL at runtime
-# Default to localhost:5000 if not set
+# Default API URL (will be replaced at runtime)
 ENV API_URL=http://localhost:5000
 
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["/docker-entrypoint.sh"]
