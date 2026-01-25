@@ -12,6 +12,21 @@ if ($LASTEXITCODE -ne 0) { Pop-Location; exit 1 }
 Pop-Location
 
 Write-Host "`n******************************************************"
+Write-Host "BUILDING DOCKER IMAGES"
+Write-Host "******************************************************"
+
+# Build WebAPI Docker image
+Write-Host "Building WebAPI Docker image..."
+$env:DOCKER_BUILDKIT = "0"
+docker build -f "$repoRoot/src/Presentation/WebAPI/Dockerfile" -t webapi-acceptance-test:latest "$repoRoot"
+if ($LASTEXITCODE -ne 0) { exit 1 }
+
+# Build Angular Docker image
+Write-Host "Building Angular Docker image..."
+docker build -f "$repoRoot/src/Presentation/webapp/Dockerfile" -t angular-acceptance-test:latest "$repoRoot/src/Presentation/webapp"
+if ($LASTEXITCODE -ne 0) { exit 1 }
+
+Write-Host "`n******************************************************"
 Write-Host "BUILDING SOLUTION"
 Write-Host "******************************************************"
 dotnet build "$repoRoot/src/Solution.slnx"

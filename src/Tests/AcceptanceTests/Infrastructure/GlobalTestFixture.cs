@@ -44,12 +44,16 @@ public class GlobalTestFixture
         _testEnvironment = new TestEnvironment();
         await _testEnvironment.InitializeAsync();
 
+        // Wait for infrastructure containers to be fully ready
+        // This ensures network aliases are properly registered
+        await Task.Delay(TimeSpan.FromSeconds(5));
+
         // Start WebAPI container
         _webApiContainerFixture = new WebApiContainerFixture(_testEnvironment, _testEnvironment.Network);
         await _webApiContainerFixture.StartAsync();
 
-        // Start Angular app container (uses WebAPI's external address for API calls from browser)
-        _angularContainerFixture = new AngularContainerFixture(_webApiContainerFixture.ServerAddress, _testEnvironment.Network);
+        // Start Angular app container
+        _angularContainerFixture = new AngularContainerFixture(_testEnvironment.Network);
         await _angularContainerFixture.StartAsync();
     }
 

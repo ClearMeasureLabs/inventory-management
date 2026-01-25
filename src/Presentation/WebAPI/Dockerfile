@@ -6,19 +6,28 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0-preview AS build
 WORKDIR /src
 
 # Copy project files
-COPY ["Core/Domain/Domain.csproj", "Core/Domain/"]
-COPY ["Core/Application/Application.csproj", "Core/Application/"]
-COPY ["Infrastructure/Bootstrap/Bootstrap.csproj", "Infrastructure/Bootstrap/"]
-COPY ["Infrastructure/Redis/Redis.csproj", "Infrastructure/Redis/"]
-COPY ["Infrastructure/RabbitMQ/RabbitMQ.csproj", "Infrastructure/RabbitMQ/"]
-COPY ["Infrastructure/SQLServer/SQLServer.csproj", "Infrastructure/SQLServer/"]
-COPY ["Presentation/WebAPI/WebAPI.csproj", "Presentation/WebAPI/"]
+COPY ["src/Core/Domain/Domain.csproj", "Core/Domain/"]
+COPY ["src/Core/Application/Application.csproj", "Core/Application/"]
+COPY ["src/Infrastructure/Bootstrap/Bootstrap.csproj", "Infrastructure/Bootstrap/"]
+COPY ["src/Infrastructure/Redis/Redis.csproj", "Infrastructure/Redis/"]
+COPY ["src/Infrastructure/RabbitMQ/RabbitMQ.csproj", "Infrastructure/RabbitMQ/"]
+COPY ["src/Infrastructure/SQLServer/SQLServer.csproj", "Infrastructure/SQLServer/"]
+COPY ["src/Presentation/WebAPI/WebAPI.csproj", "Presentation/WebAPI/"]
+
+# Copy environments folder (needed for project references)
+COPY ["environments/", "/environments/"]
 
 # Restore
 RUN dotnet restore "Presentation/WebAPI/WebAPI.csproj"
 
-# Copy everything else
-COPY . .
+# Copy source directories
+COPY src/Core/Domain/ Core/Domain/
+COPY src/Core/Application/ Core/Application/
+COPY src/Infrastructure/Bootstrap/ Infrastructure/Bootstrap/
+COPY src/Infrastructure/Redis/ Infrastructure/Redis/
+COPY src/Infrastructure/RabbitMQ/ Infrastructure/RabbitMQ/
+COPY src/Infrastructure/SQLServer/ Infrastructure/SQLServer/
+COPY src/Presentation/WebAPI/ Presentation/WebAPI/
 
 # Build
 WORKDIR "/src/Presentation/WebAPI"
@@ -30,10 +39,6 @@ RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish /p:UseAppHost=fals
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-
-# Copy config files
-COPY ["environments/local/local.config.json", "config/local.config.json"]
-COPY ["environments/global.config.json", "config/global.config.json"]
 
 ENV ASPNETCORE_URLS=http://+:8080
 ENTRYPOINT ["dotnet", "WebAPI.dll"]

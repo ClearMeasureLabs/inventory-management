@@ -31,10 +31,15 @@ public class TestEnvironment : IAsyncDisposable
     public string RabbitMqUser { get; private set; } = string.Empty;
     public string RabbitMqPassword { get; private set; } = string.Empty;
 
-    // Container aliases for inter-container communication
+    // Container network aliases and IPs for inter-container communication
     public string SqlContainerAlias => "sqlserver";
     public string RedisContainerAlias => "redis";
     public string RabbitMqContainerAlias => "rabbitmq";
+
+    // Container IP addresses for inter-container communication
+    public string SqlContainerIp { get; private set; } = string.Empty;
+    public string RedisContainerIp { get; private set; } = string.Empty;
+    public string RabbitMqContainerIp { get; private set; } = string.Empty;
 
     // Shared network for all containers
     public INetwork Network => _network ?? throw new InvalidOperationException("Network not initialized");
@@ -94,6 +99,11 @@ public class TestEnvironment : IAsyncDisposable
         RabbitMqPort = _rabbitMqContainer.GetMappedPublicPort(5672);
         RabbitMqUser = "guest";
         RabbitMqPassword = "guest";
+
+        // Get container IP addresses for inter-container communication
+        SqlContainerIp = _sqlContainer.IpAddress;
+        RedisContainerIp = _redisContainer.IpAddress;
+        RabbitMqContainerIp = _rabbitMqContainer.IpAddress;
     }
 
     public async ValueTask DisposeAsync()
