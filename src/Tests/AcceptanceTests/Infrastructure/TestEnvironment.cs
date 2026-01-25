@@ -17,6 +17,9 @@ public class TestEnvironment : IAsyncDisposable
     private IFutureDockerImage? _webAppImage;
     private IContainer? _webAppContainer;
 
+    // Network and alias configuration - use unique name per test run to avoid conflicts
+    private readonly string _networkName = $"inventory-management-acceptance-{Guid.NewGuid():N}";
+
     // Network alias names for container-to-container communication
     public const string SqlServerAlias = "sqlserver";
     public const string RedisAlias = "redis";
@@ -42,9 +45,9 @@ public class TestEnvironment : IAsyncDisposable
 
     public async Task InitializeAsync()
     {
-        // Create a shared network for all containers
+        // Create a shared network for all containers with unique name per test run
         _network = new NetworkBuilder()
-            .WithName($"acceptance-test-network-{Guid.NewGuid():N}")
+            .WithName(_networkName)
             .Build();
 
         await _network.CreateAsync();
@@ -183,21 +186,23 @@ public class TestEnvironment : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        // Stop and remove all containers when the test suite completes
         if (_webAppContainer != null)
             await _webAppContainer.DisposeAsync();
 
         if (_webAppImage != null)
             await _webAppImage.DisposeAsync();
 
-        if (_sqlContainer != null)
-            await _sqlContainer.DisposeAsync();
+        if (_redisContainer != null)
+            await _redisContainer.DisposeAsync();
 
         if (_rabbitMqContainer != null)
             await _rabbitMqContainer.DisposeAsync();
 
-        if (_redisContainer != null)
-            await _redisContainer.DisposeAsync();
+        if (_sqlContainer != null)
+            await _sqlContainer.DisposeAsync();
 
+        // Delete the network after all containers are removed
         if (_network != null)
             await _network.DeleteAsync();
     }

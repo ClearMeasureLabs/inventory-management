@@ -18,13 +18,6 @@ Write-Host "******************************************************"
 dotnet test "$repoRoot/src/Tests/IntegrationTests" --no-build --no-restore
 
 Write-Host "`n******************************************************"
-Write-Host "BUILDING WEBAPP DOCKER IMAGE"
-Write-Host "******************************************************"
-$env:DOCKER_BUILDKIT = "0"
-docker build -f "$repoRoot/src/Presentation/WebApp/Dockerfile" -t webapp-acceptance-test:latest $repoRoot
-if ($LASTEXITCODE -ne 0) { exit 1 }
-
-Write-Host "`n******************************************************"
 Write-Host "RUNNING ACCEPTANCE TESTS"
 Write-Host "******************************************************"
 $env:WEBAPP_TEST_IMAGE = "webapp-acceptance-test:latest"

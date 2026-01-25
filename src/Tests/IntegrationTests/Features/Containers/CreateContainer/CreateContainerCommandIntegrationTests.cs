@@ -1,6 +1,5 @@
 using Application.Features.Containers.CreateContainer;
 using Bogus;
-using IntegrationTests.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace IntegrationTests.Features.Containers.CreateContainer;
@@ -8,29 +7,15 @@ namespace IntegrationTests.Features.Containers.CreateContainer;
 [TestFixture]
 public class CreateContainerCommandIntegrationTests
 {
-    private TestEnvironment _testEnvironment = null!;
     private IServiceProvider _serviceProvider = null!;
     private Faker _faker = null!;
 
     [OneTimeSetUp]
-    public async Task OneTimeSetUp()
+    public void OneTimeSetUp()
     {
-        _testEnvironment = new TestEnvironment();
-        await _testEnvironment.InitializeAsync();
-
-        var builder = new ServiceProviderBuilder(_testEnvironment);
-        _serviceProvider = await builder.BuildAsync();
-
+        // Use shared service provider from global fixture
+        _serviceProvider = GlobalTestFixture.ServiceProvider;
         _faker = new Faker();
-    }
-
-    [OneTimeTearDown]
-    public async Task OneTimeTearDown()
-    {
-        if (_serviceProvider is IDisposable disposable)
-            disposable.Dispose();
-
-        await _testEnvironment.DisposeAsync();
     }
 
     [Test]

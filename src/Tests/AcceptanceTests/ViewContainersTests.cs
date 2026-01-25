@@ -6,7 +6,6 @@ namespace AcceptanceTests;
 [TestFixture]
 public class ViewContainersTests
 {
-    private TestEnvironment _testEnvironment = null!;
     private PlaywrightServerFixture _serverFixture = null!;
     private IPlaywright _playwright = null!;
     private IBrowser _browser = null!;
@@ -15,12 +14,11 @@ public class ViewContainersTests
     [OneTimeSetUp]
     public async Task OneTimeSetUp()
     {
-        // Initialize test containers
-        _testEnvironment = new TestEnvironment();
-        await _testEnvironment.InitializeAsync();
+        // Use shared test environment from global fixture
+        var testEnvironment = GlobalTestFixture.TestEnvironment;
 
         // Create and start the containerized WebApp for Playwright tests
-        _serverFixture = new PlaywrightServerFixture(_testEnvironment);
+        _serverFixture = new PlaywrightServerFixture(testEnvironment);
         await _serverFixture.StartAsync();
         _baseUrl = _serverFixture.ServerAddress;
 
@@ -39,7 +37,6 @@ public class ViewContainersTests
         _playwright.Dispose();
 
         await _serverFixture.DisposeAsync();
-        await _testEnvironment.DisposeAsync();
     }
 
     [Test]
@@ -73,9 +70,8 @@ public class ViewContainersTests
         // Wait for Blazor to hydrate
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
-        // Assert
-        var title = await page.TitleAsync();
-        Assert.That(title, Is.EqualTo("Ivan"));
+        // Assert - wait for title to be set by Blazor
+        await Assertions.Expect(page).ToHaveTitleAsync("Ivan", new() { Timeout = 30000 });
 
         await page.CloseAsync();
     }
@@ -89,21 +85,26 @@ public class ViewContainersTests
         // Act
         await page.GotoAsync(_baseUrl);
         
-        // Wait for Blazor to hydrate and content to load
+        // Wait for Blazor to hydrate
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        // Wait for spinner to disappear (indicating Blazor Server has finished loading data)
+        var spinner = page.Locator(".spinner-border");
+        await spinner.WaitForAsync(new() { State = WaitForSelectorState.Hidden, Timeout = 30000 });
 
         // Assert
         var jumbotron = page.Locator(".bg-light.rounded-3");
-        await Expect(jumbotron).ToBeVisibleAsync();
+        await Expect(jumbotron).ToBeVisibleAsync(new() { Timeout = 10000 });
 
         var heading = page.Locator("h1:has-text('No Containers')");
-        await Expect(heading).ToBeVisibleAsync();
+        await Expect(heading).ToBeVisibleAsync(new() { Timeout = 10000 });
 
         var addButton = page.Locator("button:has-text('Add Container')");
-        await Expect(addButton).ToBeVisibleAsync();
+        await Expect(addButton).ToBeVisibleAsync(new() { Timeout = 10000 });
 
         await page.CloseAsync();
     }
+
 
     [Test]
     public async Task LandingPage_WhenNoContainers_AddButtonShouldBePresent()
@@ -117,9 +118,13 @@ public class ViewContainersTests
         // Wait for Blazor to hydrate
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
+        // Wait for spinner to disappear (indicating Blazor Server has finished loading data)
+        var spinner = page.Locator(".spinner-border");
+        await spinner.WaitForAsync(new() { State = WaitForSelectorState.Hidden, Timeout = 30000 });
+
         // Assert
         var addButton = page.Locator("button.btn-primary:has-text('Add Container')");
-        await Expect(addButton).ToBeVisibleAsync();
+        await Expect(addButton).ToBeVisibleAsync(new() { Timeout = 10000 });
 
         await page.CloseAsync();
     }

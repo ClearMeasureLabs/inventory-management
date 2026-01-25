@@ -6,19 +6,17 @@ namespace AcceptanceTests;
 [TestFixture]
 public class HealthCheckTests
 {
-    private TestEnvironment _testEnvironment = null!;
     private WebAppFixture _webAppFixture = null!;
     private HttpClient _httpClient = null!;
 
     [OneTimeSetUp]
     public async Task OneTimeSetUp()
     {
-        // Initialize test containers (SQL Server, Redis, RabbitMQ)
-        _testEnvironment = new TestEnvironment();
-        await _testEnvironment.InitializeAsync();
+        // Use shared test environment from global fixture
+        var testEnvironment = GlobalTestFixture.TestEnvironment;
 
         // Create and start containerized web application
-        _webAppFixture = new WebAppFixture(_testEnvironment);
+        _webAppFixture = new WebAppFixture(testEnvironment);
         await _webAppFixture.StartAsync();
         _httpClient = _webAppFixture.CreateClient();
     }
@@ -28,7 +26,6 @@ public class HealthCheckTests
     {
         _httpClient?.Dispose();
         await _webAppFixture.DisposeAsync();
-        await _testEnvironment.DisposeAsync();
     }
 
     [Test]
