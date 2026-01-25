@@ -104,38 +104,23 @@ public class TestEnvironment : IAsyncDisposable
         if (_network == null)
             throw new InvalidOperationException("TestEnvironment must be initialized before starting WebApp container");
 
-        // Use pre-built image if available (set by build script), otherwise build from Dockerfile
-        var prebuiltImage = Environment.GetEnvironmentVariable("WEBAPP_TEST_IMAGE");
-        
-        if (string.IsNullOrEmpty(prebuiltImage))
-        {
-            // Find the repository root (where the Dockerfile context is)
-            var currentDir = Directory.GetCurrentDirectory();
-            var repoRoot = FindRepositoryRoot(currentDir) 
-                ?? throw new DirectoryNotFoundException($"Could not find repository root from {currentDir}");
+        // Find the repository root (where the Dockerfile context is)
+        var currentDir = Directory.GetCurrentDirectory();
+        var repoRoot = FindRepositoryRoot(currentDir)
+            ?? throw new DirectoryNotFoundException($"Could not find repository root from {currentDir}");
 
-            // Build the Docker image from Dockerfile
-            _webAppImage = new ImageFromDockerfileBuilder()
-                .WithDockerfileDirectory(repoRoot)
-                .WithDockerfile("src/Presentation/WebApp/Dockerfile")
-                .WithDeleteIfExists(true)
-                .Build();
+        // Build the Docker image from Dockerfile
+        _webAppImage = new ImageFromDockerfileBuilder()
+            .WithDockerfileDirectory(repoRoot)
+            .WithDockerfile("src/Presentation/WebApp/Dockerfile")
+            .WithDeleteIfExists(true)
+            .Build();
 
-            await _webAppImage.CreateAsync();
-        }
+        await _webAppImage.CreateAsync();
 
         // Create and start the WebApp container
-        var containerBuilder = new ContainerBuilder();
-        
-        if (!string.IsNullOrEmpty(prebuiltImage))
-        {
-            containerBuilder = containerBuilder.WithImage(prebuiltImage);
-        }
-        else
-        {
-            containerBuilder = containerBuilder.WithImage(_webAppImage!);
-        }
-        
+        var containerBuilder = new ContainerBuilder().WithImage(_webAppImage!);
+
         _webAppContainer = containerBuilder
             .WithNetwork(_network)
             .WithNetworkAliases(WebAppAlias)
