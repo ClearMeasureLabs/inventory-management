@@ -101,26 +101,39 @@ public class TestEnvironment : IAsyncDisposable
         if (_network == null)
             throw new InvalidOperationException("TestEnvironment must be initialized before starting WebApp container");
 
-        // Find the repository root (where the Dockerfile context is)
-        var currentDir = Directory.GetCurrentDirectory();
-        var repoRoot = FindRepositoryRoot(currentDir) 
-            ?? throw new DirectoryNotFoundException($"Could not find repository root from {currentDir}");
+        // Use pre-built image if available (set by build script), otherwise build from Dockerfile
+        var prebuiltImage = Environment.GetEnvironmentVariable("WEBAPP_TEST_IMAGE");
+        
+        if (string.IsNullOrEmpty(prebuiltImage))
+        {
+            // Find the repository root (where the Dockerfile context is)
+            var currentDir = Directory.GetCurrentDirectory();
+            var repoRoot = FindRepositoryRoot(currentDir) 
+                ?? throw new DirectoryNotFoundException($"Could not find repository root from {currentDir}");
 
-        // Disable BuildKit to use the legacy builder (works around vfs storage driver issues)
-        Environment.SetEnvironmentVariable("DOCKER_BUILDKIT", "0");
+            // Build the Docker image from Dockerfile
+            _webAppImage = new ImageFromDockerfileBuilder()
+                .WithDockerfileDirectory(repoRoot)
+                .WithDockerfile("src/Presentation/WebApp/Dockerfile")
+                .WithDeleteIfExists(true)
+                .Build();
 
-        // Build the Docker image from Dockerfile
-        _webAppImage = new ImageFromDockerfileBuilder()
-            .WithDockerfileDirectory(repoRoot)
-            .WithDockerfile("src/Presentation/WebApp/Dockerfile")
-            .WithDeleteIfExists(true)
-            .Build();
-
-        await _webAppImage.CreateAsync();
+            await _webAppImage.CreateAsync();
+        }
 
         // Create and start the WebApp container
-        _webAppContainer = new ContainerBuilder()
-            .WithImage(_webAppImage)
+        var containerBuilder = new ContainerBuilder();
+        
+        if (!string.IsNullOrEmpty(prebuiltImage))
+        {
+            containerBuilder = containerBuilder.WithImage(prebuiltImage);
+        }
+        else
+        {
+            containerBuilder = containerBuilder.WithImage(_webAppImage!);
+        }
+        
+        _webAppContainer = containerBuilder
             .WithNetwork(_network)
             .WithNetworkAliases(WebAppAlias)
             .WithPortBinding(8080, true)
@@ -145,8 +158,7 @@ public class TestEnvironment : IAsyncDisposable
                 .UntilHttpRequestIsSucceeded(r => r
                     .ForPath("/Health")
                     .ForPort(8080)
-                    .ForStatusCode(System.Net.HttpStatusCode.OK))
-                .WithTimeout(TimeSpan.FromMinutes(3)))
+                    .ForStatusCode(System.Net.HttpStatusCode.OK)))
             .Build();
 
         await _webAppContainer.StartAsync();
