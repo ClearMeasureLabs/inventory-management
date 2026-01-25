@@ -1,4 +1,5 @@
 @page "/containers/add"
+@using Application.Exceptions
 @using Application.Features.Containers
 @using Application.Features.Containers.CreateContainer
 @using Microsoft.AspNetCore.Components.Forms
@@ -11,15 +12,27 @@
 
 <div class="row">
     <div class="col-md-6">
+        @if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <div class="alert alert-danger" role="alert">
+                @_errorMessage
+            </div>
+        }
+
         <EditForm Model="_command" OnValidSubmit="HandleSubmit" FormName="AddContainerForm" method="post">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+
             <div class="mb-3">
                 <label for="name" class="form-label">Name</label>
                 <InputText id="name" class="form-control" @bind-Value="_command!.Name" />
+                <ValidationMessage For="@(() => _command!.Name)" class="text-danger" />
             </div>
 
             <div class="mb-3">
                 <label for="description" class="form-label">Description</label>
                 <InputText id="description" class="form-control" @bind-Value="_command!.Description" />
+                <ValidationMessage For="@(() => _command!.Description)" class="text-danger" />
             </div>
 
             <div class="mb-3">
@@ -33,6 +46,8 @@
 @code {
     [SupplyParameterFromForm]
     private CreateContainerCommand? _command { get; set; }
+    
+    private string? _errorMessage;
 
     protected override void OnInitialized()
     {
@@ -43,7 +58,21 @@
     {
         if (_command is null) return;
         
-        await Containers.CreateAsync(_command, CancellationToken.None);
-        NavigationManager.NavigateTo("/");
+        _errorMessage = null;
+        
+        try
+        {
+            await Containers.CreateAsync(_command, CancellationToken.None);
+            NavigationManager.NavigateTo("/");
+        }
+        catch (ValidationException ex)
+        {
+            // Build user-friendly error message from validation errors
+            var errorMessages = ex.Errors
+                .SelectMany(kvp => kvp.Value)
+                .ToList();
+            
+            _errorMessage = $"Validation failed: {string.Join(", ", errorMessages)}";
+        }
     }
 }

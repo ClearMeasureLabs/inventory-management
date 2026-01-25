@@ -144,5 +144,67 @@ public class AddContainerTests
         await page.CloseAsync();
     }
 
+    [Test]
+    public async Task AddContainerPage_WhenEmptyFormSubmitted_ShouldDisplayValidationErrors()
+    {
+        // Arrange
+        var page = await _browser.NewPageAsync();
+        await page.GotoAsync($"{_baseUrl}/containers/add");
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        // Act - Submit form without filling any fields
+        var submitButton = page.Locator("button[type='submit']:has-text('Create Container')");
+        await submitButton.ClickAsync();
+
+        // Wait for page to process (form post and return with validation errors)
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        // Assert - Should still be on the add container page
+        await Assertions.Expect(page).ToHaveURLAsync(
+            new System.Text.RegularExpressions.Regex(@".*/containers/add"),
+            new() { Timeout = 10000 });
+
+        // Validation errors should be displayed
+        var validationSummary = page.Locator(".validation-summary-errors, .text-danger");
+        await Expect(validationSummary.First).ToBeVisibleAsync(new() { Timeout = 10000 });
+
+        // Check that "required" error messages are shown
+        var pageContent = await page.ContentAsync();
+        Assert.That(pageContent, Does.Contain("required").IgnoreCase, 
+            "Expected validation error messages to mention 'required'");
+
+        await page.CloseAsync();
+    }
+
+    [Test]
+    public async Task AddContainerPage_WhenOnlyNameProvided_ShouldDisplayDescriptionValidationError()
+    {
+        // Arrange
+        var page = await _browser.NewPageAsync();
+        await page.GotoAsync($"{_baseUrl}/containers/add");
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        // Act - Fill only the name field
+        await page.FillAsync("#name", "Test Container");
+
+        var submitButton = page.Locator("button[type='submit']:has-text('Create Container')");
+        await submitButton.ClickAsync();
+
+        // Wait for page to process
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        // Assert - Should still be on the add container page with validation error
+        await Assertions.Expect(page).ToHaveURLAsync(
+            new System.Text.RegularExpressions.Regex(@".*/containers/add"),
+            new() { Timeout = 10000 });
+
+        // Check that description validation error is shown
+        var pageContent = await page.ContentAsync();
+        Assert.That(pageContent, Does.Contain("Description").IgnoreCase.And.Contain("required").IgnoreCase,
+            "Expected validation error message for Description field");
+
+        await page.CloseAsync();
+    }
+
     private static ILocatorAssertions Expect(ILocator locator) => Assertions.Expect(locator);
 }
