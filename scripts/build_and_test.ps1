@@ -20,7 +20,6 @@ dotnet test "$repoRoot/src/Tests/IntegrationTests" --no-build --no-restore
 Write-Host "`n******************************************************"
 Write-Host "RUNNING ACCEPTANCE TESTS"
 Write-Host "******************************************************"
-$env:WEBAPP_TEST_IMAGE = "webapp-acceptance-test:latest"
 dotnet test "$repoRoot/src/Tests/AcceptanceTests" --no-build --no-restore
 if ($LASTEXITCODE -ne 0) { exit 1 }
 
