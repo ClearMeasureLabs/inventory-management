@@ -18,8 +18,8 @@ namespace Bootstrap;
 
 public static class DependencyInjection
 {
-    private const int MaxRetries = 10;
-    private static readonly TimeSpan RetryDelay = TimeSpan.FromSeconds(3);
+    private const int MaxRetries = 15;
+    private static readonly TimeSpan RetryDelay = TimeSpan.FromSeconds(5);
 
     public static IConfigurationBuilder GetConfiguration(this IConfigurationBuilder builder, string basePath)
     {

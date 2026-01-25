@@ -45,8 +45,8 @@ public class GlobalTestFixture
         await _testEnvironment.InitializeAsync();
 
         // Wait for infrastructure containers to be fully ready
-        // This ensures network aliases are properly registered
-        await Task.Delay(TimeSpan.FromSeconds(5));
+        // This ensures network aliases are properly registered and services are accepting connections
+        await Task.Delay(TimeSpan.FromSeconds(15));
 
         // Start WebAPI container
         _webApiContainerFixture = new WebApiContainerFixture(_testEnvironment, _testEnvironment.Network);
