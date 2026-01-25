@@ -63,7 +63,7 @@ Ivan is a full-stack inventory management application that tracks containers and
 dotnet run --project src\Presentation\WebAPI
 ```
 
-The API will be available at `http://localhost:5000`.
+The API will be available at `https://localhost:5000`.
 
 **Frontend (Angular):**
 
