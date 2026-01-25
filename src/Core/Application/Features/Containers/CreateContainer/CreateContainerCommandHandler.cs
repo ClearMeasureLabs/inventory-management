@@ -1,4 +1,4 @@
-﻿using Application.Exceptions;
+using Application.Exceptions;
 using Application.Infrastructure;
 using Domain.Entities;
 
@@ -20,6 +20,8 @@ public class CreateContainerCommandHandler : ICreateContainerCommandHandler
         _eventHub = eventHub;
     }
 
+    private const int NameMaxLength = 200;
+
     public async Task<ContainerDto> HandleAsync(CreateContainerCommand request, CancellationToken cancellationToken)
     {
         var errors = new Dictionary<string, List<string>>();
@@ -29,11 +31,10 @@ public class CreateContainerCommandHandler : ICreateContainerCommandHandler
             errors.TryAdd(nameof(request.Name), new List<string>());
             errors[nameof(request.Name)].Add("Name is required");
         }
-
-        if (string.IsNullOrWhiteSpace(request.Description))
+        else if (request.Name.Length > NameMaxLength)
         {
-            errors.TryAdd(nameof(request.Description), new List<string>());
-            errors[nameof(request.Description)].Add("Description is required");
+            errors.TryAdd(nameof(request.Name), new List<string>());
+            errors[nameof(request.Name)].Add($"Name cannot exceed {NameMaxLength} characters");
         }
 
         if (errors.Count > 0)

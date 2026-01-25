@@ -361,7 +361,7 @@ public class CreateContainerCommandHandlerTests
     }
 
     [Test]
-    public void HandleAsync_WithEmptyDescription_ShouldThrowValidationException()
+    public async Task HandleAsync_WithEmptyDescription_ShouldSucceed()
     {
         // Arrange
         var command = new CreateContainerCommand
@@ -370,48 +370,65 @@ public class CreateContainerCommandHandlerTests
             Description = string.Empty
         };
 
-        // Act & Assert
-        var exception = Should.Throw<ValidationException>(async () =>
-            await _handler.HandleAsync(command, CancellationToken.None));
+        // Act
+        var result = await _handler.HandleAsync(command, CancellationToken.None);
 
-        exception.Errors.ShouldContainKey("Description");
-        exception.Errors["Description"].ShouldContain("Description is required");
+        // Assert
+        result.ShouldNotBeNull();
+        result.Name.ShouldBe(command.Name);
     }
 
     [Test]
-    public void HandleAsync_WithWhitespaceDescription_ShouldThrowValidationException()
+    public async Task HandleAsync_WithValidNameOnly_ShouldCreateContainer()
     {
         // Arrange
         var command = new CreateContainerCommand
         {
-            Name = _faker.Commerce.ProductName(),
-            Description = "   "
+            Name = _faker.Commerce.ProductName()
+        };
+
+        // Act
+        var result = await _handler.HandleAsync(command, CancellationToken.None);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Name.ShouldBe(command.Name);
+    }
+
+    [Test]
+    public void HandleAsync_WithNameExceedingMaxLength_ShouldThrowValidationException()
+    {
+        // Arrange
+        var command = new CreateContainerCommand
+        {
+            Name = new string('a', 201), // 201 characters exceeds max of 200
+            Description = _faker.Lorem.Sentence()
         };
 
         // Act & Assert
         var exception = Should.Throw<ValidationException>(async () =>
             await _handler.HandleAsync(command, CancellationToken.None));
 
-        exception.Errors.ShouldContainKey("Description");
-    }
-
-    [Test]
-    public void HandleAsync_WithBothFieldsEmpty_ShouldThrowValidationExceptionWithMultipleErrors()
-    {
-        // Arrange
-        var command = new CreateContainerCommand
-        {
-            Name = string.Empty,
-            Description = string.Empty
-        };
-
-        // Act & Assert
-        var exception = Should.Throw<ValidationException>(async () =>
-            await _handler.HandleAsync(command, CancellationToken.None));
-
-        exception.Errors.Count.ShouldBe(2);
         exception.Errors.ShouldContainKey("Name");
-        exception.Errors.ShouldContainKey("Description");
+        exception.Errors["Name"].ShouldContain("Name cannot exceed 200 characters");
+    }
+
+    [Test]
+    public async Task HandleAsync_WithNameAtMaxLength_ShouldSucceed()
+    {
+        // Arrange
+        var command = new CreateContainerCommand
+        {
+            Name = new string('a', 200), // Exactly 200 characters
+            Description = _faker.Lorem.Sentence()
+        };
+
+        // Act
+        var result = await _handler.HandleAsync(command, CancellationToken.None);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Name.ShouldBe(command.Name);
     }
 
     [Test]
@@ -420,8 +437,7 @@ public class CreateContainerCommandHandlerTests
         // Arrange
         var command = new CreateContainerCommand
         {
-            Name = string.Empty,
-            Description = string.Empty
+            Name = string.Empty // Only Name is required now
         };
 
         // Act & Assert
@@ -442,8 +458,7 @@ public class CreateContainerCommandHandlerTests
         // Arrange
         var command = new CreateContainerCommand
         {
-            Name = string.Empty,
-            Description = string.Empty
+            Name = string.Empty // Only Name is required now
         };
 
         // Act & Assert
@@ -461,8 +476,7 @@ public class CreateContainerCommandHandlerTests
         // Arrange
         var command = new CreateContainerCommand
         {
-            Name = string.Empty,
-            Description = string.Empty
+            Name = string.Empty // Only Name is required now
         };
 
         // Act & Assert
