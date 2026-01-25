@@ -1,22 +1,20 @@
-using Bootstrap;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using SQLServer;
-using WebApp.Components;
+using Microsoft.Extensions.Hosting;
 
 namespace AcceptanceTests.Infrastructure;
 
 /// <summary>
-/// Starts a real Kestrel server for Playwright browser tests.
-/// This creates an actual HTTP server that Playwright can connect to.
+/// Provides access to the WebApp server for Playwright browser tests.
+/// Starts a real Kestrel server on a dynamic port that browsers can connect to.
 /// </summary>
 public class PlaywrightServerFixture : IAsyncDisposable
 {
-    private WebApplication? _app;
     private readonly TestEnvironment _testEnvironment;
+    private WebApplicationFactory<Program>? _factory;
 
     public string ServerAddress { get; private set; } = string.Empty;
 
@@ -27,116 +25,92 @@ public class PlaywrightServerFixture : IAsyncDisposable
 
     public async Task StartAsync()
     {
-        // Find a free port
-        var listener = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback, 0);
-        listener.Start();
-        var port = ((System.Net.IPEndPoint)listener.LocalEndpoint).Port;
-        listener.Stop();
-        ServerAddress = $"http://127.0.0.1:{port}";
+        // Create a WebApplicationFactory that uses Kestrel instead of TestServer
+        _factory = new KestrelWebApplicationFactory(_testEnvironment);
+        
+        // Creating a client triggers the host to start
+        _ = _factory.CreateClient();
 
-        // Set environment variables
-        SetEnvironmentVariables();
-
-        // Get the WebApp's output directory for proper content root
-        var webAppAssembly = typeof(Program).Assembly;
-        var webAppPath = Path.GetDirectoryName(webAppAssembly.Location)
-            ?? throw new DirectoryNotFoundException("WebApp assembly location not found");
-
-        // Create the web application builder
-        var builder = WebApplication.CreateBuilder(new WebApplicationOptions
-        {
-            EnvironmentName = "Development",
-            ContentRootPath = webAppPath,
-            WebRootPath = Path.Combine(webAppPath, "wwwroot")
-        });
-
-        // Configure to use our port
-        builder.WebHost.UseUrls(ServerAddress);
-
-        // Load configuration (same as Program.cs)
-        builder.Configuration.GetConfiguration(webAppPath)
-            .AddJsonFile(Path.Combine(webAppPath, "appsettings.json"), optional: true);
-
-        // Add services (matching Program.cs)
-        builder.Services.AddRazorComponents()
-            .AddInteractiveServerComponents()
-            .AddInteractiveWebAssemblyComponents();
-
-        builder.Services.AddControllers();
-
-        await builder.Services.AddAplicationAsync(builder.Configuration);
-        builder.Services.AddAllHealthChecks(builder.Configuration);
-
-        _app = builder.Build();
-
-        // Run migrations
-        using (var scope = _app.Services.CreateScope())
-        {
-            var dbContext = scope.ServiceProvider.GetRequiredService<InventoryDbContext>();
-            await dbContext.Database.MigrateAsync();
-        }
-
-        // Configure middleware (matching Program.cs for Development)
-        _app.UseWebAssemblyDebugging();
-        _app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
-        _app.UseStaticFiles();
-        _app.UseAntiforgery();
-        _app.MapControllers();
-        _app.MapRazorComponents<App>()
-            .AddInteractiveServerRenderMode()
-            .AddInteractiveWebAssemblyRenderMode()
-            .AddAdditionalAssemblies(typeof(WebApp.Client._Imports).Assembly);
-
-        await _app.StartAsync();
-    }
-
-    private void SetEnvironmentVariables()
-    {
-        Environment.SetEnvironmentVariable("Environment", "Test");
-        Environment.SetEnvironmentVariable("Project__Name", "Ivan");
-        Environment.SetEnvironmentVariable("Project__Publisher", "Clear Measure");
-        Environment.SetEnvironmentVariable("Project__Version", "0.0.0");
-        Environment.SetEnvironmentVariable("SqlServer__Host", _testEnvironment.SqlHost);
-        Environment.SetEnvironmentVariable("SqlServer__Port", _testEnvironment.SqlPort.ToString());
-        Environment.SetEnvironmentVariable("SqlServer__User", "sa");
-        Environment.SetEnvironmentVariable("SqlServer__Password", _testEnvironment.SqlPassword);
-        Environment.SetEnvironmentVariable("SqlServer__Database", "ivan_playwright_db");
-        Environment.SetEnvironmentVariable("Redis__Host", _testEnvironment.RedisHost);
-        Environment.SetEnvironmentVariable("Redis__Port", _testEnvironment.RedisPort.ToString());
-        Environment.SetEnvironmentVariable("Redis__User", "default");
-        Environment.SetEnvironmentVariable("RabbitMQ__Host", _testEnvironment.RabbitMqHost);
-        Environment.SetEnvironmentVariable("RabbitMQ__Port", _testEnvironment.RabbitMqPort.ToString());
-        Environment.SetEnvironmentVariable("RabbitMQ__User", _testEnvironment.RabbitMqUser);
-        Environment.SetEnvironmentVariable("RabbitMQ__Password", _testEnvironment.RabbitMqPassword);
-    }
-
-    private void ClearEnvironmentVariables()
-    {
-        Environment.SetEnvironmentVariable("Environment", null);
-        Environment.SetEnvironmentVariable("Project__Name", null);
-        Environment.SetEnvironmentVariable("Project__Publisher", null);
-        Environment.SetEnvironmentVariable("Project__Version", null);
-        Environment.SetEnvironmentVariable("SqlServer__Host", null);
-        Environment.SetEnvironmentVariable("SqlServer__Port", null);
-        Environment.SetEnvironmentVariable("SqlServer__User", null);
-        Environment.SetEnvironmentVariable("SqlServer__Password", null);
-        Environment.SetEnvironmentVariable("SqlServer__Database", null);
-        Environment.SetEnvironmentVariable("Redis__Host", null);
-        Environment.SetEnvironmentVariable("Redis__Port", null);
-        Environment.SetEnvironmentVariable("Redis__User", null);
-        Environment.SetEnvironmentVariable("RabbitMQ__Host", null);
-        Environment.SetEnvironmentVariable("RabbitMQ__Port", null);
-        Environment.SetEnvironmentVariable("RabbitMQ__User", null);
-        Environment.SetEnvironmentVariable("RabbitMQ__Password", null);
+        // Get the actual server address from Kestrel
+        var server = _factory.Services.GetRequiredService<IServer>();
+        var addressFeature = server.Features.Get<IServerAddressesFeature>();
+        ServerAddress = addressFeature?.Addresses.FirstOrDefault() 
+            ?? throw new InvalidOperationException("Could not get server address");
     }
 
     public async ValueTask DisposeAsync()
     {
-        if (_app != null)
+        if (_factory != null)
         {
-            await _app.StopAsync();
-            await _app.DisposeAsync();
+            await _factory.DisposeAsync();
         }
-        ClearEnvironmentVariables();
+    }
+
+    /// <summary>
+    /// Custom WebApplicationFactory that uses Kestrel for real HTTP connections.
+    /// </summary>
+    private class KestrelWebApplicationFactory : WebApplicationFactory<Program>
+    {
+        private readonly TestEnvironment _testEnvironment;
+        private IHost? _host;
+
+        public KestrelWebApplicationFactory(TestEnvironment testEnvironment)
+        {
+            _testEnvironment = testEnvironment;
+        }
+
+        protected override void ConfigureWebHost(IWebHostBuilder builder)
+        {
+            builder.UseEnvironment("Test");
+
+            // Configure to use Kestrel with dynamic port
+            builder.UseKestrel();
+            builder.UseUrls("http://127.0.0.1:0");
+
+            // Override configuration to point to test containers
+            builder.UseSetting("Environment", "Test");
+            builder.UseSetting("Project:Name", "Ivan");
+            builder.UseSetting("Project:Publisher", "Clear Measure");
+            builder.UseSetting("Project:Version", "0.0.0");
+            builder.UseSetting("SqlServer:Host", _testEnvironment.SqlHost);
+            builder.UseSetting("SqlServer:Port", _testEnvironment.SqlPort.ToString());
+            builder.UseSetting("SqlServer:User", "sa");
+            builder.UseSetting("SqlServer:Password", _testEnvironment.SqlPassword);
+            builder.UseSetting("SqlServer:Database", "ivan_acceptance_db");
+            builder.UseSetting("Redis:Host", _testEnvironment.RedisHost);
+            builder.UseSetting("Redis:Port", _testEnvironment.RedisPort.ToString());
+            builder.UseSetting("Redis:User", "default");
+            builder.UseSetting("RabbitMQ:Host", _testEnvironment.RabbitMqHost);
+            builder.UseSetting("RabbitMQ:Port", _testEnvironment.RabbitMqPort.ToString());
+            builder.UseSetting("RabbitMQ:User", _testEnvironment.RabbitMqUser);
+            builder.UseSetting("RabbitMQ:Password", _testEnvironment.RabbitMqPassword);
+        }
+
+        protected override IHost CreateHost(IHostBuilder builder)
+        {
+            // Create the host but don't use the default TestServer
+            var dummyHost = builder.Build();
+            
+            // Create and start a real Kestrel host
+            builder.ConfigureWebHost(webBuilder =>
+            {
+                webBuilder.UseKestrel();
+                webBuilder.UseUrls("http://127.0.0.1:0");
+            });
+
+            _host = builder.Build();
+            _host.Start();
+
+            return dummyHost;
+        }
+
+        public override IServiceProvider Services => _host?.Services ?? base.Services;
+
+        protected override void Dispose(bool disposing)
+        {
+            _host?.StopAsync().GetAwaiter().GetResult();
+            _host?.Dispose();
+            base.Dispose(disposing);
+        }
     }
 }

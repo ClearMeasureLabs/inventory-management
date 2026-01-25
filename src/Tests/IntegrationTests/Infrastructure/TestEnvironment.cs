@@ -64,8 +64,14 @@ public class TestEnvironment : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        if (_sqlContainer != null) await _sqlContainer.DisposeAsync();
-        if (_rabbitMqContainer != null) await _rabbitMqContainer.DisposeAsync();
-        if (_redisContainer != null) await _redisContainer.DisposeAsync();
+        // Stop and remove all containers when the test suite completes
+        if (_redisContainer != null)
+            await _redisContainer.DisposeAsync();
+
+        if (_rabbitMqContainer != null)
+            await _rabbitMqContainer.DisposeAsync();
+
+        if (_sqlContainer != null)
+            await _sqlContainer.DisposeAsync();
     }
 }

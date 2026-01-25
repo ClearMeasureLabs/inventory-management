@@ -5,12 +5,17 @@ using Testcontainers.Redis;
 
 namespace AcceptanceTests.Infrastructure;
 
+/// <summary>
+/// Manages infrastructure test containers (SQL Server, Redis, RabbitMQ).
+/// The WebApp runs in-process via WebApplicationFactory.
+/// </summary>
 public class TestEnvironment : IAsyncDisposable
 {
     private MsSqlContainer? _sqlContainer;
     private RabbitMqContainer? _rabbitMqContainer;
     private RedisContainer? _redisContainer;
 
+    // Connection details for external access (from test host)
     public string SqlConnectionString { get; private set; } = string.Empty;
     public string SqlHost { get; private set; } = string.Empty;
     public int SqlPort { get; private set; }
@@ -26,7 +31,7 @@ public class TestEnvironment : IAsyncDisposable
 
     public async Task InitializeAsync()
     {
-        // Start all containers in parallel
+        // Build infrastructure containers
         _sqlContainer = new MsSqlBuilder()
             .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
             .WithPassword("Test@Password123!")
@@ -45,13 +50,14 @@ public class TestEnvironment : IAsyncDisposable
             .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(6379))
             .Build();
 
+        // Start infrastructure containers in parallel
         await Task.WhenAll(
             _sqlContainer.StartAsync(),
             _rabbitMqContainer.StartAsync(),
             _redisContainer.StartAsync()
         );
 
-        // Extract connection details
+        // Extract connection details for external access
         SqlConnectionString = _sqlContainer.GetConnectionString();
         SqlHost = _sqlContainer.Hostname;
         SqlPort = _sqlContainer.GetMappedPublicPort(1433);
@@ -68,13 +74,14 @@ public class TestEnvironment : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        if (_sqlContainer != null)
-            await _sqlContainer.DisposeAsync();
+        // Stop and remove all containers when the test suite completes
+        if (_redisContainer != null)
+            await _redisContainer.DisposeAsync();
 
         if (_rabbitMqContainer != null)
             await _rabbitMqContainer.DisposeAsync();
 
-        if (_redisContainer != null)
-            await _redisContainer.DisposeAsync();
+        if (_sqlContainer != null)
+            await _sqlContainer.DisposeAsync();
     }
 }
