@@ -1,43 +1,27 @@
 namespace AcceptanceTests.Infrastructure;
 
 /// <summary>
-/// Provides HTTP client access to the containerized WebApp for API tests.
-/// The WebApp runs in a Docker container alongside other infrastructure containers.
+/// Provides HTTP client access to the WebApp for API tests.
+/// Uses WebApplicationFactory for in-process hosting with test containers for infrastructure.
 /// </summary>
-public class WebAppFixture : IAsyncDisposable
+public class WebAppFixture : IDisposable
 {
-    private readonly TestEnvironment _testEnvironment;
+    private readonly CustomWebApplicationFactory _factory;
     private HttpClient? _httpClient;
 
-    public WebAppFixture(TestEnvironment testEnvironment)
+    public WebAppFixture(CustomWebApplicationFactory factory)
     {
-        _testEnvironment = testEnvironment;
-    }
-
-    public async Task StartAsync()
-    {
-        // Start the WebApp container (infrastructure containers should already be running)
-        await _testEnvironment.StartWebAppContainerAsync();
-        
-        // Create HTTP client pointing at the container
-        _httpClient = new HttpClient
-        {
-            BaseAddress = new Uri(_testEnvironment.WebAppUrl)
-        };
+        _factory = factory;
     }
 
     public HttpClient CreateClient()
     {
-        if (_httpClient == null)
-            throw new InvalidOperationException("WebAppFixture must be started before creating a client");
-        
+        _httpClient ??= _factory.CreateClient();
         return _httpClient;
     }
 
-    public ValueTask DisposeAsync()
+    public void Dispose()
     {
         _httpClient?.Dispose();
-        // Cleanup is handled by TestEnvironment
-        return ValueTask.CompletedTask;
     }
 }

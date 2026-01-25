@@ -15,10 +15,7 @@ public class ViewContainersTests
     public async Task OneTimeSetUp()
     {
         // Use shared test environment from global fixture
-        var testEnvironment = GlobalTestFixture.TestEnvironment;
-
-        // Create and start the containerized WebApp for Playwright tests
-        _serverFixture = new PlaywrightServerFixture(testEnvironment);
+        _serverFixture = new PlaywrightServerFixture(GlobalTestFixture.TestEnvironment);
         await _serverFixture.StartAsync();
         _baseUrl = _serverFixture.ServerAddress;
 

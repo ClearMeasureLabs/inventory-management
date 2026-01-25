@@ -7,32 +7,26 @@ namespace AcceptanceTests;
 public class HealthCheckTests
 {
     private WebAppFixture _webAppFixture = null!;
-    private HttpClient _httpClient = null!;
 
     [OneTimeSetUp]
-    public async Task OneTimeSetUp()
+    public void OneTimeSetUp()
     {
-        // Use shared test environment from global fixture
-        var testEnvironment = GlobalTestFixture.TestEnvironment;
-
-        // Create and start containerized web application
-        _webAppFixture = new WebAppFixture(testEnvironment);
-        await _webAppFixture.StartAsync();
-        _httpClient = _webAppFixture.CreateClient();
+        // Use shared WebApplicationFactory from global fixture
+        _webAppFixture = new WebAppFixture(GlobalTestFixture.WebApplicationFactory);
     }
 
     [OneTimeTearDown]
-    public async Task OneTimeTearDown()
+    public void OneTimeTearDown()
     {
-        _httpClient?.Dispose();
-        await _webAppFixture.DisposeAsync();
+        _webAppFixture?.Dispose();
     }
 
     [Test]
     public async Task HealthEndpoint_AllDependenciesHealthy()
     {
         // Act
-        var response = await _httpClient.GetAsync("/Health");
+        var client = _webAppFixture.CreateClient();
+        var response = await client.GetAsync("/Health");
         var content = await response.Content.ReadAsStringAsync();
         var healthResponse = JsonSerializer.Deserialize<JsonElement>(content);
 
