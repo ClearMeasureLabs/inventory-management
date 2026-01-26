@@ -18,6 +18,7 @@ export class AddContainerModalComponent {
   isVisible = false;
   isSubmitting = false;
   containerName = '';
+  containerDescription = '';
   validationErrors: { [key: string]: string[] } = {};
   generalError: string | null = null;
 
@@ -25,6 +26,7 @@ export class AddContainerModalComponent {
 
   open(): void {
     this.containerName = '';
+    this.containerDescription = '';
     this.validationErrors = {};
     this.generalError = null;
     this.isSubmitting = false;
@@ -43,7 +45,7 @@ export class AddContainerModalComponent {
 
     const request: CreateContainerRequest = {
       name: this.containerName,
-      description: ''
+      description: this.containerDescription
     };
 
     this.containerService.create(request).subscribe({
@@ -71,5 +73,13 @@ export class AddContainerModalComponent {
 
   getNameErrors(): string[] {
     return this.validationErrors['Name'] || this.validationErrors['name'] || [];
+  }
+
+  hasDescriptionError(): boolean {
+    return !!this.validationErrors['Description'] || !!this.validationErrors['description'];
+  }
+
+  getDescriptionErrors(): string[] {
+    return this.validationErrors['Description'] || this.validationErrors['description'] || [];
   }
 }
