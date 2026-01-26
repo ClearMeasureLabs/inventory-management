@@ -60,12 +60,14 @@ describe('AddContainerModalComponent', () => {
 
   it('should reset form when opened', () => {
     component.containerName = 'Test';
+    component.containerDescription = 'Test Description';
     component.validationErrors = { Name: ['Error'] };
     component.generalError = 'General error';
     
     component.open();
     
     expect(component.containerName).toBe('');
+    expect(component.containerDescription).toBe('');
     expect(component.validationErrors).toEqual({});
     expect(component.generalError).toBeNull();
   });
@@ -82,6 +84,27 @@ describe('AddContainerModalComponent', () => {
     expect(req.request.body).toEqual({ name: 'New Container', description: '' });
     
     const mockResponse = { containerId: 1, name: 'New Container', description: '' };
+    req.flush(mockResponse);
+    
+    tick();
+    
+    expect(component.containerCreated.emit).toHaveBeenCalledWith(mockResponse);
+    expect(component.isVisible).toBeFalse();
+  }));
+
+  it('should submit container with description', fakeAsync(() => {
+    spyOn(component.containerCreated, 'emit');
+    
+    component.open();
+    component.containerName = 'New Container';
+    component.containerDescription = 'A test description';
+    component.submit();
+    
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ name: 'New Container', description: 'A test description' });
+    
+    const mockResponse = { containerId: 1, name: 'New Container', description: 'A test description' };
     req.flush(mockResponse);
     
     tick();

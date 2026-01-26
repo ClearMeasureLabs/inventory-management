@@ -25,6 +25,16 @@
                 </div>
               }
             </div>
+            <div class="mb-3">
+              <label for="containerDescription" class="form-label">Description</label>
+              <textarea 
+                class="form-control" 
+                id="containerDescription" 
+                [(ngModel)]="containerDescription"
+                name="containerDescription"
+                placeholder="Enter container description (optional)"
+                rows="3"></textarea>
+            </div>
             @if (generalError) {
               <div class="alert alert-danger" role="alert">
                 {{ generalError }}
