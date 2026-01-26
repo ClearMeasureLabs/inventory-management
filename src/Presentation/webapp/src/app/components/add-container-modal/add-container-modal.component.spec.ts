@@ -60,12 +60,14 @@ describe('AddContainerModalComponent', () => {
 
   it('should reset form when opened', () => {
     component.containerName = 'Test';
+    component.containerDescription = 'Test description';
     component.validationErrors = { Name: ['Error'] };
     component.generalError = 'General error';
     
     component.open();
     
     expect(component.containerName).toBe('');
+    expect(component.containerDescription).toBe('');
     expect(component.validationErrors).toEqual({});
     expect(component.generalError).toBeNull();
   });
@@ -88,6 +90,50 @@ describe('AddContainerModalComponent', () => {
     
     expect(component.containerCreated.emit).toHaveBeenCalledWith(mockResponse);
     expect(component.isVisible).toBeFalse();
+  }));
+
+  it('should submit container with description', fakeAsync(() => {
+    spyOn(component.containerCreated, 'emit');
+    
+    component.open();
+    component.containerName = 'New Container';
+    component.containerDescription = 'Test description';
+    component.submit();
+    
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ name: 'New Container', description: 'Test description' });
+    
+    const mockResponse = { containerId: 1, name: 'New Container', description: 'Test description' };
+    req.flush(mockResponse);
+    
+    tick();
+    
+    expect(component.containerCreated.emit).toHaveBeenCalledWith(mockResponse);
+  }));
+
+  it('should have empty description by default', () => {
+    expect(component.containerDescription).toBe('');
+  });
+
+  it('should display description validation errors on 400 response', fakeAsync(() => {
+    component.open();
+    component.containerName = 'Test Container';
+    component.containerDescription = 'a'.repeat(300);
+    component.submit();
+    
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers`);
+    req.flush(
+      { errors: { Description: ['Description cannot exceed 250 characters'] } },
+      { status: 400, statusText: 'Bad Request' }
+    );
+    
+    tick();
+    fixture.detectChanges();
+    
+    expect(component.hasDescriptionError()).toBeTrue();
+    expect(component.getDescriptionErrors()).toContain('Description cannot exceed 250 characters');
+    expect(component.isVisible).toBeTrue();
   }));
 
   it('should display validation errors on 400 response', fakeAsync(() => {

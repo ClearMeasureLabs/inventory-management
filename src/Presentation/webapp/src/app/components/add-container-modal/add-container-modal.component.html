@@ -25,6 +25,23 @@
                 </div>
               }
             </div>
+            <div class="mb-3">
+              <label for="containerDescription" class="form-label">Description</label>
+              <textarea 
+                class="form-control" 
+                [class.is-invalid]="hasDescriptionError()"
+                id="containerDescription" 
+                [(ngModel)]="containerDescription"
+                name="containerDescription"
+                placeholder="Enter container description (optional)"
+                rows="3"
+                maxlength="250"></textarea>
+              @if (hasDescriptionError()) {
+                <div class="invalid-feedback" style="display: block;">
+                  {{ getDescriptionErrors().join(', ') }}
+                </div>
+              }
+            </div>
             @if (generalError) {
               <div class="alert alert-danger" role="alert">
                 {{ generalError }}
