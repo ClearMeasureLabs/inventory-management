@@ -22,12 +22,12 @@ describe('NavComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should display navbar with dark theme', () => {
+  it('should display navbar with Clear Measure blue theme', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     const navbar = compiled.querySelector('nav.navbar');
     expect(navbar).toBeTruthy();
     expect(navbar?.classList.contains('navbar-dark')).toBeTrue();
-    expect(navbar?.classList.contains('bg-dark')).toBeTrue();
+    expect(navbar?.classList.contains('bg-clearmeasure-blue')).toBeTrue();
   });
 
   it('should display branding with correct text', () => {
