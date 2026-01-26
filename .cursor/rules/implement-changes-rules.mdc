@@ -1,0 +1,143 @@
+---
+description: Rules for implementing requested PR changes by Cursor Cloud Agent
+globs: []
+alwaysApply: false
+---
+
+# Implement Changes Rules
+
+When implementing requested changes on a pull request, follow this structured process to address review feedback systematically.
+
+## Before Starting
+
+1. **Post a starting comment** on the PR:
+   ```
+   Starting automated implementation of requested changes...
+   ```
+
+2. **Fetch the associated issue**: Extract the issue number from the PR body (look for "Closes #" or "Fixes #") and read:
+   - Original requirements and acceptance criteria
+   - Technical design comments
+   - Any constraints or validation rules
+
+3. **Read all PR review comments**: Identify all feedback requesting changes:
+   - Look for comments from the code review
+   - Note specific files and line numbers mentioned
+   - Understand the nature of each requested change
+
+## Implementing Changes
+
+For each requested change:
+
+1. **Understand the feedback**: Read the comment carefully to understand what needs to change
+2. **Locate the relevant code**: Find the file and section that needs modification
+3. **Apply the fix**: Make the necessary changes following project rules:
+   - Follow `architecture-rules.mdc` for layer boundaries and patterns
+   - Follow `automated-testing-rules.mdc` for test requirements
+   - Maintain consistent code style
+4. **Verify the change**: Ensure the fix addresses the feedback without breaking other functionality
+
+## Project Rules to Follow
+
+When making changes, ensure compliance with:
+
+### Architecture Rules
+- Respect layer boundaries (Presentation → Infrastructure → Application → Domain)
+- Follow CQRS patterns for features
+- Handlers return DTOs, not domain entities
+
+### Testing Requirements
+- Add or update unit tests for backend changes
+- Add or update integration tests for component interactions
+- Add or update Angular tests for UI changes
+- Run `scripts/build_and_test.ps1` to verify all tests pass
+
+### Code Quality
+- No linter errors
+- Consistent naming conventions
+- Proper error handling
+- No hardcoded configuration values
+
+## Committing Changes
+
+After implementing fixes:
+
+1. **Stage changes**: `git add -A`
+2. **Commit with descriptive message**:
+   ```
+   Address review feedback: [brief summary]
+   
+   - [Change 1 description]
+   - [Change 2 description]
+   - ...
+   ```
+3. **Push to PR branch**: `git push`
+
+## Post-Implementation
+
+After all changes are committed and pushed:
+
+1. **Post a summary comment** on the PR with the following format:
+
+```markdown
+## Automated Change Implementation Complete
+
+### Changes Made
+- [x] [Description of change 1]
+- [x] [Description of change 2]
+- [x] [Description of change 3]
+
+### Verification
+- [ ] All tests passing (run `scripts/build_and_test.ps1`)
+- [ ] No new linter errors
+
+### Notes
+[Any additional context or items that need manual attention]
+```
+
+2. **Mark the PR ready for review** (if all changes were successfully implemented):
+   ```bash
+   gh pr ready [PR_NUMBER]
+   ```
+
+## Handling Unresolvable Issues
+
+If you cannot implement a requested change:
+
+1. **Do not skip it silently** - always document the issue
+2. **Post a comment** explaining:
+   - What change was requested
+   - Why it couldn't be automated
+   - Suggested manual steps for the author
+3. **Continue with other changes** that can be implemented
+4. **Do not mark the PR ready** if significant changes remain unaddressed
+
+## Example Workflow
+
+```bash
+# 1. Post starting comment
+gh pr comment [PR_NUMBER] --body "Starting automated implementation of requested changes..."
+
+# 2. Make changes to files
+# [edit files as needed]
+
+# 3. Run tests
+./scripts/build_and_test.ps1
+
+# 4. Commit and push
+git add -A
+git commit -m "Address review feedback: fix layer boundary violation and add missing tests"
+git push
+
+# 5. Post summary comment
+gh pr comment [PR_NUMBER] --body "## Automated Change Implementation Complete
+### Changes Made
+- [x] Fixed layer boundary violation in ContainerService
+- [x] Added unit tests for new validation logic
+### Verification
+- [x] All tests passing
+- [x] No new linter errors"
+
+# 6. Mark ready for review
+gh pr ready [PR_NUMBER]
+```

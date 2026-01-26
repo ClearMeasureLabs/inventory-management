@@ -259,6 +259,32 @@ All PRs should use the template at `.github/PULL_REQUEST_TEMPLATE.md`, which inc
 - PRs must link to an issue using "Closes #[issue-number]"
 - The `CURSOR_API_KEY` secret must be configured in the repository
 
+## Automated Change Implementation
+
+When a PR review requests changes, a Cursor Cloud Agent can automatically implement the fixes.
+
+### How It Works
+
+1. When a reviewer requests changes, the PR is converted to draft
+2. The `converted_to_draft` event triggers a GitHub Action
+3. The action spawns a Cursor Cloud Agent via the API
+4. The agent reads all review comments and implements the requested changes
+5. The agent commits and pushes fixes to the PR branch
+6. The agent posts a summary comment and marks the PR ready for review
+
+### Workflow
+
+1. **Review phase**: Agent reviews PR and requests changes (converts to draft)
+2. **Implementation phase**: Agent implements requested changes automatically
+3. **Re-review phase**: Agent reviews the updated PR
+4. Cycle continues until PR is approved or requires manual intervention
+
+### Requirements
+
+- PRs must target the `master` branch
+- PR must have review comments with requested changes
+- The `CURSOR_API_KEY` secret must be configured in the repository
+
 ## Development with Cursor AI
 
 This repository includes configuration for [Cursor](https://cursor.com/) AI-assisted development in the `.cursor/rules/` directory. These rules ensure consistent code quality and workflow adherence.
@@ -268,6 +294,7 @@ This repository includes configuration for [Cursor](https://cursor.com/) AI-assi
 | `architecture-rules.mdc` | Layer boundaries and CQRS patterns |
 | `automated-testing-rules.mdc` | Required test coverage and testing guidelines |
 | `code-review-rules.mdc` | Automated PR review process and checklist |
+| `implement-changes-rules.mdc` | Automated implementation of requested PR changes |
 | `github-issue-rules.mdc` | Issue creation interview process |
 | `github-issue-implementation-rules.mdc` | Phase workflow for implementing issues |
 | `cursor-cloud-agent.mdc` | Operational constraints for Cloud Agent |
