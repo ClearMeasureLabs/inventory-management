@@ -9,7 +9,7 @@ When assigned to work on a GitHub issue, follow this phased workflow. Each phase
 
 ## Getting Started
 
-Before beginning any phase, create a dedicated branch for the issue and open a draft pull request:
+Before beginning any phase, create a dedicated branch for the issue, open a draft pull request, and ensure the development environment is ready:
 
 1. Create and checkout a new branch using the naming convention: `issues/[issue-number]/[issue-title]`
    - Replace `[issue-number]` with the GitHub issue number
@@ -21,6 +21,11 @@ Before beginning any phase, create a dedicated branch for the issue and open a d
    - Create a draft PR using: `gh pr create --draft --title "[Issue Title]" --body "Closes #[issue-number]"`
    - Example: `gh pr create --draft --title "Add User Authentication" --body "Closes #42"`
    - The draft PR provides early visibility into work-in-progress and enables ongoing review as changes are committed
+4. Run `scripts/install_tools.ps1` to ensure all development dependencies are installed:
+   - This starts Docker if not running
+   - Installs Angular dependencies
+   - Installs Playwright browsers for acceptance tests
+   - Installs other required tooling
 
 ## Phase 1: Technical Design
 
