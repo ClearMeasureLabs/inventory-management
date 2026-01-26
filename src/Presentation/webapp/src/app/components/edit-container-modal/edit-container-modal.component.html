@@ -1,0 +1,60 @@
+@if (isVisible && container) {
+  <div class="modal fade show" id="editContainerModal" tabindex="-1" style="display: block;" aria-labelledby="editContainerModalLabel" aria-modal="true" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editContainerModalLabel">Edit Container</h5>
+          <button type="button" class="btn-close" (click)="close()" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editContainerForm">
+            <div class="mb-3">
+              <label for="containerName" class="form-label">Name <span class="text-danger">*</span></label>
+              <input 
+                type="text" 
+                class="form-control" 
+                [class.is-invalid]="hasNameError()"
+                id="containerName" 
+                [(ngModel)]="containerName"
+                name="containerName"
+                placeholder="Enter container name"
+                required />
+              @if (hasNameError()) {
+                <div class="invalid-feedback" style="display: block;">
+                  {{ getNameErrors().join(', ') }}
+                </div>
+              }
+            </div>
+            <div class="mb-3">
+              <label for="containerDescription" class="form-label">Description</label>
+              <textarea 
+                class="form-control" 
+                id="containerDescription" 
+                [(ngModel)]="containerDescription"
+                name="containerDescription"
+                placeholder="Enter container description"
+                rows="3"></textarea>
+            </div>
+            @if (generalError) {
+              <div class="alert alert-danger" role="alert">
+                {{ generalError }}
+              </div>
+            }
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
+          <button type="button" class="btn btn-primary" (click)="submit()" [disabled]="isSubmitting">
+            @if (isSubmitting) {
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              <span>Saving...</span>
+            } @else {
+              <span>Save</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade show"></div>
+}

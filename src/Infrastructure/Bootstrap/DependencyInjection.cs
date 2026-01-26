@@ -2,6 +2,7 @@ using Application.Features.Containers;
 using Application.Features.Containers.CreateContainer;
 using Application.Features.Containers.DeleteContainer;
 using Application.Features.Containers.GetAllContainers;
+using Application.Features.Containers.UpdateContainer;
 using Application.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -72,6 +73,7 @@ public static class DependencyInjection
         services.AddScoped<ICreateContainerCommandHandler, CreateContainerCommandHandler>();
         services.AddScoped<IDeleteContainerCommandHandler, DeleteContainerCommandHandler>();
         services.AddScoped<IGetAllContainersQueryHandler, GetAllContainersQueryHandler>();
+        services.AddScoped<IUpdateContainerCommandHandler, UpdateContainerCommandHandler>();
         services.AddScoped<IContainers, Containers>();
         services.AddScoped<IApplication, Application.Application>();
     }
