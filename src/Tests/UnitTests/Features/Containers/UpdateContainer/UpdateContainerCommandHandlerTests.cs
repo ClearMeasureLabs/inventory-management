@@ -465,6 +465,128 @@ public class UpdateContainerCommandHandlerTests
     }
 
     [Test]
+    public void HandleAsync_WithDuplicateName_ShouldThrowValidationException()
+    {
+        // Arrange
+        var existingContainer = CreateValidContainer();
+        var containerToUpdate = CreateValidContainer();
+        existingContainer.Name = "Duplicate Name";
+        SetupContainersDbSet(new List<Container> { existingContainer, containerToUpdate });
+
+        var command = new UpdateContainerCommand 
+        { 
+            ContainerId = containerToUpdate.ContainerId,
+            Name = "Duplicate Name", // Same name as existing container
+            Description = _faker.Lorem.Sentence()
+        };
+
+        // Act & Assert
+        var exception = Should.Throw<ValidationException>(async () =>
+            await _handler.HandleAsync(command, CancellationToken.None));
+
+        exception.Errors.ShouldContainKey("Name");
+        exception.Errors["Name"].ShouldContain("A container with this name already exists");
+    }
+
+    [Test]
+    public async Task HandleAsync_WithSameNameOnSameContainer_ShouldSucceed()
+    {
+        // Arrange
+        var container = CreateValidContainer();
+        var originalName = container.Name;
+        SetupContainersDbSet(new List<Container> { container });
+
+        var command = new UpdateContainerCommand 
+        { 
+            ContainerId = container.ContainerId,
+            Name = originalName, // Same name (no change)
+            Description = _faker.Lorem.Sentence()
+        };
+
+        // Act
+        var result = await _handler.HandleAsync(command, CancellationToken.None);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Name.ShouldBe(originalName);
+    }
+
+    [Test]
+    public void HandleAsync_WithDuplicateName_ShouldNotCallSaveChanges()
+    {
+        // Arrange
+        var existingContainer = CreateValidContainer();
+        var containerToUpdate = CreateValidContainer();
+        existingContainer.Name = "Duplicate Name";
+        SetupContainersDbSet(new List<Container> { existingContainer, containerToUpdate });
+
+        var command = new UpdateContainerCommand 
+        { 
+            ContainerId = containerToUpdate.ContainerId,
+            Name = "Duplicate Name",
+            Description = _faker.Lorem.Sentence()
+        };
+
+        // Act & Assert
+        Should.Throw<ValidationException>(async () =>
+            await _handler.HandleAsync(command, CancellationToken.None));
+
+        _repositoryMock.Verify(
+            r => r.SaveChangesAsync(It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Test]
+    public void HandleAsync_WithDuplicateName_ShouldNotCallCache()
+    {
+        // Arrange
+        var existingContainer = CreateValidContainer();
+        var containerToUpdate = CreateValidContainer();
+        existingContainer.Name = "Duplicate Name";
+        SetupContainersDbSet(new List<Container> { existingContainer, containerToUpdate });
+
+        var command = new UpdateContainerCommand 
+        { 
+            ContainerId = containerToUpdate.ContainerId,
+            Name = "Duplicate Name",
+            Description = _faker.Lorem.Sentence()
+        };
+
+        // Act & Assert
+        Should.Throw<ValidationException>(async () =>
+            await _handler.HandleAsync(command, CancellationToken.None));
+
+        _cacheMock.Verify(
+            c => c.SetAsync(It.IsAny<string>(), It.IsAny<Container>(), It.IsAny<TimeSpan?>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Test]
+    public void HandleAsync_WithDuplicateName_ShouldNotPublishEvent()
+    {
+        // Arrange
+        var existingContainer = CreateValidContainer();
+        var containerToUpdate = CreateValidContainer();
+        existingContainer.Name = "Duplicate Name";
+        SetupContainersDbSet(new List<Container> { existingContainer, containerToUpdate });
+
+        var command = new UpdateContainerCommand 
+        { 
+            ContainerId = containerToUpdate.ContainerId,
+            Name = "Duplicate Name",
+            Description = _faker.Lorem.Sentence()
+        };
+
+        // Act & Assert
+        Should.Throw<ValidationException>(async () =>
+            await _handler.HandleAsync(command, CancellationToken.None));
+
+        _eventHubMock.Verify(
+            e => e.PublishAsync(It.IsAny<ContainerUpdatedEvent>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Test]
     public async Task HandleAsync_WithNameAtMaxLength_ShouldSucceed()
     {
         // Arrange

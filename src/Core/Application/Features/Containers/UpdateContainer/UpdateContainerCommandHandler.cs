@@ -50,6 +50,18 @@ public class UpdateContainerCommandHandler : IUpdateContainerCommandHandler
             errors.TryAdd(nameof(request.Name), new List<string>());
             errors[nameof(request.Name)].Add($"Name cannot exceed {NameMaxLength} characters");
         }
+        else
+        {
+            // Check for duplicate name (excluding current container)
+            var duplicateExists = await _repository.Containers
+                .AnyAsync(c => c.Name == request.Name && c.ContainerId != request.ContainerId, cancellationToken);
+
+            if (duplicateExists)
+            {
+                errors.TryAdd(nameof(request.Name), new List<string>());
+                errors[nameof(request.Name)].Add("A container with this name already exists");
+            }
+        }
 
         if (errors.Count > 0)
         {
