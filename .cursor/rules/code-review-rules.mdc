@@ -10,11 +10,6 @@ alwaysApply: false
 
 1. **Fetch the issue**: Extract from PR body ("Closes #" or "Fixes #"). Read requirements, acceptance criteria, technical design.
 2. **Check README**: Does it need updates for new features, scripts, or config?
-3. **Update labels**: Set only `In Review By Agent`.
-
-```bash
-gh pr edit [PR] --remove-label "Changes Requested" --remove-label "Development" --remove-label "Ready for Review" --add-label "In Review By Agent"
-```
 
 ## Review Checklist
 
@@ -59,19 +54,17 @@ Evaluate against project rules:
 
 ### Recommend Approval
 If all checklist items pass:
-1. Set only `Approved by Agent` label
+1. Add `Approved by Agent` label
 2. **Do NOT** use `gh pr review --approve`—only add the label
 
 ```bash
-gh pr edit [PR] --remove-label "In Review By Agent" --remove-label "Changes Requested" --remove-label "Development" --add-label "Ready for Review"
+gh pr edit [PR] --add-label "Approved by Agent"
 ```
 
 ### Request Changes
 If issues are found:
 1. Convert PR to draft
-2. Set only `Changes Requested` label
 
 ```bash
 gh pr ready [PR] --undo
-gh pr edit [PR] --remove-label "In Review By Agent" --remove-label "Development" --remove-label "Ready for Review" --add-label "Changes Requested"
 ```

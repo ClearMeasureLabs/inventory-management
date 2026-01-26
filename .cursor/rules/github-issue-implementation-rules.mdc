@@ -58,7 +58,6 @@ Not required for: Backend-only, UI-only, docs, refactoring.
 **Label:** `Functional-Validation`
 
 1. Run `scripts/acceptance_tests.ps1` until passing
-2. Add label to PR: `gh pr edit --add-label "Functional-Validation"`
 
 **Gate:** Both test scripts must pass.
 
