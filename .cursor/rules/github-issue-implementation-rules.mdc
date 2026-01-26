@@ -71,11 +71,14 @@ Before beginning any phase, create a dedicated branch for the issue and open a d
 5. If the script fails to execute for any reason (missing dependencies, Docker issues, environment problems, etc.), diagnose and fix the issue, then re-run the script
 6. If any tests fail, fix the code or tests until all tests pass
 7. Repeat steps 4-6 until the script completes successfully with all tests passing
-8. **Prerequisite for Review:** All tests must execute and pass — do not mark the pull request as ready for review until `scripts/build_and_test.ps1` completes with zero failures
-9. Commit final changes and mark the draft pull request as ready for review using: `gh pr ready`
+8. **Work is not complete until `scripts/build_and_test.ps1` passes with no errors.** Do not proceed to Phase 4 until this requirement is met.
+9. Commit final changes and push to the draft pull request
 
 ## Phase 4: Validation Handoff
 
 1. Update issue labels: remove all existing labels, add `Functional-Validation`
+2. Add the `Functional-Validation` label to the pull request using: `gh pr edit --add-label "Functional-Validation"`
 
-**Note:** Do not close the issue. The `Functional-Validation` label signals that manual review and testing are required before closure.
+**Important:** The `Functional-Validation` label cannot be added until `scripts/build_and_test.ps1` completes with no errors. The PR remains in draft status.
+
+**Note:** Do not close the issue. The `Functional-Validation` label on both the issue and PR signals that manual review and testing are required before closure.
