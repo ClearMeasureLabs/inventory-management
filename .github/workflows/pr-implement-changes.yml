@@ -1,0 +1,104 @@
+name: PR Implement Changes
+
+on:
+  pull_request:
+    types: [converted_to_draft]
+    branches:
+      - master
+  # Manual trigger for testing
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to implement changes for'
+        required: true
+        type: number
+      repository:
+        description: 'Repository (owner/repo)'
+        required: false
+        type: string
+      ref:
+        description: 'Branch ref to work on'
+        required: false
+        type: string
+
+jobs:
+  implement-changes:
+    name: Cursor Cloud Agent Implement Changes
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Log trigger info
+        run: |
+          echo "Event name: ${{ github.event_name }}"
+          echo "Repository: ${{ github.repository }}"
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "PR Number: ${{ github.event.pull_request.number }}"
+            echo "PR Title: ${{ github.event.pull_request.title }}"
+            echo "Head Branch: ${{ github.head_ref }}"
+            echo "Base Branch: ${{ github.base_ref }}"
+          else
+            echo "Manual trigger with PR: ${{ inputs.pr_number }}"
+          fi
+
+      - name: Get PR details (manual trigger)
+        if: github.event_name == 'workflow_dispatch'
+        id: pr_details
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_REPO: ${{ inputs.repository || github.repository }}
+        run: |
+          PR_DATA=$(gh pr view ${{ inputs.pr_number }} --repo ${INPUT_REPO} --json number,title,body,headRefName,baseRefName)
+          echo "pr_number=$(echo $PR_DATA | jq -r '.number')" >> $GITHUB_OUTPUT
+          echo "pr_title=$(echo $PR_DATA | jq -r '.title')" >> $GITHUB_OUTPUT
+          echo "head_branch=$(echo $PR_DATA | jq -r '.headRefName')" >> $GITHUB_OUTPUT
+          echo "base_branch=$(echo $PR_DATA | jq -r '.baseRefName')" >> $GITHUB_OUTPUT
+
+      - name: Trigger Cursor Cloud Agent to Implement Changes
+        env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          PR_NUMBER: ${{ github.event_name == 'workflow_dispatch' && steps.pr_details.outputs.pr_number || github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event_name == 'workflow_dispatch' && steps.pr_details.outputs.pr_title || github.event.pull_request.title }}
+          HEAD_BRANCH: ${{ github.event_name == 'workflow_dispatch' && (inputs.ref || steps.pr_details.outputs.head_branch) || github.head_ref }}
+          BASE_BRANCH: ${{ github.event_name == 'workflow_dispatch' && steps.pr_details.outputs.base_branch || github.base_ref }}
+          REPO: ${{ inputs.repository || github.repository }}
+        run: |
+          echo "Preparing to call Cursor Cloud Agent API..."
+          echo "PR Number: ${PR_NUMBER}"
+          echo "Head Branch: ${HEAD_BRANCH}"
+          echo "Repository: ${REPO}"
+          
+          # Build the prompt text with instructions to implement changes
+          PROMPT_TEXT="Implement requested changes for PR #${PR_NUMBER} in repository ${REPO}. Follow the implement_changes_rules: 1) Review the associated issue to understand original requirements, 2) Read the PR description and all review comments, 3) Identify all requested changes from review feedback, 4) Implement each requested change following project rules, 5) Commit and push fixes to the PR branch, 6) Post a summary comment listing changes made. If unable to resolve all changes, comment on what was addressed and what needs manual attention. PR Title: ${PR_TITLE}. PR Branch: ${HEAD_BRANCH}"
+          
+          # Build the request payload using jq for proper JSON escaping
+          PAYLOAD=$(jq -n \
+            --arg prompt "$PROMPT_TEXT" \
+            --arg repo "$REPO" \
+            --arg ref "$HEAD_BRANCH" \
+            '{"prompt": {"text": $prompt}, "source": {"repository": $repo, "ref": $ref}}')
+          
+          echo "Request payload:"
+          echo "$PAYLOAD" | jq .
+          
+          # Make the API call and capture response
+          HTTP_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "https://api.cursor.com/v0/agents" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $CURSOR_API_KEY" \
+            -d "$PAYLOAD")
+          
+          # Extract body and status code
+          HTTP_BODY=$(echo "$HTTP_RESPONSE" | sed '$d')
+          HTTP_STATUS=$(echo "$HTTP_RESPONSE" | tail -n 1)
+          
+          echo "API Response Status: $HTTP_STATUS"
+          echo "API Response Body: $HTTP_BODY"
+          
+          # Check if successful
+          if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
+            echo "Successfully triggered Cursor Cloud Agent to implement changes"
+          else
+            echo "Failed to trigger Cursor Cloud Agent"
+            echo "Status: $HTTP_STATUS"
+            echo "Response: $HTTP_BODY"
+            exit 1
+          fi
