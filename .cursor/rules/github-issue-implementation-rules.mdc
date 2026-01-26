@@ -77,7 +77,7 @@ Before beginning any phase, create a dedicated branch for the issue and open a d
 ## Phase 4: Validation Handoff
 
 1. Update issue labels: remove all existing labels, add `Functional-Validation`
-2. Add the `Functional-Validation` label to the pull request using: `gh pr edit --add-label "Functional-Validation"`
+2. Update pull request labels: remove all existing labels, add `Functional-Validation` using: `gh pr edit --remove-label "<existing-labels>" --add-label "Functional-Validation"`
 
 **Important:** The `Functional-Validation` label cannot be added until `scripts/build_and_test.ps1` completes with no errors. The PR remains in draft status.
 
