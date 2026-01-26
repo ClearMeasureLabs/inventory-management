@@ -27,7 +27,7 @@ Before beginning any phase, create a dedicated branch for the issue and open a d
 1. Read and understand the issue requirements
 2. Update issue labels: remove all existing labels, add `Technical-Design`
 3. Explore the codebase to understand relevant components and dependencies
-4. Formulate an implementation plan focused on architecture and code changes (exclude test considerations)
+4. Formulate an implementation plan including architecture changes and required tests (unit, integration, Angular)
 5. Add the Technical Design as a comment to the issue using this format:
 
 ```markdown
@@ -40,33 +40,48 @@ Before beginning any phase, create a dedicated branch for the issue and open a d
 2. [Continue for all steps...]
 
 **Dependencies:** [Any new packages or infrastructure required]
+
+**Unit Tests:** [Test descriptions and categories per automated-testing-rules.mdc, or "None required" with rationale]
+
+**Integration Tests:** [Test descriptions covering component interactions, or "None required" with rationale]
+
+**Angular Tests:** [Test descriptions covering UI behavior, or "None required" with rationale]
 ```
 
-## Phase 2: Test Design
+## Phase 2: Acceptance Test Design
 
 1. Update issue labels: remove all existing labels, add `Test-Design`
 2. Review the issue requirements, Technical Design comment, and `@.cursor/rules/automated-testing-rules.mdc`
-3. Formulate a test plan covering required unit, integration, and Angular tests
-4. Add the Test Design as a comment to the issue using this format:
+3. Determine if acceptance tests are required for this issue (see criteria below)
+4. Add the Acceptance Test Design as a comment to the issue using this format:
 
 ```markdown
-## Test Design
+## Acceptance Test Design
 
-**Unit Tests:**
-- [Test description and category from automated-testing.mdc]
+**Acceptance Tests:**
+- [Test description covering end-to-end user workflow]
 
-**Integration Tests:**
-- [Test description covering component interactions]
+OR
 
-**Angular Tests:**
-- [Test description covering user workflows]
+**Acceptance Tests:** None required - [rationale: e.g., "backend-only change with no user-facing impact"]
 ```
+
+### When Acceptance Tests Are Required
+- New user-facing features that span WebApp and WebAPI
+- Critical user workflows that require end-to-end validation
+- Changes that affect the deployed application behavior
+
+### When Acceptance Tests Are NOT Required
+- Backend-only changes (covered by unit/integration tests)
+- UI-only changes (covered by Angular tests)
+- Documentation or configuration changes
+- Refactoring with no behavior change
 
 ## Phase 3: Development
 
 1. Update issue labels: remove all existing labels, add `Development`
-2. Implement the Technical Design changes
-3. Implement the Test Design tests
+2. Implement the Technical Design changes (including unit, integration, and Angular tests)
+3. Implement any acceptance tests from the Acceptance Test Design
 4. Run `scripts/build_and_test.ps1` to verify all changes
 5. If the script fails to execute for any reason (missing dependencies, Docker issues, environment problems, etc.), diagnose and fix the issue, then re-run the script
 6. If any tests fail, fix the code or tests until all tests pass

@@ -33,6 +33,26 @@ Located alongside components in `src/Presentation/webapp/src/app/`. Verify UI be
 4. **Error handling** - Validation errors and API errors display appropriately
 5. **State management** - Component state updates correctly after actions
 
+## Acceptance Tests (.NET)
+
+Located in `src/Tests/AcceptanceTests/`. Full system tests that deploy the complete application stack (infrastructure, WebAPI, WebApp) and verify end-to-end functionality using Playwright:
+
+1. **System deployment** - Application stack deploys successfully via Docker Compose
+2. **User workflows** - Complete user journeys work correctly across the UI
+3. **API accessibility** - WebAPI endpoints are accessible from the deployed environment
+4. **Cross-component integration** - WebApp correctly communicates with WebAPI
+
+### Acceptance Test Structure
+- Tests inherit from `Microsoft.Playwright.NUnit.PageTest` for browser automation
+- `Infrastructure/TestEnvironment.cs` manages Docker deployment lifecycle
+- `Infrastructure/AcceptanceTestFixture.cs` is the NUnit SetUpFixture for one-time setup/teardown
+- Tests run against the deployed application at `http://localhost:4200` (WebApp) and `http://localhost:5000` (WebAPI)
+
+### When to Write Acceptance Tests
+- New user-facing features that require end-to-end validation
+- Critical user workflows that span multiple components
+- Regression scenarios for production issues
+
 ## When New Tests Are Required
 
 - **New backend functionality**: Unit tests and integration tests required
@@ -57,7 +77,7 @@ Located alongside components in `src/Presentation/webapp/src/app/`. Verify UI be
 ## Running Tests
 
 ```powershell
-# Run all tests
+# Run all tests (unit, integration, Angular)
 .\scripts\build_and_test.ps1
 
 # Run .NET unit tests only
@@ -69,4 +89,7 @@ dotnet test src/Tests/IntegrationTests
 # Run Angular tests only
 cd src/Presentation/webapp
 npm test -- --watch=false --browsers=ChromeHeadless
+
+# Run acceptance tests only (requires Docker)
+dotnet test src/Tests/AcceptanceTests
 ```
