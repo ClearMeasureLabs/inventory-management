@@ -240,7 +240,7 @@ This repository uses a Cursor Cloud Agent to automatically review pull requests 
 
 ### How It Works
 
-1. When a PR targeting `main` is marked "Ready for review", a GitHub Action triggers
+1. When a PR targeting `master` is marked "Ready for review", a GitHub Action triggers
 2. The action spawns a Cursor Cloud Agent via the API
 3. The agent reviews the PR against the checklist in the PR template
 4. The agent references the linked issue to understand requirements
@@ -255,7 +255,7 @@ All PRs should use the template at `.github/PULL_REQUEST_TEMPLATE.md`, which inc
 
 ### Requirements
 
-- PRs must target the `main` branch
+- PRs must target the `master` branch
 - PRs must link to an issue using "Closes #[issue-number]"
 - The `CURSOR_API_KEY` secret must be configured in the repository
 

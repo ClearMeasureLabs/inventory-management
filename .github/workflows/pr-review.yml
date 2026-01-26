@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [ready_for_review]
     branches:
-      - main
+      - master
 
 jobs:
   code-review:
