@@ -1,0 +1,49 @@
+@if (isVisible) {
+  <div class="modal fade show" id="addWorkOrderModal" tabindex="-1" style="display: block;" aria-labelledby="addWorkOrderModalLabel" aria-modal="true" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addWorkOrderModalLabel">Add Work Order</h5>
+          <button type="button" class="btn-close" (click)="close()" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="addWorkOrderForm">
+            <div class="mb-3">
+              <label for="workOrderTitle" class="form-label">Title</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                [class.is-invalid]="hasTitleError()"
+                id="workOrderTitle" 
+                [(ngModel)]="workOrderTitle"
+                name="workOrderTitle"
+                placeholder="Enter work order title" />
+              @if (hasTitleError()) {
+                <div class="invalid-feedback" style="display: block;">
+                  {{ getTitleErrors().join(', ') }}
+                </div>
+              }
+            </div>
+            @if (generalError) {
+              <div class="alert alert-danger" role="alert">
+                {{ generalError }}
+              </div>
+            }
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
+          <button type="button" class="btn btn-primary" (click)="submit()" [disabled]="isSubmitting">
+            @if (isSubmitting) {
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              <span>Creating...</span>
+            } @else {
+              <span>Create</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade show"></div>
+}

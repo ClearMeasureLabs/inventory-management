@@ -1,0 +1,60 @@
+@if (isLoading) {
+  <div class="d-flex justify-content-center">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+} @else if (workOrders && workOrders.length === 0) {
+  <div class="p-5 mb-4 bg-light rounded-3">
+    <div class="container-fluid py-5 text-center">
+      <h1 class="display-5 fw-bold">No Work Orders</h1>
+      <p class="col-md-8 mx-auto fs-4">You don't have any work orders yet. Create your first work order to get started.</p>
+      <button class="btn btn-primary btn-lg" type="button" (click)="openAddModal()">Add Work Order</button>
+    </div>
+  </div>
+} @else {
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Work Orders</h1>
+    <button class="btn btn-primary" type="button" (click)="openAddModal()">Add Work Order</button>
+  </div>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (workOrder of workOrders; track workOrder.workOrderId) {
+        <tr>
+          <td>{{ workOrder.workOrderId }}</td>
+          <td>{{ workOrder.title }}</td>
+          <td>
+            <button 
+              class="btn btn-outline-danger btn-sm" 
+              type="button" 
+              (click)="openDeleteModal(workOrder)"
+              title="Delete work order"
+              aria-label="Delete work order">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+              </svg>
+            </button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}
+
+<app-add-work-order-modal 
+  #addWorkOrderModal 
+  (workOrderCreated)="onWorkOrderCreated($event)">
+</app-add-work-order-modal>
+
+<app-delete-work-order-modal
+  #deleteWorkOrderModal
+  (workOrderDeleted)="onWorkOrderDeleted($event)">
+</app-delete-work-order-modal>
