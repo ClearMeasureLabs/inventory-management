@@ -187,7 +187,9 @@ describe('EditContainerModalComponent', () => {
     component.container = null;
     component.submit();
     
+    // No HTTP requests should be made
     httpMock.expectNone(`${environment.apiUrl}/api/containers`);
+    expect(component.isSubmitting).toBeFalse();
   });
 
   it('should handle hasNameError for uppercase key', () => {
