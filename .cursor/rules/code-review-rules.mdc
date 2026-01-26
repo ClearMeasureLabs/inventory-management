@@ -1,0 +1,124 @@
+---
+description: Rules for automated PR code review by Cursor Cloud Agent
+globs: []
+alwaysApply: false
+---
+
+# Code Review Rules
+
+When reviewing a pull request, follow this structured process to ensure thorough and consistent reviews.
+
+## Before Starting the Review
+
+1. **Fetch the associated issue**: Extract the issue number from the PR body (look for "Closes #" or "Fixes #") and read the issue to understand:
+   - The requirements and acceptance criteria
+   - Any technical design comments
+   - Validation rules and edge cases
+   - Discussion and clarifications
+
+2. **Review the README**: Check if the README needs updates based on the changes:
+   - New features or functionality
+   - New scripts or commands
+   - Configuration changes
+   - Architecture changes
+
+## Review Checklist
+
+Evaluate the PR against each section of the PR template checklist. Reference the corresponding Cursor rules for detailed requirements.
+
+### Architecture Rules (see `architecture-rules.mdc`)
+
+Verify:
+- Layer boundaries are respected (Presentation → Infrastructure → Application → Domain)
+- No reverse dependencies exist
+- CQRS pattern is followed for new features
+- Feature organization follows the established structure
+- Handlers return DTOs, not domain entities
+- No unauthorized changes to packages, SDK versions, or new projects
+
+### Automated Testing (see `automated-testing-rules.mdc`)
+
+Verify:
+- Unit tests exist for new backend functionality
+- Integration tests exist for component interactions
+- Angular component tests exist for UI changes
+- Tests follow Arrange-Act-Assert pattern
+- Test coverage includes required categories
+
+### Documentation
+
+Verify:
+- README is updated if new features added
+- Code comments explain complex logic
+- API changes are documented
+
+### Code Quality
+
+Verify:
+- No linter errors introduced
+- Consistent naming conventions
+- No hardcoded configuration values
+- Proper error handling
+- No security vulnerabilities
+
+### Issue Requirements
+
+Verify:
+- All acceptance criteria are addressed
+- Implementation matches technical design
+- Edge cases are handled
+
+## Posting the Review
+
+After completing the review, post a comment on the PR with the following format:
+
+```markdown
+## Automated Code Review
+
+### Checklist Results
+
+#### Architecture Rules
+- [x] Layer boundaries respected
+- [x] No reverse dependencies
+- [ ] CQRS pattern followed - **Issue: [describe problem]**
+
+#### Automated Testing
+- [x] Unit tests added
+- [x] Integration tests added
+- [x] Tests follow AAA pattern
+
+#### Documentation
+- [x] README updated
+- [x] Code comments present
+
+#### Code Quality
+- [x] No linter errors
+- [x] Naming conventions followed
+
+#### Issue Requirements
+- [x] Acceptance criteria met
+- [x] Technical design followed
+
+### Summary
+
+[Provide a brief summary of findings]
+
+### Required Changes
+
+[List specific changes needed, or "None - PR approved"]
+```
+
+## Review Decision
+
+- **Approve** the PR if all checklist items pass and no issues are found
+- **Request changes** if any issues are found, providing specific feedback on what needs to be fixed
+
+Use the GitHub CLI to submit the review:
+
+```bash
+# To approve
+gh pr review [PR_NUMBER] --approve --body "Review comment here"
+
+# To request changes
+gh pr review [PR_NUMBER] --request-changes --body "Review comment here"
+```

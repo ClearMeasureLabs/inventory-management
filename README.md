@@ -234,6 +234,31 @@ npm test -- --watch=false --browsers=ChromeHeadless
 
 This runs all test suites: .NET unit tests, .NET integration tests, and Angular component tests.
 
+## Automated PR Review
+
+This repository uses a Cursor Cloud Agent to automatically review pull requests when they are marked ready for review.
+
+### How It Works
+
+1. When a PR targeting `main` is marked "Ready for review", a GitHub Action triggers
+2. The action spawns a Cursor Cloud Agent via the API
+3. The agent reviews the PR against the checklist in the PR template
+4. The agent references the linked issue to understand requirements
+5. The agent posts a review comment with findings and either approves or requests changes
+
+### PR Template
+
+All PRs should use the template at `.github/PULL_REQUEST_TEMPLATE.md`, which includes:
+- Summary and related issue sections
+- Comprehensive review checklist covering architecture, testing, documentation, and code quality
+- Reviewer notes section for additional context
+
+### Requirements
+
+- PRs must target the `main` branch
+- PRs must link to an issue using "Closes #[issue-number]"
+- The `CURSOR_API_KEY` secret must be configured in the repository
+
 ## Development with Cursor AI
 
 This repository includes configuration for [Cursor](https://cursor.com/) AI-assisted development in the `.cursor/rules/` directory. These rules ensure consistent code quality and workflow adherence.
@@ -242,6 +267,7 @@ This repository includes configuration for [Cursor](https://cursor.com/) AI-assi
 |-----------|---------|
 | `architecture-rules.mdc` | Layer boundaries and CQRS patterns |
 | `automated-testing-rules.mdc` | Required test coverage and testing guidelines |
+| `code-review-rules.mdc` | Automated PR review process and checklist |
 | `github-issue-rules.mdc` | Issue creation interview process |
 | `github-issue-implementation-rules.mdc` | Phase workflow for implementing issues |
 | `cursor-cloud-agent.mdc` | Operational constraints for Cloud Agent |

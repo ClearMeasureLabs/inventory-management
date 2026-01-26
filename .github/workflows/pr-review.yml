@@ -1,0 +1,35 @@
+name: PR Code Review
+
+on:
+  pull_request:
+    types: [ready_for_review]
+    branches:
+      - main
+
+jobs:
+  code-review:
+    name: Cursor Cloud Agent Review
+    runs-on: ubuntu-latest
+    # Skip if PR is still a draft (safety check)
+    if: github.event.pull_request.draft == false
+    
+    steps:
+      - name: Trigger Cursor Cloud Agent Review
+        env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+        run: |
+          curl -X POST "https://api.cursor.com/agent" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $CURSOR_API_KEY" \
+            -d '{
+              "task": "Review PR #${{ github.event.pull_request.number }} in repository ${{ github.repository }}. Follow the code_review_rules to review the changes, reference the associated issue, and post a review comment with the checklist findings. Approve if all checks pass, or request changes with specific feedback.",
+              "repo": "${{ github.repository }}",
+              "branch": "${{ github.head_ref }}",
+              "context": {
+                "pr_number": ${{ github.event.pull_request.number }},
+                "pr_title": "${{ github.event.pull_request.title }}",
+                "pr_body": ${{ toJson(github.event.pull_request.body) }},
+                "base_branch": "${{ github.base_ref }}",
+                "head_branch": "${{ github.head_ref }}"
+              }
+            }'
