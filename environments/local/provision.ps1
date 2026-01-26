@@ -17,4 +17,4 @@ $env:REDIS_PORT = $localConfig.Redis.Port
 $env:REDIS_INSIGHT_PORT = $localConfig.RedisInsight.Port
 
 # Run docker compose with the project name
-docker compose -p $projectName up -d
+docker compose -p "${projectName}_infra" up -d

@@ -72,9 +72,18 @@ $env:WEBAPP_PORT = "4200"
 # Disable BuildKit to avoid transient build issues
 $env:DOCKER_BUILDKIT = "0"
 
-# Step 3: Build WebAPI Docker image
+# Step 3: Stop and remove existing application containers
 Write-Host ""
-Write-Host "Step 3: Building WebAPI Docker image..." -ForegroundColor Cyan
+Write-Host "Step 3: Stopping existing application containers..." -ForegroundColor Cyan
+docker compose -f docker-compose.app.yml -p "${projectName}_app" down --remove-orphans 2>$null
+# Also remove any orphaned containers with hardcoded names
+docker stop webapp webapi 2>$null
+docker rm webapp webapi 2>$null
+Write-Host "Existing containers removed." -ForegroundColor Green
+
+# Step 4: Build WebAPI Docker image
+Write-Host ""
+Write-Host "Step 4: Building WebAPI Docker image..." -ForegroundColor Cyan
 docker compose -f docker-compose.app.yml -p "${projectName}_app" build webapi
 if ($LASTEXITCODE -ne 0) {
     Write-Host "ERROR: Failed to build WebAPI image." -ForegroundColor Red
@@ -83,9 +92,9 @@ if ($LASTEXITCODE -ne 0) {
 }
 Write-Host "WebAPI image built successfully." -ForegroundColor Green
 
-# Step 4: Build WebApp Docker image
+# Step 5: Build WebApp Docker image
 Write-Host ""
-Write-Host "Step 4: Building WebApp Docker image..." -ForegroundColor Cyan
+Write-Host "Step 5: Building WebApp Docker image..." -ForegroundColor Cyan
 docker compose -f docker-compose.app.yml -p "${projectName}_app" build webapp
 if ($LASTEXITCODE -ne 0) {
     Write-Host "ERROR: Failed to build WebApp image." -ForegroundColor Red
@@ -94,9 +103,9 @@ if ($LASTEXITCODE -ne 0) {
 }
 Write-Host "WebApp image built successfully." -ForegroundColor Green
 
-# Step 5: Start application containers
+# Step 6: Start application containers
 Write-Host ""
-Write-Host "Step 5: Starting application containers..." -ForegroundColor Cyan
+Write-Host "Step 6: Starting application containers..." -ForegroundColor Cyan
 docker compose -f docker-compose.app.yml -p "${projectName}_app" up -d
 if ($LASTEXITCODE -ne 0) {
     Write-Host "ERROR: Failed to start application containers." -ForegroundColor Red
