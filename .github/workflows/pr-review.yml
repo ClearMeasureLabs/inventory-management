@@ -5,31 +5,62 @@ on:
     types: [ready_for_review]
     branches:
       - master
+  # Manual trigger for testing
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to review'
+        required: true
+        type: number
 
 jobs:
   code-review:
     name: Cursor Cloud Agent Review
     runs-on: ubuntu-latest
-    # Skip if PR is still a draft (safety check)
-    if: github.event.pull_request.draft == false
+    # Skip if PR is still a draft (only applies to pull_request event)
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false
     
     steps:
+      - name: Get PR details (manual trigger)
+        if: github.event_name == 'workflow_dispatch'
+        id: pr_details
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PR_DATA=$(gh pr view ${{ inputs.pr_number }} --repo ${{ github.repository }} --json number,title,body,headRefName,baseRefName)
+          echo "pr_number=$(echo $PR_DATA | jq -r '.number')" >> $GITHUB_OUTPUT
+          echo "pr_title=$(echo $PR_DATA | jq -r '.title')" >> $GITHUB_OUTPUT
+          echo "pr_body<<EOF" >> $GITHUB_OUTPUT
+          echo $PR_DATA | jq -r '.body' >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "head_branch=$(echo $PR_DATA | jq -r '.headRefName')" >> $GITHUB_OUTPUT
+          echo "base_branch=$(echo $PR_DATA | jq -r '.baseRefName')" >> $GITHUB_OUTPUT
+
       - name: Trigger Cursor Cloud Agent Review
         env:
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          # Use PR event data or manual input data
+          PR_NUMBER: ${{ github.event_name == 'workflow_dispatch' && steps.pr_details.outputs.pr_number || github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event_name == 'workflow_dispatch' && steps.pr_details.outputs.pr_title || github.event.pull_request.title }}
+          PR_BODY: ${{ github.event_name == 'workflow_dispatch' && steps.pr_details.outputs.pr_body || github.event.pull_request.body }}
+          HEAD_BRANCH: ${{ github.event_name == 'workflow_dispatch' && steps.pr_details.outputs.head_branch || github.head_ref }}
+          BASE_BRANCH: ${{ github.event_name == 'workflow_dispatch' && steps.pr_details.outputs.base_branch || github.base_ref }}
         run: |
+          # Escape the PR body for JSON
+          PR_BODY_ESCAPED=$(echo "$PR_BODY" | jq -Rs .)
+          
           curl -X POST "https://api.cursor.com/agent" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $CURSOR_API_KEY" \
-            -d '{
-              "task": "Review PR #${{ github.event.pull_request.number }} in repository ${{ github.repository }}. Follow the code_review_rules to review the changes, reference the associated issue, and post a review comment with the checklist findings. Approve if all checks pass, or request changes with specific feedback.",
-              "repo": "${{ github.repository }}",
-              "branch": "${{ github.head_ref }}",
-              "context": {
-                "pr_number": ${{ github.event.pull_request.number }},
-                "pr_title": "${{ github.event.pull_request.title }}",
-                "pr_body": ${{ toJson(github.event.pull_request.body) }},
-                "base_branch": "${{ github.base_ref }}",
-                "head_branch": "${{ github.head_ref }}"
+            -d "{
+              \"task\": \"Review PR #${PR_NUMBER} in repository ${{ github.repository }}. Follow the code_review_rules to review the changes, reference the associated issue, and post a review comment with the checklist findings. Approve if all checks pass, or request changes with specific feedback.\",
+              \"repo\": \"${{ github.repository }}\",
+              \"branch\": \"${HEAD_BRANCH}\",
+              \"context\": {
+                \"pr_number\": ${PR_NUMBER},
+                \"pr_title\": \"${PR_TITLE}\",
+                \"pr_body\": ${PR_BODY_ESCAPED},
+                \"base_branch\": \"${BASE_BRANCH}\",
+                \"head_branch\": \"${HEAD_BRANCH}\"
               }
-            }'
+            }"
