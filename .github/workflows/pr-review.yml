@@ -21,6 +21,19 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false
     
     steps:
+      - name: Log trigger info
+        run: |
+          echo "Event name: ${{ github.event_name }}"
+          echo "Repository: ${{ github.repository }}"
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "PR Number: ${{ github.event.pull_request.number }}"
+            echo "PR Title: ${{ github.event.pull_request.title }}"
+            echo "Head Branch: ${{ github.head_ref }}"
+            echo "Base Branch: ${{ github.base_ref }}"
+          else
+            echo "Manual trigger with PR: ${{ inputs.pr_number }}"
+          fi
+
       - name: Get PR details (manual trigger)
         if: github.event_name == 'workflow_dispatch'
         id: pr_details
@@ -46,21 +59,52 @@ jobs:
           HEAD_BRANCH: ${{ github.event_name == 'workflow_dispatch' && steps.pr_details.outputs.head_branch || github.head_ref }}
           BASE_BRANCH: ${{ github.event_name == 'workflow_dispatch' && steps.pr_details.outputs.base_branch || github.base_ref }}
         run: |
+          echo "Preparing to call Cursor Cloud Agent API..."
+          echo "PR Number: ${PR_NUMBER}"
+          echo "Head Branch: ${HEAD_BRANCH}"
+          
           # Escape the PR body for JSON
           PR_BODY_ESCAPED=$(echo "$PR_BODY" | jq -Rs .)
           
-          curl -X POST "https://api.cursor.com/agent" \
+          # Build the request payload
+          PAYLOAD=$(cat <<EOF
+          {
+            "task": "Review PR #${PR_NUMBER} in repository ${{ github.repository }}. Follow the code_review_rules to review the changes, reference the associated issue, and post a review comment with the checklist findings. Approve if all checks pass, or request changes with specific feedback.",
+            "repo": "${{ github.repository }}",
+            "branch": "${HEAD_BRANCH}",
+            "context": {
+              "pr_number": ${PR_NUMBER},
+              "pr_title": "${PR_TITLE}",
+              "pr_body": ${PR_BODY_ESCAPED},
+              "base_branch": "${BASE_BRANCH}",
+              "head_branch": "${HEAD_BRANCH}"
+            }
+          }
+          EOF
+          )
+          
+          echo "Request payload:"
+          echo "$PAYLOAD" | jq .
+          
+          # Make the API call and capture response
+          HTTP_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "https://api.cursor.com/agent" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $CURSOR_API_KEY" \
-            -d "{
-              \"task\": \"Review PR #${PR_NUMBER} in repository ${{ github.repository }}. Follow the code_review_rules to review the changes, reference the associated issue, and post a review comment with the checklist findings. Approve if all checks pass, or request changes with specific feedback.\",
-              \"repo\": \"${{ github.repository }}\",
-              \"branch\": \"${HEAD_BRANCH}\",
-              \"context\": {
-                \"pr_number\": ${PR_NUMBER},
-                \"pr_title\": \"${PR_TITLE}\",
-                \"pr_body\": ${PR_BODY_ESCAPED},
-                \"base_branch\": \"${BASE_BRANCH}\",
-                \"head_branch\": \"${HEAD_BRANCH}\"
-              }
-            }"
+            -d "$PAYLOAD")
+          
+          # Extract body and status code
+          HTTP_BODY=$(echo "$HTTP_RESPONSE" | sed '$d')
+          HTTP_STATUS=$(echo "$HTTP_RESPONSE" | tail -n 1)
+          
+          echo "API Response Status: $HTTP_STATUS"
+          echo "API Response Body: $HTTP_BODY"
+          
+          # Check if successful
+          if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
+            echo "Successfully triggered Cursor Cloud Agent review"
+          else
+            echo "Failed to trigger Cursor Cloud Agent review"
+            echo "Status: $HTTP_STATUS"
+            echo "Response: $HTTP_BODY"
+            exit 1
+          fi
