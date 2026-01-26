@@ -87,7 +87,7 @@ jobs:
           echo "$PAYLOAD" | jq .
           
           # Make the API call and capture response
-          HTTP_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "https://api.cursor.com/agent" \
+          HTTP_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "https://api.cursor.com/agents" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $CURSOR_API_KEY" \
             -d "$PAYLOAD")
