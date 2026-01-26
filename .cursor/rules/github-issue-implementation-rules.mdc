@@ -87,18 +87,39 @@ OR
 1. Update issue labels: remove all existing labels, add `Development`
 2. Implement the Technical Design changes (including unit, integration, and Angular tests)
 3. Implement any acceptance tests from the Acceptance Test Design
-4. Run `scripts/build_and_test.ps1` to verify all changes
+4. Run `scripts/build_and_test.ps1` to verify all changes (runs unit tests, integration tests, and Angular tests)
 5. If the script fails to execute for any reason (missing dependencies, Docker issues, environment problems, etc.), diagnose and fix the issue, then re-run the script
 6. If any tests fail, fix the code or tests until all tests pass
 7. Repeat steps 4-6 until the script completes successfully with all tests passing
-8. **Work is not complete until `scripts/build_and_test.ps1` passes with no errors.** Do not proceed to Phase 4 until this requirement is met.
-9. Commit final changes and push to the draft pull request
+8. **Do not proceed to Phase 4 until `scripts/build_and_test.ps1` passes with no errors.**
+9. Commit changes and push to the draft pull request
 
-## Phase 4: Validation Handoff
+## Phase 4: Functional Validation
 
 1. Update issue labels: remove all existing labels, add `Functional-Validation`
-2. Update pull request labels: remove all existing labels, add `Functional-Validation` using: `gh pr edit --remove-label "<existing-labels>" --add-label "Functional-Validation"`
+2. Run `scripts/acceptance_tests.ps1` to deploy the application and execute acceptance tests
+3. If acceptance tests fail:
+   - Diagnose the failure (deployment issue, test issue, or application bug)
+   - Fix the issue
+   - Commit and push the fix
+   - Re-run `scripts/acceptance_tests.ps1`
+4. Repeat step 3 until all acceptance tests pass
+5. Update pull request labels: remove all existing labels, add `Functional-Validation` using: `gh pr edit --remove-label "<existing-labels>" --add-label "Functional-Validation"`
 
-**Important:** The `Functional-Validation` label cannot be added until `scripts/build_and_test.ps1` completes with no errors. The PR remains in draft status.
+**Important:** The `Functional-Validation` label cannot be added until both:
+- `scripts/build_and_test.ps1` passes (unit, integration, Angular tests)
+- `scripts/acceptance_tests.ps1` passes (acceptance tests)
 
-**Note:** Do not close the issue. The `Functional-Validation` label on both the issue and PR signals that manual review and testing are required before closure.
+## Phase 5: Review Handoff
+
+1. Verify all test suites have passed:
+   - Unit tests (via `build_and_test.ps1`)
+   - Integration tests (via `build_and_test.ps1`)
+   - Angular tests (via `build_and_test.ps1`)
+   - Acceptance tests (via `acceptance_tests.ps1`)
+2. Mark the pull request as ready for review using: `gh pr ready`
+3. The PR is now ready for code review and merge
+
+**Important:** A PR cannot be marked as ready for review until ALL 4 test suites pass. The PR must remain in draft status until this requirement is met.
+
+**Note:** Do not close the issue. The completed PR signals that manual code review is required before merge.
