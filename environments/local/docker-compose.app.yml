@@ -1,0 +1,35 @@
+services:
+  webapi:
+    build:
+      context: ../../
+      dockerfile: src/Presentation/WebAPI/Dockerfile
+    container_name: webapi
+    ports:
+      - "${WEBAPI_PORT:-5000}:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - SqlServer__Host=host.docker.internal
+      - SqlServer__Port=${SQL_PORT:-1433}
+      - SqlServer__User=${SQL_USER:-sa}
+      - SqlServer__Password=${SQL_SA_PASSWORD}
+      - SqlServer__Database=${SQL_DATABASE}
+      - RabbitMQ__Host=host.docker.internal
+      - RabbitMQ__Port=${RABBITMQ_PORT:-5672}
+      - RabbitMQ__User=${RABBITMQ_USER}
+      - RabbitMQ__Password=${RABBITMQ_PASSWORD}
+      - Redis__Host=host.docker.internal
+      - Redis__Port=${REDIS_PORT:-6379}
+    depends_on:
+      - webapp
+
+  webapp:
+    build:
+      context: ../../src/Presentation/webapp
+      dockerfile: Dockerfile
+    container_name: webapp
+    ports:
+      - "${WEBAPP_PORT:-4200}:80"
+    environment:
+      - API_URL=http://localhost:${WEBAPI_PORT:-5000}
