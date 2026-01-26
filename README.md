@@ -1,6 +1,6 @@
 # Ivan - Inventory Management System
 
-An inventory management system built with .NET 10 and Angular, following clean architecture principles with CQRS.
+An inventory management system built with .NET 10 and Angular, following clean architecture principles with CQRS (Command Query Responsibility Segregation).
 
 ## Overview
 
