@@ -432,6 +432,109 @@ public class CreateContainerCommandHandlerTests
     }
 
     [Test]
+    public void HandleAsync_WithDescriptionExceedingMaxLength_ShouldThrowValidationException()
+    {
+        // Arrange
+        var command = new CreateContainerCommand
+        {
+            Name = _faker.Commerce.ProductName(),
+            Description = new string('a', 251) // 251 characters exceeds max of 250
+        };
+
+        // Act & Assert
+        var exception = Should.Throw<ValidationException>(async () =>
+            await _handler.HandleAsync(command, CancellationToken.None));
+
+        exception.Errors.ShouldContainKey("Description");
+        exception.Errors["Description"].ShouldContain("Description cannot exceed 250 characters");
+    }
+
+    [Test]
+    public async Task HandleAsync_WithDescriptionAtMaxLength_ShouldSucceed()
+    {
+        // Arrange
+        var command = new CreateContainerCommand
+        {
+            Name = _faker.Commerce.ProductName(),
+            Description = new string('a', 250) // Exactly 250 characters
+        };
+
+        // Act
+        var result = await _handler.HandleAsync(command, CancellationToken.None);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Description.ShouldBe(command.Description);
+    }
+
+    [Test]
+    public async Task HandleAsync_WithDescriptionHavingLeadingAndTrailingWhitespace_ShouldTrimWhitespace()
+    {
+        // Arrange
+        var descriptionContent = "Test description content";
+        var command = new CreateContainerCommand
+        {
+            Name = _faker.Commerce.ProductName(),
+            Description = $"   {descriptionContent}   "
+        };
+        Container? capturedContainer = null;
+
+        _containersDbSetMock
+            .Setup(db => db.AddAsync(It.IsAny<Container>(), It.IsAny<CancellationToken>()))
+            .Callback<Container, CancellationToken>((container, _) => capturedContainer = container);
+
+        // Act
+        var result = await _handler.HandleAsync(command, CancellationToken.None);
+
+        // Assert
+        capturedContainer.ShouldNotBeNull();
+        capturedContainer.Description.ShouldBe(descriptionContent);
+        result.Description.ShouldBe(descriptionContent);
+    }
+
+    [Test]
+    public async Task HandleAsync_WithNullDescription_ShouldSucceed()
+    {
+        // Arrange
+        var command = new CreateContainerCommand
+        {
+            Name = _faker.Commerce.ProductName(),
+            Description = null!
+        };
+
+        // Act
+        var result = await _handler.HandleAsync(command, CancellationToken.None);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Description.ShouldBe(string.Empty);
+    }
+
+    [Test]
+    public async Task HandleAsync_WithWhitespaceOnlyDescription_ShouldTrimToEmpty()
+    {
+        // Arrange
+        var command = new CreateContainerCommand
+        {
+            Name = _faker.Commerce.ProductName(),
+            Description = "   "
+        };
+        Container? capturedContainer = null;
+
+        _containersDbSetMock
+            .Setup(db => db.AddAsync(It.IsAny<Container>(), It.IsAny<CancellationToken>()))
+            .Callback<Container, CancellationToken>((container, _) => capturedContainer = container);
+
+        // Act
+        var result = await _handler.HandleAsync(command, CancellationToken.None);
+
+        // Assert
+        capturedContainer.ShouldNotBeNull();
+        capturedContainer.Description.ShouldBe(string.Empty);
+        result.Description.ShouldBe(string.Empty);
+    }
+
+    [Test]
     public void HandleAsync_WithInvalidCommand_ShouldNotCallRepository()
     {
         // Arrange

@@ -21,6 +21,7 @@ public class CreateContainerCommandHandler : ICreateContainerCommandHandler
     }
 
     private const int NameMaxLength = 200;
+    private const int DescriptionMaxLength = 250;
 
     public async Task<ContainerDto> HandleAsync(CreateContainerCommand request, CancellationToken cancellationToken)
     {
@@ -37,6 +38,14 @@ public class CreateContainerCommandHandler : ICreateContainerCommandHandler
             errors[nameof(request.Name)].Add($"Name cannot exceed {NameMaxLength} characters");
         }
 
+        var trimmedDescription = request.Description?.Trim() ?? string.Empty;
+
+        if (trimmedDescription.Length > DescriptionMaxLength)
+        {
+            errors.TryAdd(nameof(request.Description), new List<string>());
+            errors[nameof(request.Description)].Add($"Description cannot exceed {DescriptionMaxLength} characters");
+        }
+
         if (errors.Count > 0)
         {
             throw new ValidationException
@@ -48,7 +57,7 @@ public class CreateContainerCommandHandler : ICreateContainerCommandHandler
         var container = new Container
         {
             Name = request.Name,
-            Description = request.Description
+            Description = trimmedDescription
         };
 
         await _repository.Containers.AddAsync(container, cancellationToken);
