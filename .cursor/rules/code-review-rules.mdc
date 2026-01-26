@@ -63,7 +63,7 @@ gh pr edit [PR] --add-label "Approved by Agent"
 
 ### Request Changes
 If issues are found:
-1. Convert PR to draft
+1. Move PR back to draft
 
 ```bash
 gh pr ready [PR] --undo

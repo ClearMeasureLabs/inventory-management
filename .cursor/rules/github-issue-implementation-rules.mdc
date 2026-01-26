@@ -64,6 +64,10 @@ Not required for: Backend-only, UI-only, docs, refactoring.
 ## Phase 5: Review Handoff
 
 1. Verify all tests passed (unit, integration, Angular, acceptance)
-2. Mark ready: `gh pr ready`
+2. Move PR from draft to ready for review
+
+```bash
+gh pr ready [PR]
+```
 
 **Gate:** All tests must pass before marking ready.
