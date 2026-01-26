@@ -9,13 +9,18 @@ When assigned to work on a GitHub issue, follow this phased workflow. Each phase
 
 ## Getting Started
 
-Before beginning any phase, create a dedicated branch for the issue:
+Before beginning any phase, create a dedicated branch for the issue and open a draft pull request:
 
 1. Create and checkout a new branch using the naming convention: `issues/[issue-number]/[issue-title]`
    - Replace `[issue-number]` with the GitHub issue number
    - Replace `[issue-title]` with the issue title in kebab-case (lowercase, hyphens instead of spaces, remove special characters)
    - Example: Issue #42 "Add User Authentication" → `issues/42/add-user-authentication`
 2. All work for this issue should be committed to this branch
+3. Immediately open a draft pull request referencing the issue:
+   - Push the branch to the remote repository
+   - Create a draft PR using: `gh pr create --draft --title "[Issue Title]" --body "Closes #[issue-number]"`
+   - Example: `gh pr create --draft --title "Add User Authentication" --body "Closes #42"`
+   - The draft PR provides early visibility into work-in-progress and enables ongoing review as changes are committed
 
 ## Phase 1: Technical Design
 
@@ -66,8 +71,8 @@ Before beginning any phase, create a dedicated branch for the issue:
 5. If the script fails to execute for any reason (missing dependencies, Docker issues, environment problems, etc.), diagnose and fix the issue, then re-run the script
 6. If any tests fail, fix the code or tests until all tests pass
 7. Repeat steps 4-6 until the script completes successfully with all tests passing
-8. **Prerequisite for PR:** All tests must execute and pass — do not open a pull request until `scripts/build_and_test.ps1` completes with zero failures
-9. Commit changes and open a pull request referencing the issue
+8. **Prerequisite for Review:** All tests must execute and pass — do not mark the pull request as ready for review until `scripts/build_and_test.ps1` completes with zero failures
+9. Commit final changes and mark the draft pull request as ready for review using: `gh pr ready`
 
 ## Phase 4: Validation Handoff
 
