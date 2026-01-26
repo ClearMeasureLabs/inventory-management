@@ -115,4 +115,72 @@ describe('ContainerService', () => {
       req.flush(null, { status: 500, statusText: 'Server Error' });
     });
   });
+
+  describe('delete', () => {
+    it('should delete container via DELETE', () => {
+      service.delete(1).subscribe(() => {
+        expect(true).toBeTrue();
+      });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/1`);
+      expect(req.request.method).toBe('DELETE');
+      req.flush(null);
+    });
+
+    it('should call correct endpoint with container ID', () => {
+      const containerId = 42;
+
+      service.delete(containerId).subscribe();
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/42`);
+      expect(req.request.method).toBe('DELETE');
+      req.flush(null);
+    });
+
+    it('should handle validation error response', () => {
+      const validationError = {
+        errors: { ContainerId: ['Cannot delete a container that has items'] }
+      };
+
+      service.delete(1).subscribe({
+        next: () => fail('should have failed'),
+        error: (error) => {
+          expect(error.errors).toBeTruthy();
+          expect(error.errors['ContainerId']).toContain('Cannot delete a container that has items');
+        }
+      });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/1`);
+      req.flush(validationError, { status: 400, statusText: 'Bad Request' });
+    });
+
+    it('should handle not found error response', () => {
+      const validationError = {
+        errors: { ContainerId: ['Container not found'] }
+      };
+
+      service.delete(999).subscribe({
+        next: () => fail('should have failed'),
+        error: (error) => {
+          expect(error.errors).toBeTruthy();
+          expect(error.errors['ContainerId']).toContain('Container not found');
+        }
+      });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/999`);
+      req.flush(validationError, { status: 400, statusText: 'Bad Request' });
+    });
+
+    it('should handle server error response', () => {
+      service.delete(1).subscribe({
+        next: () => fail('should have failed'),
+        error: (error) => {
+          expect(error.title).toBe('An unexpected error occurred. Please try again.');
+        }
+      });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/1`);
+      req.flush(null, { status: 500, statusText: 'Server Error' });
+    });
+  });
 });

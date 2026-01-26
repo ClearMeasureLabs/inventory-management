@@ -1,5 +1,6 @@
 using Application.Features.Containers;
 using Application.Features.Containers.CreateContainer;
+using Application.Features.Containers.DeleteContainer;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.Contracts;
 using ValidationException = Application.Exceptions.ValidationException;
@@ -50,6 +51,38 @@ public class ContainersController : ControllerBase
             var response = ContainerResponse.FromDto(result);
             
             return CreatedAtAction(nameof(GetAllContainers), new { id = response.ContainerId }, response);
+        }
+        catch (ValidationException ex)
+        {
+            foreach (var error in ex.Errors)
+            {
+                foreach (var message in error.Value)
+                {
+                    ModelState.AddModelError(error.Key, message);
+                }
+            }
+            return ValidationProblem(ModelState);
+        }
+    }
+
+    /// <summary>
+    /// Deletes a container by ID.
+    /// </summary>
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> DeleteContainer(int id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var command = new DeleteContainerCommand
+            {
+                ContainerId = id
+            };
+
+            await _containers.DeleteAsync(command, cancellationToken);
+            
+            return NoContent();
         }
         catch (ValidationException ex)
         {
