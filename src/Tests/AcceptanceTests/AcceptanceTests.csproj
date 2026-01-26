@@ -26,11 +26,4 @@
     <Using Include="Shouldly" />
   </ItemGroup>
 
-  <!-- Install Playwright browsers after build -->
-  <Target Name="InstallPlaywright" AfterTargets="Build">
-    <Exec Command="pwsh -Command &quot;./bin/$(Configuration)/$(TargetFramework)/playwright.ps1 install chromium&quot;" 
-          WorkingDirectory="$(MSBuildProjectDirectory)" 
-          IgnoreExitCode="true" />
-  </Target>
-
 </Project>
