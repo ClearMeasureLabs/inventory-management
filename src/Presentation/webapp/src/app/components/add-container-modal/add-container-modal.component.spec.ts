@@ -142,4 +142,22 @@ describe('AddContainerModalComponent', () => {
     const req = httpMock.expectOne(`${environment.apiUrl}/api/containers`);
     req.flush({ containerId: 1, name: 'Test', description: '' });
   });
+
+  it('should have red (btn-danger) Create button', () => {
+    component.open();
+    fixture.detectChanges();
+    
+    const createButton = fixture.nativeElement.querySelector('button.btn-danger');
+    expect(createButton).toBeTruthy();
+    expect(createButton.textContent).toContain('Create');
+  });
+
+  it('should not have btn-primary class on Create button', () => {
+    component.open();
+    fixture.detectChanges();
+    
+    const buttons = fixture.nativeElement.querySelectorAll('button.btn-primary');
+    // There should be no btn-primary buttons (Create button should be btn-danger)
+    expect(buttons.length).toBe(0);
+  });
 });
