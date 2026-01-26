@@ -34,9 +34,10 @@ gh label list | create
 
 **Code changes require an associated GitHub issue.**
 
-1. Confirm an issue exists
-2. Reference the issue number in changes
-3. Follow the workflow in `github-issue-implementation-rules.mdc`
+1. Check if an issue exists for the requested change
+2. If no issue exists, create one first by following the interview process in `github-issue-rules.mdc`
+3. Reference the issue number in changes
+4. Follow the workflow in `github-issue-implementation-rules.mdc`
 
 **Prohibited without an issue:** Creating files, modifying source code, changing config, updating dependencies.
 
