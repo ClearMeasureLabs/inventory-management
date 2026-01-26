@@ -17,13 +17,19 @@ if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
 Write-Host "Checking Docker status..."
 $dockerInfo = docker info 2>&1
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "Starting Docker..."
+    Write-Host "Docker is not running. Attempting to start..."
+    $dockerStarted = $false
+    
     if ($IsWindows) {
-        Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe" -WindowStyle Hidden
+        Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe" -WindowStyle Hidden -ErrorAction SilentlyContinue
     } elseif ($IsLinux) {
-        sudo systemctl start docker
+        # Try systemctl first, then service command
+        $result = sudo systemctl start docker 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            $result = sudo service docker start 2>&1
+        }
     } elseif ($IsMacOS) {
-        open -a Docker
+        open -a Docker -ErrorAction SilentlyContinue
     }
     
     # Wait for Docker to be ready
@@ -34,15 +40,16 @@ if ($LASTEXITCODE -ne 0) {
         $dockerInfo = docker info 2>&1
         if ($LASTEXITCODE -eq 0) {
             Write-Host "Docker is running." -ForegroundColor Green
+            $dockerStarted = $true
             break
         }
         $attempt++
         Write-Host "Waiting for Docker to start... ($attempt/$maxAttempts)"
     }
     
-    if ($attempt -eq $maxAttempts) {
-        Write-Error "Docker failed to start. Please start Docker manually."
-        exit 1
+    if (-not $dockerStarted) {
+        Write-Warning "Docker could not be started automatically. Integration and acceptance tests require Docker."
+        Write-Warning "Please start Docker manually before running tests."
     }
 } else {
     Write-Host "Docker is already running." -ForegroundColor Green
@@ -88,22 +95,17 @@ Push-Location "$repoRoot/src/Presentation/webapp"
 npm ci
 Pop-Location
 
-# Build AcceptanceTests project to generate Playwright script
+# Build AcceptanceTests project
 Write-Host "Building AcceptanceTests project..."
 dotnet build "$repoRoot/src/Tests/AcceptanceTests/AcceptanceTests.csproj" --configuration Debug | Out-Null
 
-# Install Playwright browsers
+# Install Playwright browsers using npx
 Write-Host "Installing Playwright browsers..."
-$playwrightScript = "$repoRoot/src/Tests/AcceptanceTests/bin/Debug/net10.0/playwright.ps1"
-if (Test-Path $playwrightScript) {
-    & pwsh -File $playwrightScript install chromium
-    if ($LASTEXITCODE -ne 0) {
-        Write-Warning "Playwright browser installation may have failed. You may need to install manually."
-    } else {
-        Write-Host "Playwright browsers installed successfully." -ForegroundColor Green
-    }
+npx playwright install chromium
+if ($LASTEXITCODE -ne 0) {
+    Write-Warning "Playwright browser installation may have failed. You may need to install manually with: npx playwright install chromium"
 } else {
-    Write-Warning "Playwright script not found. Build the AcceptanceTests project first."
+    Write-Host "Playwright browsers installed successfully." -ForegroundColor Green
 }
 
 Write-Host "All tools installed successfully." -ForegroundColor Green
