@@ -4,23 +4,37 @@ namespace AcceptanceTests.Infrastructure;
 
 /// <summary>
 /// Manages the deployment and teardown of the full application stack for acceptance testing.
-/// Uses Docker Compose to deploy infrastructure (SQL Server, RabbitMQ, Redis) and application (WebAPI, WebApp).
+/// Uses the existing local deploy script to deploy infrastructure and application via Docker.
 /// </summary>
 public static class TestEnvironment
 {
-    private static readonly string ProjectRoot;
+    private static readonly string RepoRoot;
     private static readonly string LocalEnvPath;
     private static bool _isDeployed;
 
-    public static string WebAppUrl { get; private set; } = "http://localhost:4200";
-    public static string WebApiUrl { get; private set; } = "http://localhost:5000";
+    public static string WebAppUrl { get; } = "http://localhost:4200";
+    public static string WebApiUrl { get; } = "http://localhost:5000";
 
     static TestEnvironment()
     {
-        // Navigate from src/Tests/AcceptanceTests to repository root
-        var currentDir = Directory.GetCurrentDirectory();
-        ProjectRoot = Path.GetFullPath(Path.Combine(currentDir, "..", "..", "..", "..", ".."));
-        LocalEnvPath = Path.Combine(ProjectRoot, "environments", "local");
+        // Find the repository root by searching up for the environments/local directory
+        var searchDir = AppContext.BaseDirectory;
+        
+        while (!string.IsNullOrEmpty(searchDir))
+        {
+            var envPath = Path.Combine(searchDir, "environments", "local", "deploy.ps1");
+            if (File.Exists(envPath))
+            {
+                RepoRoot = searchDir;
+                LocalEnvPath = Path.Combine(searchDir, "environments", "local");
+                return;
+            }
+            searchDir = Path.GetDirectoryName(searchDir);
+        }
+        
+        // Fallback to /workspace if searching fails
+        RepoRoot = "/workspace";
+        LocalEnvPath = "/workspace/environments/local";
     }
 
     /// <summary>
@@ -33,9 +47,8 @@ public static class TestEnvironment
             return;
         }
 
-        Console.WriteLine("Deploying application stack for acceptance tests...");
+        Console.WriteLine($"Deploying application stack from: {LocalEnvPath}");
 
-        // Run the deploy.ps1 script
         var deployScript = Path.Combine(LocalEnvPath, "deploy.ps1");
         
         if (!File.Exists(deployScript))
@@ -65,10 +78,14 @@ public static class TestEnvironment
         
         await process.WaitForExitAsync();
 
+        Console.WriteLine(output);
+        if (!string.IsNullOrEmpty(error))
+        {
+            Console.WriteLine($"Deploy stderr: {error}");
+        }
+
         if (process.ExitCode != 0)
         {
-            Console.WriteLine($"Deploy output: {output}");
-            Console.WriteLine($"Deploy error: {error}");
             throw new InvalidOperationException($"Deploy script failed with exit code {process.ExitCode}");
         }
 
@@ -148,7 +165,6 @@ public static class TestEnvironment
 
     /// <summary>
     /// Tears down the application stack (stops containers).
-    /// Note: Infrastructure containers (SQL, RabbitMQ, Redis) are left running for development convenience.
     /// </summary>
     public static async Task TeardownAsync()
     {

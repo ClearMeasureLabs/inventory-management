@@ -7,10 +7,21 @@ if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
     exit 1
 }
 
-# Docker
+# Docker - Install if not present
 if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
-    Write-Error "Docker not found. Install Docker Desktop from https://docker.com/products/docker-desktop"
-    exit 1
+    Write-Host "Docker not found. Installing Docker..."
+    if ($IsLinux) {
+        # Install Docker on Linux
+        & bash -c "curl -fsSL https://get.docker.com | sh"
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error "Docker installation failed. Install manually from https://docker.com"
+            exit 1
+        }
+        Write-Host "Docker installed successfully." -ForegroundColor Green
+    } else {
+        Write-Error "Docker not found. Install Docker Desktop from https://docker.com/products/docker-desktop"
+        exit 1
+    }
 }
 
 # Start Docker if not running
@@ -23,10 +34,14 @@ if ($LASTEXITCODE -ne 0) {
     if ($IsWindows) {
         Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe" -WindowStyle Hidden -ErrorAction SilentlyContinue
     } elseif ($IsLinux) {
-        # Try systemctl first, then service command
-        $result = sudo systemctl start docker 2>&1
+        # Try service command first (works in containers), then systemctl
+        $result = sudo service docker start 2>&1
         if ($LASTEXITCODE -ne 0) {
-            $result = sudo service docker start 2>&1
+            $result = sudo systemctl start docker 2>&1
+        }
+        # Fix socket permissions if needed
+        if (Test-Path "/var/run/docker.sock") {
+            sudo chmod 666 /var/run/docker.sock 2>&1 | Out-Null
         }
     } elseif ($IsMacOS) {
         open -a Docker -ErrorAction SilentlyContinue
@@ -48,8 +63,8 @@ if ($LASTEXITCODE -ne 0) {
     }
     
     if (-not $dockerStarted) {
-        Write-Warning "Docker could not be started automatically. Integration and acceptance tests require Docker."
-        Write-Warning "Please start Docker manually before running tests."
+        Write-Error "Docker could not be started. Integration and acceptance tests require Docker."
+        exit 1
     }
 } else {
     Write-Host "Docker is already running." -ForegroundColor Green

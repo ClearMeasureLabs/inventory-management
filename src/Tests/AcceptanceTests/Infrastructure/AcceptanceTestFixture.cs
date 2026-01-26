@@ -1,4 +1,4 @@
-namespace AcceptanceTests.Infrastructure;
+namespace AcceptanceTests;
 
 /// <summary>
 /// NUnit SetUpFixture that manages the application deployment lifecycle for acceptance tests.
@@ -10,12 +10,12 @@ public class AcceptanceTestFixture
     [OneTimeSetUp]
     public async Task GlobalSetup()
     {
-        await TestEnvironment.DeployAsync();
+        await Infrastructure.TestEnvironment.DeployAsync();
     }
 
     [OneTimeTearDown]
     public async Task GlobalTeardown()
     {
-        await TestEnvironment.TeardownAsync();
+        await Infrastructure.TestEnvironment.TeardownAsync();
     }
 }
