@@ -1,99 +1,70 @@
 ---
-description: Workflow for implementing GitHub issues through design, development, and validation phases
+description: Phased workflow for implementing GitHub issues
 alwaysApply: true
 ---
 
 # Issue Implementation Workflow
 
-Follow this phased workflow when implementing GitHub issues. Update labels at each phase transition.
+Update issue labels at each phase transition.
 
 ## Getting Started
 
-1. **Create branch:** `issues/[issue-number]/[issue-title-in-kebab-case]`
-   - Example: Issue #42 "Add User Authentication" → `issues/42/add-user-authentication`
-
-2. **Open draft PR immediately:**
-   ```bash
-   git push -u origin [branch-name]
-   gh pr create --draft --title "[Issue Title]" --body "Closes #[issue-number]"
-   ```
-
-3. **Install dependencies:** `scripts/install_tools.ps1`
+1. **Branch:** `issues/[number]/[title-kebab-case]`
+2. **Draft PR:** `gh pr create --draft --title "[Title]" --body "Closes #[number]"`
+3. **Install:** `scripts/install_tools.ps1`
 
 ## Phase 1: Technical Design
 
 **Label:** `Technical-Design`
 
-Explore the codebase and document the implementation plan as an issue comment:
+Post as issue comment:
 
 ```markdown
 ## Technical Design
-
-**Affected Components:** [Files/modules to modify or create]
-
+**Affected Components:** [Files to modify/create]
 **Implementation Steps:**
-1. [Step with specific file and change description]
-2. [Continue for all steps...]
-
-**Dependencies:** [New packages or infrastructure, or "None"]
-
-**Unit Tests:** [Test descriptions, or "None required" with rationale]
-
-**Integration Tests:** [Test descriptions, or "None required" with rationale]
-
-**Angular Tests:** [Test descriptions, or "None required" with rationale]
+1. [Step with file and change]
+**Dependencies:** [New packages or "None"]
+**Tests:** [Describe unit, integration, Angular tests needed]
 ```
 
 ## Phase 2: Acceptance Test Design
 
 **Label:** `Test-Design`
 
-Determine if end-to-end acceptance tests are needed and document as an issue comment:
+Post as issue comment:
 
 ```markdown
 ## Acceptance Test Design
-
-**Acceptance Tests:**
-- [Test description covering end-to-end user workflow]
-
-OR
-
-**Acceptance Tests:** None required - [rationale]
+**Acceptance Tests:** [E2E workflow tests] or None required - [rationale]
 ```
 
-**Required when:** New user-facing features, critical workflows, or changes affecting deployed behavior.
-
-**Not required when:** Backend-only changes, UI-only changes, documentation, or refactoring.
+Required for: User-facing features, critical workflows, deployed behavior changes.
+Not required for: Backend-only, UI-only, docs, refactoring.
 
 ## Phase 3: Development
 
 **Label:** `Development`
 
-1. Implement the Technical Design changes and tests
-2. Run `scripts/build_and_test.ps1` (unit, integration, Angular tests)
-3. Fix any failures and repeat until all tests pass
-4. Commit and push changes
+1. Implement changes following `architecture-rules.mdc`
+2. Add tests per `automated-testing-rules.mdc`
+3. Run `scripts/build_and_test.ps1` until passing
+4. Commit and push
 
-**Gate:** Do not proceed until `build_and_test.ps1` passes.
+**Gate:** `build_and_test.ps1` must pass.
 
 ## Phase 4: Functional Validation
 
-**Label:** `Functional-Validation` (issue and PR)
+**Label:** `Functional-Validation`
 
-1. Run `scripts/acceptance_tests.ps1` (deploys app and runs Playwright tests)
-2. Fix any failures and repeat until all tests pass
-3. Add label to PR: `gh pr edit --add-label "Functional-Validation"`
+1. Run `scripts/acceptance_tests.ps1` until passing
+2. Add label to PR: `gh pr edit --add-label "Functional-Validation"`
 
-**Gate:** Both `build_and_test.ps1` and `acceptance_tests.ps1` must pass.
+**Gate:** Both test scripts must pass.
 
 ## Phase 5: Review Handoff
 
-1. Verify all 4 test suites passed:
-   - Unit tests ✓
-   - Integration tests ✓
-   - Angular tests ✓
-   - Acceptance tests ✓
+1. Verify all tests passed (unit, integration, Angular, acceptance)
+2. Mark ready: `gh pr ready`
 
-2. Mark PR ready for review: `gh pr ready`
-
-**Gate:** PR cannot be marked ready until ALL tests pass.
+**Gate:** All tests must pass before marking ready.

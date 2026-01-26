@@ -1,95 +1,69 @@
 ---
-description: Automated testing requirements for all code changes
+description: Test requirements for all code changes
 alwaysApply: true
 ---
 
 # Automated Testing Requirements
 
-All code changes require automated tests that pass before committing. Verify by running `scripts/build_and_test.ps1`.
+All changes require passing tests. Verify with `scripts/build_and_test.ps1`.
 
-## Unit Tests (.NET)
+## Test Types
 
-Located in `src/Tests/UnitTests/`. Verify isolated behavior using mocks. Each test should cover one of these categories:
+### Unit Tests (.NET)
+**Location:** `src/Tests/UnitTests/`
 
-1. **Dependencies called** - Verify expected dependencies are invoked with correct parameters
-2. **Business logic executed** - Validate correct data transformations and processing
-3. **State changes persisted** - Confirm state is saved in the correct order
-4. **Return values correct** - Assert expected DTOs/responses are returned
-5. **Exceptions thrown** - Verify validation errors and edge cases throw appropriate exceptions
+Isolated behavior with mocks. Cover:
+- Dependencies called with correct parameters
+- Business logic and data transformations
+- State changes persisted correctly
+- Return values (DTOs/responses)
+- Exceptions for validation/edge cases
 
-## Integration Tests (.NET)
+### Integration Tests (.NET)
+**Location:** `src/Tests/IntegrationTests/`
 
-Located in `src/Tests/IntegrationTests/`. Verify components work together with real infrastructure (via Testcontainers):
+Components with real infrastructure (Testcontainers). Cover happy path.
 
-1. **Happy path succeeds** - Valid inputs produce expected results without errors
+### Angular Tests
+**Location:** Alongside components as `*.spec.ts`
 
-## Angular Component Tests
+UI behavior with Jasmine/Karma. Cover:
+- Component rendering
+- User interactions
+- API integration (mock with `HttpTestingController`)
+- Error handling
+- State management
 
-Located alongside components in `src/Presentation/webapp/src/app/`. Verify UI behavior using Jasmine/Karma:
+### Acceptance Tests (.NET)
+**Location:** `src/Tests/AcceptanceTests/`
 
-1. **Component renders** - Components display correctly with expected elements
-2. **User interactions** - Button clicks, form submissions trigger expected behavior
-3. **API integration** - Services call correct endpoints with proper parameters
-4. **Error handling** - Validation errors and API errors display appropriately
-5. **State management** - Component state updates correctly after actions
+Full stack with Playwright. Deploy via Docker Compose, test at `localhost:4200` (WebApp) / `localhost:5000` (WebAPI).
 
-## Acceptance Tests (.NET)
+Required for: User-facing features, critical workflows, production regressions.
 
-Located in `src/Tests/AcceptanceTests/`. Full system tests that deploy the complete application stack (infrastructure, WebAPI, WebApp) and verify end-to-end functionality using Playwright:
+## When Tests Are Required
 
-1. **System deployment** - Application stack deploys successfully via Docker Compose
-2. **User workflows** - Complete user journeys work correctly across the UI
-3. **API accessibility** - WebAPI endpoints are accessible from the deployed environment
-4. **Cross-component integration** - WebApp correctly communicates with WebAPI
-
-### Acceptance Test Structure
-- Tests inherit from `Microsoft.Playwright.NUnit.PageTest` for browser automation
-- `Infrastructure/TestEnvironment.cs` manages Docker deployment lifecycle
-- `Infrastructure/AcceptanceTestFixture.cs` is the NUnit SetUpFixture for one-time setup/teardown
-- Tests run against the deployed application at `http://localhost:4200` (WebApp) and `http://localhost:5000` (WebAPI)
-
-### When to Write Acceptance Tests
-- New user-facing features that require end-to-end validation
-- Critical user workflows that span multiple components
-- Regression scenarios for production issues
-
-## When New Tests Are Required
-
-- **New backend functionality**: Unit tests and integration tests required
-- **New UI components**: Angular component tests required
-- **Modified functionality**: Update existing tests or add new ones as needed
-- **Bug fixes**: Add regression tests at the appropriate level
+| Change Type | Required Tests |
+|-------------|----------------|
+| Backend functionality | Unit + Integration |
+| UI components | Angular |
+| Bug fixes | Regression test at appropriate level |
 
 ## Guidelines
 
-### .NET Tests
-- Use existing tests in `src/Tests/` as reference templates
-- Follow Arrange-Act-Assert pattern
-- Use `#region` blocks to organize unit tests by category
-- Use Bogus for generating test data
+**.NET:** Use Arrange-Act-Assert, `#region` blocks for categories, Bogus for test data.
 
-### Angular Tests
-- Create spec files alongside components: `component-name.component.spec.ts`
-- Use `HttpTestingController` to mock API calls
-- Use `fakeAsync` and `tick` for async operations
-- Test both success and error scenarios
+**Angular:** Use `fakeAsync`/`tick` for async, test success and error scenarios.
 
 ## Running Tests
 
 ```powershell
-# Run all tests (unit, integration, Angular)
-.\scripts\build_and_test.ps1
+.\scripts\build_and_test.ps1           # All tests
+dotnet test src/Tests/UnitTests        # Unit only
+dotnet test src/Tests/IntegrationTests # Integration only
+dotnet test src/Tests/AcceptanceTests  # Acceptance only (requires Docker)
 
-# Run .NET unit tests only
-dotnet test src/Tests/UnitTests
-
-# Run .NET integration tests only
-dotnet test src/Tests/IntegrationTests
-
-# Run Angular tests only
+# Angular only
 cd src/Presentation/webapp
 npm test -- --watch=false --browsers=ChromeHeadless
-
-# Run acceptance tests only (requires Docker)
-dotnet test src/Tests/AcceptanceTests
 ```

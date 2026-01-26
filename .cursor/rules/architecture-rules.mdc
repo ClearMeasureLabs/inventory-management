@@ -1,64 +1,56 @@
 ---
-description: Architecture patterns and constraints for maintaining clean architecture with CQRS
+description: Clean architecture with CQRS patterns and constraints
 alwaysApply: true
 ---
 
 # Architecture Rules
 
-Maintain the established clean/onion architecture with CQRS. All changes must respect layer boundaries and dependency rules.
+Maintain clean/onion architecture with CQRS. Dependencies point inward only.
 
-## Layer Structure and Dependencies
-
-Dependencies point inward—outer layers depend on inner layers, never the reverse.
+## Layer Structure
 
 ```
-Presentation (WebApp) → Infrastructure → Application → Domain
+Presentation → Infrastructure → Application → Domain
 ```
 
 | Layer | Location | Depends On | Contains |
 |-------|----------|------------|----------|
-| Domain | `Core/Domain/` | Nothing | Entities only |
-| Application | `Core/Application/` | Domain | Features, DTOs, Interfaces (`IRepository`, `ICache`, `IEventHub`) |
-| Infrastructure | `Infrastructure/` | Application | Implementations (SQLServer, Redis, RabbitMQ, Bootstrap) |
-| Presentation | `Presentation/` | Infrastructure/Bootstrap | Controllers, Angular application |
+| Domain | `Core/Domain/` | Nothing | Entities |
+| Application | `Core/Application/` | Domain | Features, DTOs, Interfaces |
+| Infrastructure | `Infrastructure/` | Application | SQLServer, Redis, RabbitMQ, Bootstrap |
+| Presentation | `Presentation/` | Infrastructure | Controllers, Angular app |
 
-## CQRS Request Flow
-
-Follow this flow for all features:
+## CQRS Flow
 
 ```
-WebAPI Request → Command/Query → Handler → Response DTO → WebAPI Response
+WebAPI Request → Command/Query → Handler → DTO → WebAPI Response
 ```
 
 ### Feature Organization
 
-Organize features by domain concept under `Application/Features/`:
-
 ```
 Features/{Entity}/
-├── {Entity}s.cs                    # Facade aggregating operations
-├── I{Entity}s.cs                   # Facade interface
+├── {Entity}s.cs                         # Facade
+├── I{Entity}s.cs                        # Facade interface
 └── {Action}{Entity}/
-    ├── {Action}{Entity}Command.cs           # Request object
-    ├── {Action}{Entity}CommandHandler.cs    # Handler implementation
-    ├── I{Action}{Entity}CommandHandler.cs   # Handler interface
-    └── {Entity}{Action}Event.cs             # Domain event (if applicable)
+    ├── {Action}{Entity}Command.cs       # Request
+    ├── {Action}{Entity}CommandHandler.cs
+    ├── I{Action}{Entity}CommandHandler.cs
+    └── {Entity}{Action}Event.cs         # Domain event (if applicable)
 ```
 
 ### Handler Responsibilities
 
-Handlers orchestrate the operation:
-1. Validate the command (throw `ValidationException` for invalid input)
-2. Create or modify domain entities
+1. Validate (throw `ValidationException` for invalid input)
+2. Create/modify domain entities
 3. Persist via `IRepository`
 4. Cache via `ICache`
-5. Publish events via `IEventHub`
-6. Return a DTO (never a domain entity)
+5. Publish via `IEventHub`
+6. Return DTO (never domain entity)
 
 ## Approval Required
 
-Do not make these changes without explicit user consent:
-
-- **NuGet packages**: Do not add or upgrade packages
-- **SDK versions**: Do not modify target framework or SDK versions
-- **New projects**: Do not add new `.csproj` projects to the solution
+Do not change without explicit consent:
+- NuGet packages
+- SDK/framework versions
+- New `.csproj` projects
