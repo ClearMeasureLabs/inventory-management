@@ -49,4 +49,27 @@ public class RedisCache : ICache
         var json = JsonSerializer.Serialize(value, _jsonOptions);
         await _database.StringSetAsync(key, json, expiration);
     }
+
+    public async Task<WorkOrder?> GetWorkOrderAsync(string key, CancellationToken cancellationToken = default)
+    {
+        var value = await _database.StringGetAsync(key);
+
+        if (value.IsNullOrEmpty)
+        {
+            return null;
+        }
+
+        return JsonSerializer.Deserialize<WorkOrder>(value.ToString(), _jsonOptions);
+    }
+
+    public async Task SetWorkOrderAsync(string key, WorkOrder value, TimeSpan? expiration = null, CancellationToken cancellationToken = default)
+    {
+        var json = JsonSerializer.Serialize(value, _jsonOptions);
+        await _database.StringSetAsync(key, json, expiration);
+    }
+
+    public async Task RemoveWorkOrderAsync(string key, CancellationToken cancellationToken = default)
+    {
+        await _database.KeyDeleteAsync(key);
+    }
 }

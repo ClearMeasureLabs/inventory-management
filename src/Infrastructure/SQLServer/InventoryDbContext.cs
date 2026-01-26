@@ -16,6 +16,8 @@ public class InventoryDbContext : DbContext
 
     public DbSet<Item> Items => Set<Item>();
 
+    public DbSet<WorkOrder> WorkOrders => Set<WorkOrder>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Container>(entity =>
@@ -44,6 +46,12 @@ public class InventoryDbContext : DbContext
             entity.Property(e => e.SKU).IsRequired().HasMaxLength(100);
             entity.Property(e => e.Name).IsRequired().HasMaxLength(1000);
             entity.Property(e => e.Description).HasMaxLength(2000);
+        });
+
+        modelBuilder.Entity<WorkOrder>(entity =>
+        {
+            entity.HasKey(e => e.WorkOrderId);
+            entity.Property(e => e.Title).HasMaxLength(500);
         });
     }
 }

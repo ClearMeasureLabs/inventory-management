@@ -1,4 +1,4 @@
-﻿using Domain.Entities;
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Infrastructure;
@@ -8,6 +8,8 @@ public interface IRepository : IDisposable
     DbSet<Container> Containers { get; }
 
     DbSet<Item> Items { get; }
+
+    DbSet<WorkOrder> WorkOrders { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

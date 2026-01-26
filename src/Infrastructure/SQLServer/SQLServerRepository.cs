@@ -1,4 +1,4 @@
-﻿using Application.Infrastructure;
+using Application.Infrastructure;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +17,8 @@ public class SQLServerRepository : IRepository
     public DbSet<Container> Containers => _context.Containers;
 
     public DbSet<Item> Items => _context.Items;
+
+    public DbSet<WorkOrder> WorkOrders => _context.WorkOrders;
 
     public void Dispose()
     {

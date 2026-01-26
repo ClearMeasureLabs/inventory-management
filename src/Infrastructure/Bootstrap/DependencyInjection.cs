@@ -2,6 +2,10 @@ using Application.Features.Containers;
 using Application.Features.Containers.CreateContainer;
 using Application.Features.Containers.DeleteContainer;
 using Application.Features.Containers.GetAllContainers;
+using Application.Features.WorkOrders;
+using Application.Features.WorkOrders.CreateWorkOrder;
+using Application.Features.WorkOrders.DeleteWorkOrder;
+using Application.Features.WorkOrders.GetAllWorkOrders;
 using Application.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -68,11 +72,18 @@ public static class DependencyInjection
         services.AddSingleton(rabbitChannel);
         services.AddSingleton<IEventHub, RabbitMQ.RabbitMQEventHub>();
 
-        // Application services
+        // Application services - Containers
         services.AddScoped<ICreateContainerCommandHandler, CreateContainerCommandHandler>();
         services.AddScoped<IDeleteContainerCommandHandler, DeleteContainerCommandHandler>();
         services.AddScoped<IGetAllContainersQueryHandler, GetAllContainersQueryHandler>();
         services.AddScoped<IContainers, Containers>();
+
+        // Application services - WorkOrders
+        services.AddScoped<ICreateWorkOrderCommandHandler, CreateWorkOrderCommandHandler>();
+        services.AddScoped<IDeleteWorkOrderCommandHandler, DeleteWorkOrderCommandHandler>();
+        services.AddScoped<IGetAllWorkOrdersQueryHandler, GetAllWorkOrdersQueryHandler>();
+        services.AddScoped<IWorkOrders, WorkOrders>();
+
         services.AddScoped<IApplication, Application.Application>();
     }
 

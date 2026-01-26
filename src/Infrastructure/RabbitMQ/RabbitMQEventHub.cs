@@ -3,6 +3,8 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Application.Features.Containers.CreateContainer;
 using Application.Features.Containers.DeleteContainer;
+using Application.Features.WorkOrders.CreateWorkOrder;
+using Application.Features.WorkOrders.DeleteWorkOrder;
 using Application.Infrastructure;
 using RabbitMQ.Client;
 
@@ -54,6 +56,36 @@ public class RabbitMQEventHub : IEventHub
     public async Task PublishAsync(ContainerDeletedEvent @event, CancellationToken cancellationToken = default)
     {
         var exchangeName = nameof(ContainerDeletedEvent);
+        await EnsureExchangeExistsAsync(exchangeName, cancellationToken);
+
+        var message = JsonSerializer.Serialize(@event, _jsonOptions);
+        var body = Encoding.UTF8.GetBytes(message);
+
+        await _channel.BasicPublishAsync(
+            exchange: exchangeName,
+            routingKey: string.Empty,
+            body: body,
+            cancellationToken: cancellationToken);
+    }
+
+    public async Task PublishAsync(WorkOrderCreatedEvent @event, CancellationToken cancellationToken = default)
+    {
+        var exchangeName = nameof(WorkOrderCreatedEvent);
+        await EnsureExchangeExistsAsync(exchangeName, cancellationToken);
+
+        var message = JsonSerializer.Serialize(@event, _jsonOptions);
+        var body = Encoding.UTF8.GetBytes(message);
+
+        await _channel.BasicPublishAsync(
+            exchange: exchangeName,
+            routingKey: string.Empty,
+            body: body,
+            cancellationToken: cancellationToken);
+    }
+
+    public async Task PublishAsync(WorkOrderDeletedEvent @event, CancellationToken cancellationToken = default)
+    {
+        var exchangeName = nameof(WorkOrderDeletedEvent);
         await EnsureExchangeExistsAsync(exchangeName, cancellationToken);
 
         var message = JsonSerializer.Serialize(@event, _jsonOptions);
