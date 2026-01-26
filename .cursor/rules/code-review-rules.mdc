@@ -112,13 +112,26 @@ After completing the review, post a comment on the PR with the following format:
 
 - **Approve** the PR if all checklist items pass and no issues are found
 - **Request changes** if any issues are found, providing specific feedback on what needs to be fixed
+  - When requesting changes, **convert the PR back to draft** so the author can address the feedback before re-requesting review
 
-Use the GitHub CLI to submit the review:
+Use the GitHub CLI to submit the review and manage PR state:
 
 ```bash
 # To approve
 gh pr review [PR_NUMBER] --approve --body "Review comment here"
 
-# To request changes
+# To request changes AND convert back to draft
 gh pr review [PR_NUMBER] --request-changes --body "Review comment here"
+gh pr ready [PR_NUMBER] --undo
 ```
+
+## Post-Review Actions
+
+After submitting your review:
+
+1. **If approved**: No further action needed. The PR is ready for merge.
+
+2. **If changes requested**: 
+   - Convert the PR back to draft using `gh pr ready [PR_NUMBER] --undo`
+   - This signals to the author that the PR needs work before re-review
+   - When the author addresses the feedback and marks the PR ready again, a new review will be triggered automatically
