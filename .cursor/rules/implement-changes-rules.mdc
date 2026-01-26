@@ -50,7 +50,15 @@ Post summary comment:
 [Items needing manual attention, if any]
 ```
 
-Mark ready: `gh pr ready [PR]`
+## Mark PR Ready
+
+After successfully implementing all requested changes and verifying tests pass:
+
+```bash
+gh pr ready
+```
+
+This moves the PR from draft back to ready for review status.
 
 ## Unresolvable Issues
 
