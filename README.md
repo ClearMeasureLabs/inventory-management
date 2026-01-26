@@ -233,3 +233,17 @@ npm test -- --watch=false --browsers=ChromeHeadless
 ```
 
 This runs all test suites: .NET unit tests, .NET integration tests, and Angular component tests.
+
+## Development with Cursor AI
+
+This repository includes configuration for [Cursor](https://cursor.com/) AI-assisted development in the `.cursor/rules/` directory. These rules ensure consistent code quality and workflow adherence.
+
+| Rule File | Purpose |
+|-----------|---------|
+| `architecture-rules.mdc` | Layer boundaries and CQRS patterns |
+| `automated-testing-rules.mdc` | Required test coverage and testing guidelines |
+| `github-issue-rules.mdc` | Issue creation interview process |
+| `github-issue-implementation-rules.mdc` | Phase workflow for implementing issues |
+| `cursor-cloud-agent.mdc` | Operational constraints for Cloud Agent |
+
+When using Cursor to contribute, the AI will automatically follow these rules to maintain project standards.

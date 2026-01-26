@@ -20,7 +20,7 @@ Presentation (WebApp) → Infrastructure → Application → Domain
 | Domain | `Core/Domain/` | Nothing | Entities only |
 | Application | `Core/Application/` | Domain | Features, DTOs, Interfaces (`IRepository`, `ICache`, `IEventHub`) |
 | Infrastructure | `Infrastructure/` | Application | Implementations (SQLServer, Redis, RabbitMQ, Bootstrap) |
-| Presentation | `Presentation/` | Infrastructure/Bootstrap | Controllers, Blazor components |
+| Presentation | `Presentation/` | Infrastructure/Bootstrap | Controllers, Angular application |
 
 ## CQRS Request Flow
 
