@@ -142,4 +142,13 @@ describe('AddContainerModalComponent', () => {
     const req = httpMock.expectOne(`${environment.apiUrl}/api/containers`);
     req.flush({ containerId: 1, name: 'Test', description: '' });
   });
+
+  it('should display Create button with red (btn-danger) styling', () => {
+    component.open();
+    fixture.detectChanges();
+    
+    const createButton = fixture.nativeElement.querySelector('button.btn-danger');
+    expect(createButton).toBeTruthy();
+    expect(createButton.textContent).toContain('Create');
+  });
 });
