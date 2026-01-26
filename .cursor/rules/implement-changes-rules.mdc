@@ -8,9 +8,15 @@ alwaysApply: false
 
 ## Before Starting
 
-1. **Post comment**: `Starting automated implementation of requested changes...`
-2. **Fetch issue**: Read requirements, technical design, constraints from linked issue
-3. **Read review comments**: Note files, line numbers, and requested changes
+1. **Update labels**: Set only `Development`.
+
+```bash
+gh pr edit [PR] --remove-label "Changes Requested" --remove-label "In Review By Agent" --remove-label "Ready for Review" --add-label "Development"
+```
+
+2. **Post comment**: `Starting automated implementation of requested changes...`
+3. **Fetch issue**: Read requirements, technical design, constraints from linked issue
+4. **Read review comments**: Note files, line numbers, and requested changes
 
 ## Implementing Changes
 
@@ -33,7 +39,14 @@ git push
 
 ## Post-Implementation
 
-Post summary comment:
+1. Mark PR ready for review
+2. Set only `Ready for Review` label
+3. Post summary comment
+
+```bash
+gh pr ready [PR]
+gh pr edit [PR] --remove-label "Development" --remove-label "Changes Requested" --remove-label "In Review By Agent" --add-label "Ready for Review"
+```
 
 ```markdown
 ## Automated Change Implementation Complete
@@ -49,8 +62,6 @@ Post summary comment:
 ### Notes
 [Items needing manual attention, if any]
 ```
-
-Mark ready: `gh pr ready [PR]`
 
 ## Unresolvable Issues
 

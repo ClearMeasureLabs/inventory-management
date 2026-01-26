@@ -10,10 +10,10 @@ alwaysApply: false
 
 1. **Fetch the issue**: Extract from PR body ("Closes #" or "Fixes #"). Read requirements, acceptance criteria, technical design.
 2. **Check README**: Does it need updates for new features, scripts, or config?
-3. **Update labels**: Remove any existing labels, then add `In Review By Agent`.
+3. **Update labels**: Set only `In Review By Agent`.
 
 ```bash
-gh pr edit [PR] --remove-label "Approved by Agent" --remove-label "Development" --add-label "In Review By Agent"
+gh pr edit [PR] --remove-label "Changes Requested" --remove-label "Development" --remove-label "Ready for Review" --add-label "In Review By Agent"
 ```
 
 ## Review Checklist
@@ -59,19 +59,19 @@ Evaluate against project rules:
 
 ### Recommend Approval
 If all checklist items pass:
-1. Remove existing labels, add `Approved by Agent`
+1. Set only `Approved by Agent` label
 2. **Do NOT** use `gh pr review --approve`—only add the label
 
 ```bash
-gh pr edit [PR] --remove-label "In Review By Agent" --remove-label "Development" --add-label "Approved by Agent"
+gh pr edit [PR] --remove-label "In Review By Agent" --remove-label "Changes Requested" --remove-label "Development" --add-label "Ready for Review"
 ```
 
 ### Request Changes
 If issues are found:
-1. Remove existing labels, add `Development`
-2. Convert PR back to draft
+1. Convert PR to draft
+2. Set only `Changes Requested` label
 
 ```bash
-gh pr edit [PR] --remove-label "In Review By Agent" --remove-label "Approved by Agent" --add-label "Development"
 gh pr ready [PR] --undo
+gh pr edit [PR] --remove-label "In Review By Agent" --remove-label "Development" --remove-label "Ready for Review" --add-label "Changes Requested"
 ```
