@@ -1,5 +1,6 @@
 using Application.Features.Containers;
 using Application.Features.Containers.CreateContainer;
+using Application.Features.Containers.UpdateContainer;
 using Bogus;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -276,6 +277,203 @@ public class ContainersControllerTests
 
         // Assert
         _containersMock.Verify(c => c.GetAllAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    #endregion
+
+    #region UpdateContainer Success Tests
+
+    [Test]
+    public async Task UpdateContainer_WithValidRequest_ShouldReturn200Ok()
+    {
+        // Arrange
+        var containerId = _faker.Random.Int(1, 1000);
+        var request = new UpdateContainerRequest
+        {
+            Name = _faker.Commerce.ProductName(),
+            Description = _faker.Lorem.Sentence()
+        };
+        var expectedDto = new ContainerDto
+        {
+            ContainerId = containerId,
+            Name = request.Name,
+            Description = request.Description
+        };
+
+        _containersMock
+            .Setup(c => c.UpdateAsync(It.IsAny<UpdateContainerCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedDto);
+
+        // Act
+        var result = await _controller.UpdateContainer(containerId, request, CancellationToken.None);
+
+        // Assert
+        result.ShouldBeOfType<OkObjectResult>();
+        var okResult = (OkObjectResult)result;
+        okResult.StatusCode.ShouldBe(StatusCodes.Status200OK);
+    }
+
+    [Test]
+    public async Task UpdateContainer_WithValidRequest_ShouldReturnContainerResponse()
+    {
+        // Arrange
+        var containerId = _faker.Random.Int(1, 1000);
+        var request = new UpdateContainerRequest
+        {
+            Name = _faker.Commerce.ProductName(),
+            Description = _faker.Lorem.Sentence()
+        };
+        var expectedDto = new ContainerDto
+        {
+            ContainerId = containerId,
+            Name = request.Name,
+            Description = request.Description
+        };
+
+        _containersMock
+            .Setup(c => c.UpdateAsync(It.IsAny<UpdateContainerCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedDto);
+
+        // Act
+        var result = await _controller.UpdateContainer(containerId, request, CancellationToken.None);
+
+        // Assert
+        var okResult = (OkObjectResult)result;
+        var response = okResult.Value.ShouldBeOfType<ContainerResponse>();
+        response.ContainerId.ShouldBe(expectedDto.ContainerId);
+        response.Name.ShouldBe(expectedDto.Name);
+        response.Description.ShouldBe(expectedDto.Description);
+    }
+
+    [Test]
+    public async Task UpdateContainer_WithValidRequest_ShouldCallContainersFacadeWithMappedCommand()
+    {
+        // Arrange
+        var containerId = _faker.Random.Int(1, 1000);
+        var request = new UpdateContainerRequest
+        {
+            Name = _faker.Commerce.ProductName(),
+            Description = _faker.Lorem.Sentence()
+        };
+        var expectedDto = new ContainerDto
+        {
+            ContainerId = containerId,
+            Name = request.Name
+        };
+
+        _containersMock
+            .Setup(c => c.UpdateAsync(It.IsAny<UpdateContainerCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedDto);
+
+        // Act
+        await _controller.UpdateContainer(containerId, request, CancellationToken.None);
+
+        // Assert - Verify request is correctly mapped to command
+        _containersMock.Verify(
+            c => c.UpdateAsync(
+                It.Is<UpdateContainerCommand>(cmd => 
+                    cmd.ContainerId == containerId &&
+                    cmd.Name == request.Name && 
+                    cmd.Description == request.Description),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    #endregion
+
+    #region UpdateContainer Validation Error Tests
+
+    [Test]
+    public async Task UpdateContainer_WithNonExistentContainer_ShouldReturnValidationProblem()
+    {
+        // Arrange
+        var containerId = 999;
+        var request = new UpdateContainerRequest
+        {
+            Name = _faker.Commerce.ProductName()
+        };
+
+        _containersMock
+            .Setup(c => c.UpdateAsync(It.IsAny<UpdateContainerCommand>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new ValidationException
+            {
+                Errors = new Dictionary<string, string[]>
+                {
+                    { "ContainerId", new[] { "Container not found" } }
+                }
+            });
+
+        // Act
+        var result = await _controller.UpdateContainer(containerId, request, CancellationToken.None);
+
+        // Assert
+        result.ShouldBeAssignableTo<ObjectResult>();
+        var objectResult = (ObjectResult)result;
+        objectResult.Value.ShouldBeOfType<ValidationProblemDetails>();
+        var problemDetails = (ValidationProblemDetails)objectResult.Value!;
+        problemDetails.Errors.ShouldContainKey("ContainerId");
+    }
+
+    [Test]
+    public async Task UpdateContainer_WithEmptyName_ShouldReturnValidationProblem()
+    {
+        // Arrange
+        var containerId = _faker.Random.Int(1, 1000);
+        var request = new UpdateContainerRequest
+        {
+            Name = string.Empty
+        };
+
+        _containersMock
+            .Setup(c => c.UpdateAsync(It.IsAny<UpdateContainerCommand>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new ValidationException
+            {
+                Errors = new Dictionary<string, string[]>
+                {
+                    { "Name", new[] { "Name is required" } }
+                }
+            });
+
+        // Act
+        var result = await _controller.UpdateContainer(containerId, request, CancellationToken.None);
+
+        // Assert
+        var objectResult = (ObjectResult)result;
+        objectResult.Value.ShouldBeOfType<ValidationProblemDetails>();
+        var problemDetails = (ValidationProblemDetails)objectResult.Value!;
+        problemDetails.Errors.ShouldContainKey("Name");
+        problemDetails.Errors["Name"].ShouldContain("Name is required");
+    }
+
+    [Test]
+    public async Task UpdateContainer_WithDuplicateName_ShouldReturnValidationProblem()
+    {
+        // Arrange
+        var containerId = _faker.Random.Int(1, 1000);
+        var request = new UpdateContainerRequest
+        {
+            Name = "Duplicate Name"
+        };
+
+        _containersMock
+            .Setup(c => c.UpdateAsync(It.IsAny<UpdateContainerCommand>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new ValidationException
+            {
+                Errors = new Dictionary<string, string[]>
+                {
+                    { "Name", new[] { "A container with this name already exists" } }
+                }
+            });
+
+        // Act
+        var result = await _controller.UpdateContainer(containerId, request, CancellationToken.None);
+
+        // Assert
+        var objectResult = (ObjectResult)result;
+        objectResult.Value.ShouldBeOfType<ValidationProblemDetails>();
+        var problemDetails = (ValidationProblemDetails)objectResult.Value!;
+        problemDetails.Errors.ShouldContainKey("Name");
+        problemDetails.Errors["Name"].ShouldContain("A container with this name already exists");
     }
 
     #endregion

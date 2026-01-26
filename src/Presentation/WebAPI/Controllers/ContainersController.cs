@@ -1,6 +1,7 @@
 using Application.Features.Containers;
 using Application.Features.Containers.CreateContainer;
 using Application.Features.Containers.DeleteContainer;
+using Application.Features.Containers.UpdateContainer;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.Contracts;
 using ValidationException = Application.Exceptions.ValidationException;
@@ -83,6 +84,41 @@ public class ContainersController : ControllerBase
             await _containers.DeleteAsync(command, cancellationToken);
             
             return NoContent();
+        }
+        catch (ValidationException ex)
+        {
+            foreach (var error in ex.Errors)
+            {
+                foreach (var message in error.Value)
+                {
+                    ModelState.AddModelError(error.Key, message);
+                }
+            }
+            return ValidationProblem(ModelState);
+        }
+    }
+
+    /// <summary>
+    /// Updates an existing container.
+    /// </summary>
+    [HttpPut("{id}")]
+    [ProducesResponseType(typeof(ContainerResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UpdateContainer(int id, [FromBody] UpdateContainerRequest request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var command = new UpdateContainerCommand
+            {
+                ContainerId = id,
+                Name = request.Name,
+                Description = request.Description
+            };
+
+            var result = await _containers.UpdateAsync(command, cancellationToken);
+            var response = ContainerResponse.FromDto(result);
+            
+            return Ok(response);
         }
         catch (ValidationException ex)
         {

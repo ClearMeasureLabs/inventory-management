@@ -183,4 +183,100 @@ describe('ContainerService', () => {
       req.flush(null, { status: 500, statusText: 'Server Error' });
     });
   });
+
+  describe('update', () => {
+    it('should update container via PUT', () => {
+      const containerId = 1;
+      const request = { name: 'Updated Container', description: 'Updated description' };
+      const mockResponse = { containerId: 1, name: 'Updated Container', description: 'Updated description' };
+
+      service.update(containerId, request).subscribe(container => {
+        expect(container).toEqual(mockResponse);
+      });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/1`);
+      expect(req.request.method).toBe('PUT');
+      expect(req.request.body).toEqual(request);
+      req.flush(mockResponse);
+    });
+
+    it('should call correct endpoint with container ID', () => {
+      const containerId = 42;
+      const request = { name: 'Test', description: '' };
+
+      service.update(containerId, request).subscribe();
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/42`);
+      expect(req.request.method).toBe('PUT');
+      req.flush({ containerId: 42, name: 'Test', description: '' });
+    });
+
+    it('should handle validation error response for empty name', () => {
+      const request = { name: '', description: '' };
+      const validationError = {
+        errors: { Name: ['Name is required'] }
+      };
+
+      service.update(1, request).subscribe({
+        next: () => fail('should have failed'),
+        error: (error) => {
+          expect(error.errors).toBeTruthy();
+          expect(error.errors['Name']).toContain('Name is required');
+        }
+      });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/1`);
+      req.flush(validationError, { status: 400, statusText: 'Bad Request' });
+    });
+
+    it('should handle validation error response for duplicate name', () => {
+      const request = { name: 'Duplicate Name', description: '' };
+      const validationError = {
+        errors: { Name: ['A container with this name already exists'] }
+      };
+
+      service.update(1, request).subscribe({
+        next: () => fail('should have failed'),
+        error: (error) => {
+          expect(error.errors).toBeTruthy();
+          expect(error.errors['Name']).toContain('A container with this name already exists');
+        }
+      });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/1`);
+      req.flush(validationError, { status: 400, statusText: 'Bad Request' });
+    });
+
+    it('should handle not found error response', () => {
+      const request = { name: 'Test', description: '' };
+      const validationError = {
+        errors: { ContainerId: ['Container not found'] }
+      };
+
+      service.update(999, request).subscribe({
+        next: () => fail('should have failed'),
+        error: (error) => {
+          expect(error.errors).toBeTruthy();
+          expect(error.errors['ContainerId']).toContain('Container not found');
+        }
+      });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/999`);
+      req.flush(validationError, { status: 400, statusText: 'Bad Request' });
+    });
+
+    it('should handle server error response', () => {
+      const request = { name: 'Test', description: '' };
+
+      service.update(1, request).subscribe({
+        next: () => fail('should have failed'),
+        error: (error) => {
+          expect(error.title).toBe('An unexpected error occurred. Please try again.');
+        }
+      });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/1`);
+      req.flush(null, { status: 500, statusText: 'Server Error' });
+    });
+  });
 });

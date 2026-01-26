@@ -3,7 +3,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { ContainerResponse, CreateContainerRequest, ValidationProblemDetails } from '../models/container.model';
+import { ContainerResponse, CreateContainerRequest, UpdateContainerRequest, ValidationProblemDetails } from '../models/container.model';
 
 @Injectable({
   providedIn: 'root'
@@ -21,6 +21,12 @@ export class ContainerService {
 
   create(request: CreateContainerRequest): Observable<ContainerResponse> {
     return this.http.post<ContainerResponse>(this.apiUrl, request).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  update(id: number, request: UpdateContainerRequest): Observable<ContainerResponse> {
+    return this.http.put<ContainerResponse>(`${this.apiUrl}/${id}`, request).pipe(
       catchError(this.handleError)
     );
   }

@@ -9,6 +9,11 @@ export interface CreateContainerRequest {
   description: string;
 }
 
+export interface UpdateContainerRequest {
+  name: string;
+  description: string;
+}
+
 export interface ValidationProblemDetails {
   type?: string;
   title?: string;
