@@ -62,26 +62,35 @@ jobs:
           echo "Preparing to call Cursor Cloud Agent API..."
           echo "PR Number: ${PR_NUMBER}"
           echo "Head Branch: ${HEAD_BRANCH}"
+          echo "Repository: ${{ github.repository }}"
           
-          # Escape the PR body for JSON
-          PR_BODY_ESCAPED=$(echo "$PR_BODY" | jq -Rs .)
+          # Build the prompt text with all PR context
+          PROMPT_TEXT="Review PR #${PR_NUMBER} in repository ${{ github.repository }}.
+
+Follow the code_review_rules to review the changes:
+1. Reference the associated issue to understand requirements
+2. Review the changes against the PR template checklist
+3. Check architecture rules, testing requirements, and documentation
+4. Post a review comment with the checklist findings
+5. Approve if all checks pass, or request changes with specific feedback
+
+PR Title: ${PR_TITLE}
+PR Branch: ${HEAD_BRANCH} -> ${BASE_BRANCH}"
           
-          # Build the request payload
-          PAYLOAD=$(cat <<EOF
-          {
-            "task": "Review PR #${PR_NUMBER} in repository ${{ github.repository }}. Follow the code_review_rules to review the changes, reference the associated issue, and post a review comment with the checklist findings. Approve if all checks pass, or request changes with specific feedback.",
-            "repo": "${{ github.repository }}",
-            "branch": "${HEAD_BRANCH}",
-            "context": {
-              "pr_number": ${PR_NUMBER},
-              "pr_title": "${PR_TITLE}",
-              "pr_body": ${PR_BODY_ESCAPED},
-              "base_branch": "${BASE_BRANCH}",
-              "head_branch": "${HEAD_BRANCH}"
-            }
-          }
-          EOF
-          )
+          # Build the request payload using the correct API format
+          PAYLOAD=$(jq -n \
+            --arg prompt "$PROMPT_TEXT" \
+            --arg repo "${{ github.repository }}" \
+            --arg ref "$HEAD_BRANCH" \
+            '{
+              "prompt": {
+                "text": $prompt
+              },
+              "source": {
+                "repository": $repo,
+                "ref": $ref
+              }
+            }')
           
           echo "Request payload:"
           echo "$PAYLOAD" | jq .
