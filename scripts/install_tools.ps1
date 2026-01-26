@@ -7,10 +7,67 @@ if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
     exit 1
 }
 
-# Docker
+# Docker - Install if not present
 if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
-    Write-Error "Docker not found. Install Docker Desktop from https://docker.com/products/docker-desktop"
-    exit 1
+    Write-Host "Docker not found. Installing Docker..."
+    if ($IsLinux) {
+        # Install Docker on Linux
+        & bash -c "curl -fsSL https://get.docker.com | sh"
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error "Docker installation failed. Install manually from https://docker.com"
+            exit 1
+        }
+        Write-Host "Docker installed successfully." -ForegroundColor Green
+    } else {
+        Write-Error "Docker not found. Install Docker Desktop from https://docker.com/products/docker-desktop"
+        exit 1
+    }
+}
+
+# Start Docker if not running
+Write-Host "Checking Docker status..."
+$dockerInfo = docker info 2>&1
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Docker is not running. Attempting to start..."
+    $dockerStarted = $false
+    
+    if ($IsWindows) {
+        Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe" -WindowStyle Hidden -ErrorAction SilentlyContinue
+    } elseif ($IsLinux) {
+        # Try service command first (works in containers), then systemctl
+        $result = sudo service docker start 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            $result = sudo systemctl start docker 2>&1
+        }
+        # Fix socket permissions if needed
+        if (Test-Path "/var/run/docker.sock") {
+            sudo chmod 666 /var/run/docker.sock 2>&1 | Out-Null
+        }
+    } elseif ($IsMacOS) {
+        open -a Docker -ErrorAction SilentlyContinue
+    }
+    
+    # Wait for Docker to be ready
+    $maxAttempts = 30
+    $attempt = 0
+    while ($attempt -lt $maxAttempts) {
+        Start-Sleep -Seconds 2
+        $dockerInfo = docker info 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "Docker is running." -ForegroundColor Green
+            $dockerStarted = $true
+            break
+        }
+        $attempt++
+        Write-Host "Waiting for Docker to start... ($attempt/$maxAttempts)"
+    }
+    
+    if (-not $dockerStarted) {
+        Write-Error "Docker could not be started. Integration and acceptance tests require Docker."
+        exit 1
+    }
+} else {
+    Write-Host "Docker is already running." -ForegroundColor Green
 }
 
 # Node.js
@@ -52,5 +109,18 @@ Write-Host "Installing Angular dependencies..."
 Push-Location "$repoRoot/src/Presentation/webapp"
 npm ci
 Pop-Location
+
+# Build AcceptanceTests project
+Write-Host "Building AcceptanceTests project..."
+dotnet build "$repoRoot/src/Tests/AcceptanceTests/AcceptanceTests.csproj" --configuration Debug | Out-Null
+
+# Install Playwright browsers using npx
+Write-Host "Installing Playwright browsers..."
+npx playwright install chromium
+if ($LASTEXITCODE -ne 0) {
+    Write-Warning "Playwright browser installation may have failed. You may need to install manually with: npx playwright install chromium"
+} else {
+    Write-Host "Playwright browsers installed successfully." -ForegroundColor Green
+}
 
 Write-Host "All tools installed successfully." -ForegroundColor Green
