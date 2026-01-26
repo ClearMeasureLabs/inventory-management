@@ -9,18 +9,21 @@ This profile restricts the Cloud Agent to repository-focused operations and issu
 
 ## GitHub Integration
 
-**Prefer the GitHub MCP server for GitHub operations.** When an MCP tool is available for the task, use it first. If the MCP server lacks the required capability, fall back to:
-- The `gh` CLI command
-- Direct GitHub API calls via shell/curl
+**Prefer the `gh` CLI for GitHub operations.** The GitHub CLI is already authenticated and should be used for all GitHub interactions. Only fall back to the GitHub MCP server tools if `gh` CLI commands fail due to permission issues.
 
-Available MCP tools for GitHub operations include:
+Common `gh` CLI commands:
+- `gh issue list`, `gh issue view`, `gh issue create` - Issue management
+- `gh pr list`, `gh pr view`, `gh pr create` - Pull request management
+- `gh pr diff`, `gh pr checks`, `gh pr ready` - PR details and status
+- `gh run list`, `gh run view --log` - CI/workflow information
+- `gh label list`, `gh label create` - Label management
+
+If `gh` CLI fails with permission errors, fall back to GitHub MCP server tools:
 - `get_issue`, `list_issues`, `search_issues` - Retrieve issues
 - `create_issue`, `update_issue`, `add_issue_comment` - Manage issues
 - `create_pull_request`, `get_pull_request`, `list_pull_requests` - Pull requests
 - `get_pull_request_files`, `get_pull_request_reviews`, `get_pull_request_status` - PR details
 - `create_branch`, `list_commits`, `get_file_contents` - Repository operations
-
-For operations not covered by MCP tools (e.g., label management, repository settings), use the `gh` CLI.
 
 ## Permitted Operations
 
