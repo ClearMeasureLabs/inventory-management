@@ -161,7 +161,9 @@ describe('EditContainerModalComponent', () => {
     component.container = null;
     component.submit();
     
+    // Verify no HTTP request was made
     httpMock.expectNone(`${environment.apiUrl}/api/containers`);
+    expect(component.isSubmitting).toBeFalse();
   });
 
   it('should set container to null when closed', () => {
