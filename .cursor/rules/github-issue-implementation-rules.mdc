@@ -40,7 +40,7 @@ Before beginning any phase, create a dedicated branch for the issue:
 ## Phase 2: Test Design
 
 1. Update issue labels: remove all existing labels, add `Test-Design`
-2. Review the issue requirements, Technical Design comment, and `@.cursor/rules/automated-testing.mdc`
+2. Review the issue requirements, Technical Design comment, and `@.cursor/rules/automated-testing-rules.mdc`
 3. Formulate a test plan covering required unit, integration, and Angular tests
 4. Add the Test Design as a comment to the issue using this format:
 
