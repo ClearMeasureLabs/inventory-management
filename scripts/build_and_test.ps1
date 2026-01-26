@@ -3,6 +3,14 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 
 try {
     Write-Host "******************************************************"
+    Write-Host "INSTALLING TOOLS AND DEPENDENCIES"
+    Write-Host "******************************************************"
+    & "$PSScriptRoot/install_tools.ps1"
+    if ($LASTEXITCODE -ne 0) { 
+        Write-Warning "Tool installation had issues. Continuing with build..."
+    }
+
+    Write-Host "`n******************************************************"
     Write-Host "BUILDING ANGULAR APP"
     Write-Host "******************************************************"
     Push-Location "$repoRoot/src/Presentation/webapp"

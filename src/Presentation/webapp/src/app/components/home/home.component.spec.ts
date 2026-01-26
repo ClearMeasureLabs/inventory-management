@@ -122,4 +122,78 @@ describe('HomeComponent', () => {
     
     expect(component.containers?.length).toBe(1);
   }));
+
+  it('should display delete button for each container in table', fakeAsync(() => {
+    const mockContainers = [
+      { containerId: 1, name: 'Container 1', description: '' },
+      { containerId: 2, name: 'Container 2', description: '' }
+    ];
+    
+    fixture.detectChanges();
+    
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers`);
+    req.flush(mockContainers);
+    
+    tick();
+    fixture.detectChanges();
+    
+    const compiled = fixture.nativeElement as HTMLElement;
+    const deleteButtons = compiled.querySelectorAll('button.btn-outline-danger');
+    expect(deleteButtons.length).toBe(2);
+  }));
+
+  it('should display Actions column header in table', fakeAsync(() => {
+    const mockContainers = [
+      { containerId: 1, name: 'Container 1', description: '' }
+    ];
+    
+    fixture.detectChanges();
+    
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers`);
+    req.flush(mockContainers);
+    
+    tick();
+    fixture.detectChanges();
+    
+    const compiled = fixture.nativeElement as HTMLElement;
+    const headers = compiled.querySelectorAll('th');
+    const headerTexts = Array.from(headers).map(h => h.textContent);
+    expect(headerTexts).toContain('Actions');
+  }));
+
+  it('should reload containers when a container is deleted', fakeAsync(() => {
+    const mockContainers = [
+      { containerId: 1, name: 'Container 1', description: '' },
+      { containerId: 2, name: 'Container 2', description: '' }
+    ];
+    
+    fixture.detectChanges();
+    
+    // Initial load
+    const req1 = httpMock.expectOne(`${environment.apiUrl}/api/containers`);
+    req1.flush(mockContainers);
+    tick();
+    
+    // Simulate container deletion
+    component.onContainerDeleted(1);
+    
+    // Should trigger reload
+    const req2 = httpMock.expectOne(`${environment.apiUrl}/api/containers`);
+    req2.flush([{ containerId: 2, name: 'Container 2', description: '' }]);
+    tick();
+    fixture.detectChanges();
+    
+    expect(component.containers?.length).toBe(1);
+  }));
+
+  it('should have delete container modal component', fakeAsync(() => {
+    fixture.detectChanges();
+    
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers`);
+    req.flush([]);
+    tick();
+    fixture.detectChanges();
+    
+    expect(component.deleteContainerModal).toBeTruthy();
+  }));
 });

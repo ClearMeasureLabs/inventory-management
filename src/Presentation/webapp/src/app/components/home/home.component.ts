@@ -4,16 +4,18 @@ import { Title } from '@angular/platform-browser';
 import { ContainerService } from '../../services/container.service';
 import { ContainerResponse } from '../../models/container.model';
 import { AddContainerModalComponent } from '../add-container-modal/add-container-modal.component';
+import { DeleteContainerModalComponent } from '../delete-container-modal/delete-container-modal.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, AddContainerModalComponent],
+  imports: [CommonModule, AddContainerModalComponent, DeleteContainerModalComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
 export class HomeComponent implements OnInit {
   @ViewChild('addContainerModal') addContainerModal!: AddContainerModalComponent;
+  @ViewChild('deleteContainerModal') deleteContainerModal!: DeleteContainerModalComponent;
 
   containers: ContainerResponse[] | null = null;
   isLoading = true;
@@ -47,7 +49,15 @@ export class HomeComponent implements OnInit {
     this.addContainerModal.open();
   }
 
+  openDeleteModal(container: ContainerResponse): void {
+    this.deleteContainerModal.open(container);
+  }
+
   onContainerCreated(container: ContainerResponse): void {
+    this.loadContainers();
+  }
+
+  onContainerDeleted(containerId: number): void {
     this.loadContainers();
   }
 }

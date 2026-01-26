@@ -25,6 +25,12 @@ export class ContainerService {
     );
   }
 
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   private handleError(error: HttpErrorResponse): Observable<never> {
     if (error.status === 400 && error.error) {
       // Validation error - pass through the error body

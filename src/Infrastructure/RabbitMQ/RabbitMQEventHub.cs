@@ -1,7 +1,8 @@
-﻿using System.Text;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Application.Features.Containers.CreateContainer;
+using Application.Features.Containers.DeleteContainer;
 using Application.Infrastructure;
 using RabbitMQ.Client;
 
@@ -38,6 +39,21 @@ public class RabbitMQEventHub : IEventHub
     public async Task PublishAsync(ContainerCreatedEvent @event, CancellationToken cancellationToken = default)
     {
         var exchangeName = nameof(ContainerCreatedEvent);
+        await EnsureExchangeExistsAsync(exchangeName, cancellationToken);
+
+        var message = JsonSerializer.Serialize(@event, _jsonOptions);
+        var body = Encoding.UTF8.GetBytes(message);
+
+        await _channel.BasicPublishAsync(
+            exchange: exchangeName,
+            routingKey: string.Empty,
+            body: body,
+            cancellationToken: cancellationToken);
+    }
+
+    public async Task PublishAsync(ContainerDeletedEvent @event, CancellationToken cancellationToken = default)
+    {
+        var exchangeName = nameof(ContainerDeletedEvent);
         await EnsureExchangeExistsAsync(exchangeName, cancellationToken);
 
         var message = JsonSerializer.Serialize(@event, _jsonOptions);
