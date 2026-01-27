@@ -13,7 +13,24 @@ Update issue labels at each phase transition.
 2. **Draft PR:** `gh pr create --draft --title "[Title]" --body "Closes #[number]"`
 3. **Install:** `scripts/install_tools.ps1`
 
-## Phase 1: Technical Design
+## Phase 1: User Experience Design
+
+**Label:** `UX-Design`
+
+Post as issue comment:
+
+```markdown
+## User Experience Design
+**User Flow:** [Description of user interaction flow]
+**UI Components:** [New or modified UI elements]
+**Mockups/Wireframes:** [Links or descriptions]
+**Accessibility:** [A11y considerations]
+```
+
+Required for: User-facing features, UI changes, new workflows.
+Not required for: Backend-only changes, infrastructure, refactoring.
+
+## Phase 2: Technical Design
 
 **Label:** `Technical-Design`
 
@@ -28,7 +45,7 @@ Post as issue comment:
 **Tests:** [Describe unit, integration, Angular tests needed]
 ```
 
-## Phase 2: Acceptance Test Design
+## Phase 3: Acceptance Test Design
 
 **Label:** `Test-Design`
 
@@ -42,7 +59,7 @@ Post as issue comment:
 Required for: User-facing features, critical workflows, deployed behavior changes.
 Not required for: Backend-only, UI-only, docs, refactoring.
 
-## Phase 3: Development
+## Phase 4: Development
 
 **Label:** `Development`
 
@@ -53,7 +70,7 @@ Not required for: Backend-only, UI-only, docs, refactoring.
 
 **Gate:** `build_and_test.ps1` must pass.
 
-## Phase 4: Functional Validation
+## Phase 5: Functional Validation
 
 **Label:** `Functional-Validation`
 
@@ -61,7 +78,7 @@ Not required for: Backend-only, UI-only, docs, refactoring.
 
 **Gate:** Both test scripts must pass.
 
-## Phase 5: Review Handoff
+## Phase 6: Review Handoff
 
 1. Verify all tests passed (unit, integration, Angular, acceptance)
 2. Move PR from draft to ready for review
