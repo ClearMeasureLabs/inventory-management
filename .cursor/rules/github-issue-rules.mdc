@@ -37,10 +37,4 @@ Generate the conceptual definition directly from the user's prompt. Only ask fol
 
 ## Creating the Issue
 
-After user confirms, create the issue with the `Conceptual-Definition` label:
-
-```bash
-gh issue create --title "[Title]" --body "[Conceptual Definition]" --label "Conceptual-Definition"
-```
-
-This label is the starting point for the implementation workflow in `github-issue-implementation-rules.mdc`.
+After user confirms, create the issue with the `Conceptual-Definition` label. This label is the starting point for the implementation workflow in `github-issue-implementation-rules.mdc`.

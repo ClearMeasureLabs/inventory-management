@@ -9,23 +9,15 @@ alwaysApply: true
 
 **IMPORTANT:** Update the issue label when entering each phase. Remove the previous phase label and add the new one.
 
-```bash
-# Update label when transitioning phases
-gh issue edit [NUMBER] --remove-label "[Old-Label]" --add-label "[New-Label]"
-```
-
 ## Getting Started
 
 1. **Branch:** `issues/[number]/[title-kebab-case]`
-2. **Draft PR:** `gh pr create --draft --title "[Title]" --body "Closes #[number]"`
-3. **Install:** `scripts/install_tools.ps1`
+2. **Draft PR:** Create a draft PR with body `Closes #[number]`
+3. **Install:** Run `scripts/install_tools.ps1`
 
 ## Phase 1: User Experience Design
 
-**On entry, run:**
-```bash
-gh issue edit [NUMBER] --remove-label "Conceptual-Definition" --add-label "UX-Design"
-```
+**On entry:** Update labels from `Conceptual-Definition` → `UX-Design`
 
 Post as issue comment:
 
@@ -42,10 +34,7 @@ Skip for: Backend-only changes, infrastructure, refactoring (proceed to Phase 2)
 
 ## Phase 2: Technical Design
 
-**On entry, run:**
-```bash
-gh issue edit [NUMBER] --remove-label "UX-Design" --add-label "Technical-Design"
-```
+**On entry:** Update labels from `UX-Design` → `Technical-Design`
 
 Post as issue comment:
 
@@ -60,10 +49,7 @@ Post as issue comment:
 
 ## Phase 3: Acceptance Test Design
 
-**On entry, run:**
-```bash
-gh issue edit [NUMBER] --remove-label "Technical-Design" --add-label "Test-Design"
-```
+**On entry:** Update labels from `Technical-Design` → `Test-Design`
 
 Post as issue comment:
 
@@ -77,10 +63,7 @@ Skip for: Backend-only, UI-only, docs, refactoring (proceed to Phase 4).
 
 ## Phase 4: Development
 
-**On entry, run:**
-```bash
-gh issue edit [NUMBER] --remove-label "Test-Design" --add-label "Development"
-```
+**On entry:** Update labels from `Test-Design` → `Development`
 
 1. Implement changes following `architecture-rules.mdc`
 2. Add tests per `automated-testing-rules.mdc`
@@ -91,10 +74,7 @@ gh issue edit [NUMBER] --remove-label "Test-Design" --add-label "Development"
 
 ## Phase 5: Functional Validation
 
-**On entry, run:**
-```bash
-gh issue edit [NUMBER] --remove-label "Development" --add-label "Functional-Validation"
-```
+**On entry:** Update labels from `Development` → `Functional-Validation`
 
 1. Run `scripts/acceptance_tests.ps1` until passing
 
@@ -102,16 +82,9 @@ gh issue edit [NUMBER] --remove-label "Development" --add-label "Functional-Vali
 
 ## Phase 6: Review Handoff
 
-**On entry, run:**
-```bash
-gh issue edit [NUMBER] --remove-label "Functional-Validation" --add-label "Ready-For-Review"
-```
+**On entry:** Update labels from `Functional-Validation` → `Ready-For-Review`
 
 1. Verify all tests passed (unit, integration, Angular, acceptance)
 2. Move PR from draft to ready for review
-
-```bash
-gh pr ready [PR]
-```
 
 **Gate:** All tests must pass before marking ready.

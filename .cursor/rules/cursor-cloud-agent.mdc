@@ -7,28 +7,14 @@ alwaysApply: true
 
 Repository-focused operations and issue-driven development only.
 
-## GitHub CLI
+## GitHub Operations
 
-Use the `gh` CLI (already authenticated) for all GitHub operations. Fall back to MCP server tools only if `gh` fails with permission errors.
+For all GitHub operations (issues, PRs, labels, comments):
 
-```bash
-# Issues
-gh issue list
-gh issue view [NUMBER]
-gh issue create --title "[Title]" --body "[Body]" --label "[Label]"
-gh issue comment [NUMBER] --body "[Comment]"
+1. **Prefer** the `user-github` MCP server tools
+2. **Fall back** to `gh` CLI if MCP doesn't support the operation
 
-# Issue Labels (use for phase transitions per github-issue-implementation-rules.mdc)
-gh issue edit [NUMBER] --add-label "[Label]"
-gh issue edit [NUMBER] --remove-label "[Label]"
-gh issue edit [NUMBER] --remove-label "[Old]" --add-label "[New]"
 
-# Pull Requests
-gh pr list | view | create | diff | checks | ready
-
-# CI/Workflows
-gh run list | view --log
-```
 
 ## Permitted Operations
 

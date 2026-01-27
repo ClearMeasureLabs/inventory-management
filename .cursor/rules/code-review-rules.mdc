@@ -55,17 +55,9 @@ Evaluate against project rules:
 
 ### Recommend Approval
 If all checklist items pass:
-1. Add `Approved by Agent` label
+1. Add `Approved by Agent` label to the PR
 2. **Do NOT** use `gh pr review --approve`—only add the label
-
-```bash
-gh pr edit [PR] --add-label "Approved by Agent"
-```
 
 ### Request Changes
 If issues are found:
 1. Move PR back to draft
-
-```bash
-gh pr ready [PR] --undo
-```
