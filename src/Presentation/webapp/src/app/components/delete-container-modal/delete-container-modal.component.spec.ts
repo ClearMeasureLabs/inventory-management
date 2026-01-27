@@ -160,8 +160,8 @@ describe('DeleteContainerModalComponent', () => {
     fixture.detectChanges();
     
     const compiled = fixture.nativeElement as HTMLElement;
-    const cancelButton = compiled.querySelector('button.btn-secondary');
-    const deleteButton = compiled.querySelector('button.btn-danger');
+    const cancelButton = compiled.querySelector('button.btn-outline-success');
+    const deleteButton = compiled.querySelector('button.btn-success');
     
     expect(cancelButton?.textContent).toContain('Cancel');
     expect(deleteButton?.textContent).toContain('Delete');
