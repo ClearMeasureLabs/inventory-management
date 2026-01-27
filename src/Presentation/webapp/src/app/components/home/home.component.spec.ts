@@ -138,8 +138,11 @@ describe('HomeComponent', () => {
     fixture.detectChanges();
     
     const compiled = fixture.nativeElement as HTMLElement;
-    const deleteButtons = compiled.querySelectorAll('button.btn-outline-success');
+    const deleteButtons = compiled.querySelectorAll('button[aria-label="Delete container"]');
     expect(deleteButtons.length).toBe(2);
+    deleteButtons.forEach(btn => {
+      expect(btn.classList.contains('btn-outline-success')).toBeTrue();
+    });
   }));
 
   it('should display Actions column header in table', fakeAsync(() => {
