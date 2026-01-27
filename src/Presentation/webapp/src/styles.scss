@@ -1,15 +1,16 @@
 /* You can add global styles to this file, and also import other style files */
 
-/* Override all button styles to red */
+/* Override all button styles to purple (violet) - Issue #72 */
 .btn-primary,
 .btn-secondary,
 .btn-success,
 .btn-info,
 .btn-warning,
 .btn-light,
-.btn-dark {
-  background-color: #dc3545 !important;
-  border-color: #dc3545 !important;
+.btn-dark,
+.btn-danger {
+  background-color: #8B00FF !important;
+  border-color: #8B00FF !important;
   color: #fff !important;
 }
 
@@ -33,9 +34,12 @@
 .btn-light:active,
 .btn-dark:hover,
 .btn-dark:focus,
-.btn-dark:active {
-  background-color: #bb2d3b !important;
-  border-color: #b02a37 !important;
+.btn-dark:active,
+.btn-danger:hover,
+.btn-danger:focus,
+.btn-danger:active {
+  background-color: #7600DC !important;
+  border-color: #6D00CC !important;
   color: #fff !important;
 }
 
@@ -45,9 +49,10 @@
 .btn-outline-info,
 .btn-outline-warning,
 .btn-outline-light,
-.btn-outline-dark {
-  color: #dc3545 !important;
-  border-color: #dc3545 !important;
+.btn-outline-dark,
+.btn-outline-danger {
+  color: #8B00FF !important;
+  border-color: #8B00FF !important;
   background-color: transparent !important;
 }
 
@@ -71,34 +76,40 @@
 .btn-outline-light:active,
 .btn-outline-dark:hover,
 .btn-outline-dark:focus,
-.btn-outline-dark:active {
-  background-color: #dc3545 !important;
-  border-color: #dc3545 !important;
-  color: #fff !important;
-}
-
-/* Keep danger button red (already red) */
-.btn-danger {
-  background-color: #dc3545 !important;
-  border-color: #dc3545 !important;
-}
-
-.btn-danger:hover,
-.btn-danger:focus,
-.btn-danger:active {
-  background-color: #bb2d3b !important;
-  border-color: #b02a37 !important;
-}
-
-.btn-outline-danger {
-  color: #dc3545 !important;
-  border-color: #dc3545 !important;
-}
-
+.btn-outline-dark:active,
 .btn-outline-danger:hover,
 .btn-outline-danger:focus,
 .btn-outline-danger:active {
-  background-color: #dc3545 !important;
-  border-color: #dc3545 !important;
+  background-color: #8B00FF !important;
+  border-color: #8B00FF !important;
   color: #fff !important;
+}
+
+/* Disabled state for all buttons */
+.btn-primary:disabled,
+.btn-secondary:disabled,
+.btn-success:disabled,
+.btn-info:disabled,
+.btn-warning:disabled,
+.btn-light:disabled,
+.btn-dark:disabled,
+.btn-danger:disabled {
+  background-color: #B366FF !important;
+  border-color: #B366FF !important;
+  color: #fff !important;
+  opacity: 0.65 !important;
+}
+
+.btn-outline-primary:disabled,
+.btn-outline-secondary:disabled,
+.btn-outline-success:disabled,
+.btn-outline-info:disabled,
+.btn-outline-warning:disabled,
+.btn-outline-light:disabled,
+.btn-outline-dark:disabled,
+.btn-outline-danger:disabled {
+  color: #B366FF !important;
+  border-color: #B366FF !important;
+  background-color: transparent !important;
+  opacity: 0.65 !important;
 }
