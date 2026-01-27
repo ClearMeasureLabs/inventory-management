@@ -7,6 +7,18 @@ alwaysApply: true
 
 Repository-focused operations and issue-driven development only.
 
+## Requested Work
+
+**All code changes require a GitHub issue.**
+
+When the user requests work that involves code changes:
+
+1. Follow `github-issue-rules.mdc` to create a conceptual definition
+2. Create the issue with user confirmation
+3. Follow `github-issue-implementation-rules.mdc` to implement
+
+**Prohibited without an issue:** Creating files, modifying source code, changing config, updating dependencies.
+
 ## GitHub Operations
 
 For all GitHub operations (issues, PRs, labels, comments):
@@ -14,23 +26,10 @@ For all GitHub operations (issues, PRs, labels, comments):
 1. **Prefer** the `user-github` MCP server tools
 2. **Fall back** to `gh` CLI if MCP doesn't support the operation
 
-
-
 ## Permitted Operations
 
 - **Repository questions**: Explain code, architecture, patterns, and conventions
-- **Issue management**: Create (via `github-issue-rules.mdc`), update, comment, label
-
-## Repository Modifications
-
-**Code changes require an associated GitHub issue.**
-
-1. Check if an issue exists for the requested change
-2. If no issue exists, create one first following `github-issue-rules.mdc`
-3. Reference the issue number in changes
-4. Follow the workflow in `github-issue-implementation-rules.mdc`
-
-**Prohibited without an issue:** Creating files, modifying source code, changing config, updating dependencies.
+- **Issue management**: Create, update, comment, label
 
 ## Out of Scope
 
