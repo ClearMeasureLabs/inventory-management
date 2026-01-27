@@ -38,11 +38,11 @@ describe('NavComponent', () => {
     expect(brand?.textContent).toContain('Inventory Management');
   });
 
-  it('should have Home link in navigation', () => {
+  it('should have navbar brand as home link', () => {
     const compiled = fixture.nativeElement as HTMLElement;
-    const navLinks = compiled.querySelectorAll('.nav-link');
-    expect(navLinks.length).toBeGreaterThan(0);
-    expect(navLinks[0].textContent?.trim()).toBe('Home');
+    const brand = compiled.querySelector('.navbar-brand');
+    expect(brand).toBeTruthy();
+    expect(brand?.getAttribute('routerLink')).toBe('/');
   });
 
   it('should have collapsible menu for mobile', () => {
