@@ -1,1 +1,61 @@
 /* You can add global styles to this file, and also import other style files */
+
+// Purple (Violet) Color Scheme for Buttons
+// Primary color: Rainbow violet (#8B00FF)
+
+// CSS Custom Properties for violet color palette
+:root {
+  --violet-primary: #8B00FF;
+  --violet-hover: #7A00E6;
+  --violet-active: #6900CC;
+  --violet-disabled: #C299E6;
+  --violet-light: #E8D4FF;
+  --violet-border: #8B00FF;
+}
+
+// Primary Button - Solid violet background
+.btn-primary {
+  --bs-btn-bg: var(--violet-primary);
+  --bs-btn-border-color: var(--violet-primary);
+  --bs-btn-hover-bg: var(--violet-hover);
+  --bs-btn-hover-border-color: var(--violet-hover);
+  --bs-btn-active-bg: var(--violet-active);
+  --bs-btn-active-border-color: var(--violet-active);
+  --bs-btn-disabled-bg: var(--violet-disabled);
+  --bs-btn-disabled-border-color: var(--violet-disabled);
+  --bs-btn-focus-shadow-rgb: 139, 0, 255;
+}
+
+// Secondary Button - Light background with violet border
+.btn-secondary {
+  --bs-btn-bg: #f8f9fa;
+  --bs-btn-border-color: var(--violet-primary);
+  --bs-btn-color: var(--violet-primary);
+  --bs-btn-hover-bg: var(--violet-light);
+  --bs-btn-hover-border-color: var(--violet-hover);
+  --bs-btn-hover-color: var(--violet-hover);
+  --bs-btn-active-bg: var(--violet-light);
+  --bs-btn-active-border-color: var(--violet-active);
+  --bs-btn-active-color: var(--violet-active);
+  --bs-btn-disabled-bg: #f8f9fa;
+  --bs-btn-disabled-border-color: var(--violet-disabled);
+  --bs-btn-disabled-color: var(--violet-disabled);
+  --bs-btn-focus-shadow-rgb: 139, 0, 255;
+}
+
+// Outline Primary Button - Violet outline and text
+.btn-outline-primary {
+  --bs-btn-color: var(--violet-primary);
+  --bs-btn-border-color: var(--violet-primary);
+  --bs-btn-hover-bg: var(--violet-primary);
+  --bs-btn-hover-border-color: var(--violet-primary);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-active-bg: var(--violet-active);
+  --bs-btn-active-border-color: var(--violet-active);
+  --bs-btn-active-color: #fff;
+  --bs-btn-disabled-color: var(--violet-disabled);
+  --bs-btn-disabled-border-color: var(--violet-disabled);
+  --bs-btn-focus-shadow-rgb: 139, 0, 255;
+}
+
+// Note: btn-danger and btn-outline-danger remain red for semantic meaning (destructive actions)
