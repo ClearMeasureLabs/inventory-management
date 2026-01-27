@@ -383,7 +383,7 @@ public class UpdateContainerCommandHandlerTests
         var command = new UpdateContainerCommand
         {
             ContainerId = container.ContainerId,
-            Name = new string('a', 201), // 201 characters exceeds max of 200
+            Name = new string('a', 501), // 501 characters exceeds max of 500
             Description = _faker.Lorem.Sentence()
         };
 
@@ -392,7 +392,7 @@ public class UpdateContainerCommandHandlerTests
             await _handler.HandleAsync(command, CancellationToken.None));
 
         exception.Errors.ShouldContainKey("Name");
-        exception.Errors["Name"].ShouldContain("Name cannot exceed 200 characters");
+        exception.Errors["Name"].ShouldContain("Name cannot exceed 500 characters");
     }
 
     [Test]
@@ -405,7 +405,7 @@ public class UpdateContainerCommandHandlerTests
         var command = new UpdateContainerCommand
         {
             ContainerId = container.ContainerId,
-            Name = new string('a', 200), // Exactly 200 characters
+            Name = new string('a', 500), // Exactly 500 characters
             Description = _faker.Lorem.Sentence()
         };
 

@@ -21,7 +21,7 @@ public class InventoryDbContext : DbContext
         modelBuilder.Entity<Container>(entity =>
         {
             entity.HasKey(e => e.ContainerId);
-            entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(500);
             entity.Property(e => e.Description).HasMaxLength(1000);
 
             entity.HasMany(e => e.InventoryItems)

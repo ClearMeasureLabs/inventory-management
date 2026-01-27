@@ -20,7 +20,7 @@ public class CreateContainerCommandHandler : ICreateContainerCommandHandler
         _eventHub = eventHub;
     }
 
-    private const int NameMaxLength = 200;
+    private const int NameMaxLength = 500;
     private const int DescriptionMaxLength = 250;
 
     public async Task<ContainerDto> HandleAsync(CreateContainerCommand request, CancellationToken cancellationToken)

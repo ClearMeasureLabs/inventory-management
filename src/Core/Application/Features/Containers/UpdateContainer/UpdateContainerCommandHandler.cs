@@ -21,7 +21,7 @@ public class UpdateContainerCommandHandler : IUpdateContainerCommandHandler
         _eventHub = eventHub;
     }
 
-    private const int NameMaxLength = 200;
+    private const int NameMaxLength = 500;
 
     public async Task<ContainerDto> HandleAsync(UpdateContainerCommand request, CancellationToken cancellationToken)
     {
