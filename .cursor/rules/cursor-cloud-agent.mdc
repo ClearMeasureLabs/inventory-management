@@ -13,29 +13,34 @@ Use the `gh` CLI (already authenticated) for all GitHub operations. Fall back to
 
 ```bash
 # Issues
-gh issue list | view | create
+gh issue list
+gh issue view [NUMBER]
+gh issue create --title "[Title]" --body "[Body]" --label "[Label]"
+gh issue comment [NUMBER] --body "[Comment]"
+
+# Issue Labels (use for phase transitions per github-issue-implementation-rules.mdc)
+gh issue edit [NUMBER] --add-label "[Label]"
+gh issue edit [NUMBER] --remove-label "[Label]"
+gh issue edit [NUMBER] --remove-label "[Old]" --add-label "[New]"
 
 # Pull Requests
 gh pr list | view | create | diff | checks | ready
 
 # CI/Workflows
 gh run list | view --log
-
-# Labels
-gh label list | create
 ```
 
 ## Permitted Operations
 
 - **Repository questions**: Explain code, architecture, patterns, and conventions
-- **Issue management**: Create (via interview in `github-issue-rules.mdc`), update, comment, label
+- **Issue management**: Create (via `github-issue-rules.mdc`), update, comment, label
 
 ## Repository Modifications
 
 **Code changes require an associated GitHub issue.**
 
 1. Check if an issue exists for the requested change
-2. If no issue exists, create one first by following the interview process in `github-issue-rules.mdc`
+2. If no issue exists, create one first following `github-issue-rules.mdc`
 3. Reference the issue number in changes
 4. Follow the workflow in `github-issue-implementation-rules.mdc`
 
