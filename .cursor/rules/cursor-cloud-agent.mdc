@@ -21,10 +21,7 @@ When the user requests work that involves code changes:
 
 ## GitHub Operations
 
-For all GitHub operations (issues, PRs, labels, comments):
-
-1. **Prefer** the `user-github` MCP server tools
-2. **Fall back** to `gh` CLI if MCP doesn't support the operation
+For all GitHub operations (issues, PRs, labels, comments), use the `gh` CLI.
 
 ## Permitted Operations
 
