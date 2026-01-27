@@ -64,7 +64,7 @@ describe('HomeComponent', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('.bg-light.rounded-3')).toBeTruthy();
     expect(compiled.textContent).toContain('No Containers');
-    expect(compiled.querySelector('button.btn-primary')).toBeTruthy();
+    expect(compiled.querySelector('button.btn-success')).toBeTruthy();
   }));
 
   it('should display containers table when containers exist', fakeAsync(() => {
@@ -97,7 +97,7 @@ describe('HomeComponent', () => {
     fixture.detectChanges();
     
     const compiled = fixture.nativeElement as HTMLElement;
-    const addButton = compiled.querySelector('button.btn-primary');
+    const addButton = compiled.querySelector('button.btn-success');
     expect(addButton).toBeTruthy();
     expect(addButton?.textContent).toContain('Add Container');
   }));
@@ -138,7 +138,7 @@ describe('HomeComponent', () => {
     fixture.detectChanges();
     
     const compiled = fixture.nativeElement as HTMLElement;
-    const deleteButtons = compiled.querySelectorAll('button.btn-outline-danger');
+    const deleteButtons = compiled.querySelectorAll('button.btn-outline-success');
     expect(deleteButtons.length).toBe(2);
   }));
 
