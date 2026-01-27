@@ -1,1 +1,109 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* Purple (Violet) Button Color Scheme - Issue #72 */
+/* Rainbow violet: #8B00FF */
+
+:root {
+  --btn-purple: #8B00FF;
+  --btn-purple-hover: #7A00E6;
+  --btn-purple-active: #6900CC;
+  --btn-purple-disabled: #C99FFF;
+  --btn-purple-light: #E8D4FF;
+  --btn-purple-dark: #5C00AA;
+}
+
+/* Primary buttons - solid purple */
+.btn-primary {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--btn-purple);
+  --bs-btn-border-color: var(--btn-purple);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--btn-purple-hover);
+  --bs-btn-hover-border-color: var(--btn-purple-hover);
+  --bs-btn-focus-shadow-rgb: 139, 0, 255;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--btn-purple-active);
+  --bs-btn-active-border-color: var(--btn-purple-active);
+  --bs-btn-disabled-color: #fff;
+  --bs-btn-disabled-bg: var(--btn-purple-disabled);
+  --bs-btn-disabled-border-color: var(--btn-purple-disabled);
+}
+
+/* Secondary buttons - muted purple */
+.btn-secondary {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: #6c5b7b;
+  --bs-btn-border-color: #6c5b7b;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #5a4a68;
+  --bs-btn-hover-border-color: #5a4a68;
+  --bs-btn-focus-shadow-rgb: 108, 91, 123;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #4d3f59;
+  --bs-btn-active-border-color: #4d3f59;
+  --bs-btn-disabled-color: #fff;
+  --bs-btn-disabled-bg: #9e8fad;
+  --bs-btn-disabled-border-color: #9e8fad;
+}
+
+/* Danger buttons - purple instead of red */
+.btn-danger {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--btn-purple-dark);
+  --bs-btn-border-color: var(--btn-purple-dark);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #4d0088;
+  --bs-btn-hover-border-color: #4d0088;
+  --bs-btn-focus-shadow-rgb: 92, 0, 170;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #3d006b;
+  --bs-btn-active-border-color: #3d006b;
+  --bs-btn-disabled-color: #fff;
+  --bs-btn-disabled-bg: #a366cc;
+  --bs-btn-disabled-border-color: #a366cc;
+}
+
+/* Outline primary buttons */
+.btn-outline-primary {
+  --bs-btn-color: var(--btn-purple);
+  --bs-btn-border-color: var(--btn-purple);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--btn-purple);
+  --bs-btn-hover-border-color: var(--btn-purple);
+  --bs-btn-focus-shadow-rgb: 139, 0, 255;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--btn-purple-active);
+  --bs-btn-active-border-color: var(--btn-purple-active);
+  --bs-btn-disabled-color: var(--btn-purple-disabled);
+  --bs-btn-disabled-border-color: var(--btn-purple-disabled);
+}
+
+/* Outline secondary buttons */
+.btn-outline-secondary {
+  --bs-btn-color: #6c5b7b;
+  --bs-btn-border-color: #6c5b7b;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #6c5b7b;
+  --bs-btn-hover-border-color: #6c5b7b;
+  --bs-btn-focus-shadow-rgb: 108, 91, 123;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #4d3f59;
+  --bs-btn-active-border-color: #4d3f59;
+  --bs-btn-disabled-color: #9e8fad;
+  --bs-btn-disabled-border-color: #9e8fad;
+}
+
+/* Outline danger buttons - purple instead of red */
+.btn-outline-danger {
+  --bs-btn-color: var(--btn-purple-dark);
+  --bs-btn-border-color: var(--btn-purple-dark);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--btn-purple-dark);
+  --bs-btn-hover-border-color: var(--btn-purple-dark);
+  --bs-btn-focus-shadow-rgb: 92, 0, 170;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #3d006b;
+  --bs-btn-active-border-color: #3d006b;
+  --bs-btn-disabled-color: #a366cc;
+  --bs-btn-disabled-border-color: #a366cc;
+}
