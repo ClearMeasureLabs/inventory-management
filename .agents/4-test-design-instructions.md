@@ -28,10 +28,11 @@ Issue has `Technical-Design` label AND involves user-facing features or critical
 
 ## Process
 
-1. **Analyze acceptance criteria** - Map each criterion to testable scenarios
-2. **Design test scenarios** - Cover happy path and key error scenarios
-3. **Plan test data** - Document required data setup
-4. **Post design** - Add as issue comment, update labels
+1. **Update labels** - Remove `Technical-Design`, Add `Test-Design`
+2. **Analyze acceptance criteria** - Map each criterion to testable scenarios
+3. **Design test scenarios** - Cover happy path and key error scenarios
+4. **Plan test data** - Document required data setup
+5. **Post design** - Add as issue comment
 
 ## Output Template (Tests Required)
 
@@ -65,8 +66,6 @@ Issue has `Technical-Design` label AND involves user-facing features or critical
 
 **Rationale:** [One of: Backend-only change | Covered by existing test [TestName] | UI-only change covered by Angular tests]
 ```
-
-**Labels:** Remove `Technical-Design`, Add `Test-Design`
 
 ## Test Environment
 

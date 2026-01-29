@@ -26,11 +26,12 @@ Issue has `Conceptual-Definition` label AND involves user-facing changes.
 
 ## Process
 
-1. **Analyze requirements** - Review the UX field from the conceptual definition
-2. **Design user flow** - Map step-by-step user interactions including error states
-3. **Identify UI components** - List components to create and modify
-4. **Document accessibility** - Keyboard navigation, screen readers, color contrast
-5. **Post design** - Add as issue comment, update labels
+1. **Update labels** - Remove `Conceptual-Definition`, Add `UX-Design`
+2. **Analyze requirements** - Review the UX field from the conceptual definition
+3. **Design user flow** - Map step-by-step user interactions including error states
+4. **Identify UI components** - List components to create and modify
+5. **Document accessibility** - Keyboard navigation, screen readers, color contrast
+6. **Post design** - Add as issue comment
 
 ## Output Template
 
@@ -53,8 +54,6 @@ Issue has `Conceptual-Definition` label AND involves user-facing changes.
 - [Keyboard navigation approach]
 - [Screen reader considerations]
 ```
-
-**Labels:** Remove `Conceptual-Definition`, Add `UX-Design`
 
 ## Rules
 
