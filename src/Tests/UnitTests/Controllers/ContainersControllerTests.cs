@@ -1,3 +1,4 @@
+using Application;
 using Application.Features.Containers;
 using Application.Features.Containers.CreateContainer;
 using Application.Features.Containers.UpdateContainer;
@@ -13,15 +14,15 @@ namespace UnitTests.Controllers;
 [TestFixture]
 public class ContainersControllerTests
 {
-    private Mock<IContainers> _containersMock = null!;
+    private Mock<IApplication> _applicationMock = null!;
     private ContainersController _controller = null!;
     private Faker _faker = null!;
 
     [SetUp]
     public void SetUp()
     {
-        _containersMock = new Mock<IContainers>();
-        _controller = new ContainersController(_containersMock.Object);
+        _applicationMock = new Mock<IApplication>();
+        _controller = new ContainersController(_applicationMock.Object);
         _faker = new Faker();
     }
 
@@ -41,8 +42,8 @@ public class ContainersControllerTests
             Name = request.Name
         };
 
-        _containersMock
-            .Setup(c => c.CreateAsync(It.IsAny<CreateContainerCommand>(), It.IsAny<CancellationToken>()))
+        _applicationMock
+            .Setup(c => c.Containers.CreateAsync(It.IsAny<CreateContainerCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedDto);
 
         // Act
@@ -70,8 +71,8 @@ public class ContainersControllerTests
             Description = request.Description
         };
 
-        _containersMock
-            .Setup(c => c.CreateAsync(It.IsAny<CreateContainerCommand>(), It.IsAny<CancellationToken>()))
+        _applicationMock
+            .Setup(c => c.Containers.CreateAsync(It.IsAny<CreateContainerCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedDto);
 
         // Act
@@ -100,16 +101,16 @@ public class ContainersControllerTests
             Name = request.Name
         };
 
-        _containersMock
-            .Setup(c => c.CreateAsync(It.IsAny<CreateContainerCommand>(), It.IsAny<CancellationToken>()))
+        _applicationMock
+            .Setup(c => c.Containers.CreateAsync(It.IsAny<CreateContainerCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedDto);
 
         // Act
         await _controller.CreateContainer(request, CancellationToken.None);
 
         // Assert - Verify request is correctly mapped to command
-        _containersMock.Verify(
-            c => c.CreateAsync(
+        _applicationMock.Verify(
+            c => c.Containers.CreateAsync(
                 It.Is<CreateContainerCommand>(cmd => 
                     cmd.Name == request.Name && 
                     cmd.Description == request.Description),
@@ -130,8 +131,8 @@ public class ContainersControllerTests
             Name = string.Empty
         };
 
-        _containersMock
-            .Setup(c => c.CreateAsync(It.IsAny<CreateContainerCommand>(), It.IsAny<CancellationToken>()))
+        _applicationMock
+            .Setup(c => c.Containers.CreateAsync(It.IsAny<CreateContainerCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ValidationException
             {
                 Errors = new Dictionary<string, string[]>
@@ -160,8 +161,8 @@ public class ContainersControllerTests
             Name = string.Empty
         };
 
-        _containersMock
-            .Setup(c => c.CreateAsync(It.IsAny<CreateContainerCommand>(), It.IsAny<CancellationToken>()))
+        _applicationMock
+            .Setup(c => c.Containers.CreateAsync(It.IsAny<CreateContainerCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ValidationException
             {
                 Errors = new Dictionary<string, string[]>
@@ -190,8 +191,8 @@ public class ContainersControllerTests
             Name = string.Empty
         };
 
-        _containersMock
-            .Setup(c => c.CreateAsync(It.IsAny<CreateContainerCommand>(), It.IsAny<CancellationToken>()))
+        _applicationMock
+            .Setup(c => c.Containers.CreateAsync(It.IsAny<CreateContainerCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ValidationException
             {
                 Errors = new Dictionary<string, string[]>
@@ -223,8 +224,8 @@ public class ContainersControllerTests
             new() { ContainerId = 2, Name = _faker.Commerce.ProductName() }
         };
 
-        _containersMock
-            .Setup(c => c.GetAllAsync(It.IsAny<CancellationToken>()))
+        _applicationMock
+            .Setup(c => c.Containers.GetAllAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(containers);
 
         // Act
@@ -246,8 +247,8 @@ public class ContainersControllerTests
             new() { ContainerId = 2, Name = "Container 2", Description = "Desc 2" }
         };
 
-        _containersMock
-            .Setup(c => c.GetAllAsync(It.IsAny<CancellationToken>()))
+        _applicationMock
+            .Setup(c => c.Containers.GetAllAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(containers);
 
         // Act
@@ -268,15 +269,15 @@ public class ContainersControllerTests
     public async Task GetAllContainers_ShouldCallContainersFacade()
     {
         // Arrange
-        _containersMock
-            .Setup(c => c.GetAllAsync(It.IsAny<CancellationToken>()))
+        _applicationMock
+            .Setup(c => c.Containers.GetAllAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<ContainerDto>());
 
         // Act
         await _controller.GetAllContainers(CancellationToken.None);
 
         // Assert
-        _containersMock.Verify(c => c.GetAllAsync(It.IsAny<CancellationToken>()), Times.Once);
+        _applicationMock.Verify(c => c.Containers.GetAllAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     #endregion
@@ -300,8 +301,8 @@ public class ContainersControllerTests
             Description = request.Description
         };
 
-        _containersMock
-            .Setup(c => c.UpdateAsync(It.IsAny<UpdateContainerCommand>(), It.IsAny<CancellationToken>()))
+        _applicationMock
+            .Setup(c => c.Containers.UpdateAsync(It.IsAny<UpdateContainerCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedDto);
 
         // Act
@@ -330,8 +331,8 @@ public class ContainersControllerTests
             Description = request.Description
         };
 
-        _containersMock
-            .Setup(c => c.UpdateAsync(It.IsAny<UpdateContainerCommand>(), It.IsAny<CancellationToken>()))
+        _applicationMock
+            .Setup(c => c.Containers.UpdateAsync(It.IsAny<UpdateContainerCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedDto);
 
         // Act
@@ -361,16 +362,16 @@ public class ContainersControllerTests
             Name = request.Name
         };
 
-        _containersMock
-            .Setup(c => c.UpdateAsync(It.IsAny<UpdateContainerCommand>(), It.IsAny<CancellationToken>()))
+        _applicationMock
+            .Setup(c => c.Containers.UpdateAsync(It.IsAny<UpdateContainerCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedDto);
 
         // Act
         await _controller.UpdateContainer(containerId, request, CancellationToken.None);
 
         // Assert - Verify request is correctly mapped to command
-        _containersMock.Verify(
-            c => c.UpdateAsync(
+        _applicationMock.Verify(
+            c => c.Containers.UpdateAsync(
                 It.Is<UpdateContainerCommand>(cmd => 
                     cmd.ContainerId == containerId &&
                     cmd.Name == request.Name && 
@@ -393,8 +394,8 @@ public class ContainersControllerTests
             Name = _faker.Commerce.ProductName()
         };
 
-        _containersMock
-            .Setup(c => c.UpdateAsync(It.IsAny<UpdateContainerCommand>(), It.IsAny<CancellationToken>()))
+        _applicationMock
+            .Setup(c => c.Containers.UpdateAsync(It.IsAny<UpdateContainerCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ValidationException
             {
                 Errors = new Dictionary<string, string[]>
@@ -424,8 +425,8 @@ public class ContainersControllerTests
             Name = string.Empty
         };
 
-        _containersMock
-            .Setup(c => c.UpdateAsync(It.IsAny<UpdateContainerCommand>(), It.IsAny<CancellationToken>()))
+        _applicationMock
+            .Setup(c => c.Containers.UpdateAsync(It.IsAny<UpdateContainerCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ValidationException
             {
                 Errors = new Dictionary<string, string[]>
@@ -455,8 +456,8 @@ public class ContainersControllerTests
             Name = "Duplicate Name"
         };
 
-        _containersMock
-            .Setup(c => c.UpdateAsync(It.IsAny<UpdateContainerCommand>(), It.IsAny<CancellationToken>()))
+        _applicationMock
+            .Setup(c => c.Containers.UpdateAsync(It.IsAny<UpdateContainerCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ValidationException
             {
                 Errors = new Dictionary<string, string[]>

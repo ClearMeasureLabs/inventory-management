@@ -1,3 +1,4 @@
+using Application;
 using Application.Features.Containers;
 using Application.Features.Containers.CreateContainer;
 using Application.Features.Containers.DeleteContainer;
@@ -13,11 +14,11 @@ namespace WebAPI.Controllers;
 [Tags("Containers")]
 public class ContainersController : ControllerBase
 {
-    private readonly IContainers _containers;
+    private readonly IApplication _application;
 
-    public ContainersController(IContainers containers)
+    public ContainersController(IApplication application)
     {
-        _containers = containers;
+        _application = application;
     }
 
     /// <summary>
@@ -27,7 +28,7 @@ public class ContainersController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<ContainerResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllContainers(CancellationToken cancellationToken)
     {
-        var containers = await _containers.GetAllAsync(cancellationToken);
+        var containers = await _application.Containers.GetAllAsync(cancellationToken);
         var response = containers.Select(ContainerResponse.FromDto);
         return Ok(response);
     }
@@ -48,7 +49,7 @@ public class ContainersController : ControllerBase
                 Description = request.Description
             };
 
-            var result = await _containers.CreateAsync(command, cancellationToken);
+            var result = await _application.Containers.CreateAsync(command, cancellationToken);
             var response = ContainerResponse.FromDto(result);
             
             return CreatedAtAction(nameof(GetAllContainers), new { id = response.ContainerId }, response);
@@ -81,7 +82,7 @@ public class ContainersController : ControllerBase
                 ContainerId = id
             };
 
-            await _containers.DeleteAsync(command, cancellationToken);
+            await _application.Containers.DeleteAsync(command, cancellationToken);
             
             return NoContent();
         }
@@ -115,7 +116,7 @@ public class ContainersController : ControllerBase
                 Description = request.Description
             };
 
-            var result = await _containers.UpdateAsync(command, cancellationToken);
+            var result = await _application.Containers.UpdateAsync(command, cancellationToken);
             var response = ContainerResponse.FromDto(result);
             
             return Ok(response);
