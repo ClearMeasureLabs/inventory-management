@@ -88,15 +88,16 @@ public class ContainerDetailsTests : PageTest
     }
 
     [Test]
-    public async Task ContainerDetailsPage_BackLink_NavigatesToContainersList()
+    public async Task ContainerDetailsPage_BreadcrumbNavigation_NavigatesToContainersList()
     {
         // Arrange
         await Page.GotoAsync($"{TestEnvironment.WebAppUrl}/containers/{_testContainerId}");
         await Expect(Page.Locator("h1")).ToContainTextAsync("Test Container");
 
-        // Act - Click back link
-        var backLink = Page.Locator("a").Filter(new() { HasText = "Back to Containers" });
-        await backLink.ClickAsync();
+        // Act - Click "Containers" link in breadcrumb
+        var breadcrumbNav = Page.Locator("nav[aria-label='breadcrumb']");
+        var containersLink = breadcrumbNav.Locator("a", new() { HasText = "Containers" });
+        await containersLink.ClickAsync();
 
         // Assert - Verify we're back on the home page
         await Expect(Page).ToHaveURLAsync(new Regex("^" + Regex.Escape(TestEnvironment.WebAppUrl) + "/?$"));

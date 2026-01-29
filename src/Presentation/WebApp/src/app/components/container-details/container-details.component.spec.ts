@@ -120,7 +120,7 @@ describe('ContainerDetailsComponent', () => {
     expect(titleService.getTitle()).toBe('My Container - Ivan');
   }));
 
-  it('should display back link to containers list', fakeAsync(() => {
+  it('should not display back link in success state', fakeAsync(() => {
     fixture.detectChanges();
 
     const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/1`);
@@ -131,6 +131,6 @@ describe('ContainerDetailsComponent', () => {
 
     const compiled = fixture.nativeElement as HTMLElement;
     const backLink = compiled.querySelector('a[routerLink="/"]');
-    expect(backLink?.textContent).toContain('Back to Containers');
+    expect(backLink).toBeNull();
   }));
 });
