@@ -98,12 +98,16 @@ Review pull requests against project standards, architecture rules, and testing 
 ## Decision Actions
 
 **All checks pass:**
-- Add `Approved by Agent` label
-- Do NOT use `gh pr review --approve`
+- Post review comment with approval using the output template
+- Add `Approved by Agent` label to PR
+- **STOP** - Do NOT merge the PR
+- **STOP** - Do NOT close the issue
+- Human review and merge required
 
 **Issues found:**
 - Post review comment with specific feedback
 - Convert PR to draft: `gh pr ready --undo [PR]`
+- Do NOT add `Approved by Agent` label
 
 ## Rules
 
@@ -113,8 +117,11 @@ Review pull requests against project standards, architecture rules, and testing 
 4. **ALWAYS** verify tests were added, not just that they pass
 5. **NEVER** approve with open issues
 6. **NEVER** use vague feedback
+7. **NEVER** merge PRs - human review and merge required
+8. **NEVER** close issues - they will be auto-closed when PR is merged by human
+9. **NEVER** use `gh pr review --approve` or `gh pr merge`
 
 ## Next Phase
 
-- **Approved:** PR ready to merge
+- **Approved by Agent:** PR awaits human review and merge
 - **Changes requested:** **Implement Changes Agent**
