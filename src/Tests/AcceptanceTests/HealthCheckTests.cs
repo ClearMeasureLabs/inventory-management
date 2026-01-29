@@ -44,7 +44,7 @@ public class HealthCheckTests : PageTest
         await Page.GotoAsync(TestEnvironment.WebAppUrl);
 
         // Act & Assert
-        var nav = Page.Locator("nav");
+        var nav = Page.Locator("nav.navbar");
         await Expect(nav).ToBeVisibleAsync();
     }
 }
