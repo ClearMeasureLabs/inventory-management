@@ -57,7 +57,8 @@ public class BreadcrumbNavigationTests : PageTest
         await Expect(breadcrumbNav).ToBeVisibleAsync();
 
         var breadcrumbText = await breadcrumbNav.TextContentAsync();
-        breadcrumbText.ShouldContain("Containers", "Breadcrumb should display 'Containers' on home page");
+        breadcrumbText.ShouldNotBeNull();
+        breadcrumbText.ShouldContain("Containers");
 
         // "Containers" should not be a link on home page
         var containersLink = breadcrumbNav.Locator("a", new() { HasText = "Containers" });
@@ -78,8 +79,9 @@ public class BreadcrumbNavigationTests : PageTest
         await Expect(breadcrumbNav).ToBeVisibleAsync();
 
         var breadcrumbText = await breadcrumbNav.TextContentAsync();
-        breadcrumbText.ShouldContain("Containers", "Breadcrumb should display 'Containers'");
-        breadcrumbText.ShouldContain(TestContainerName, "Breadcrumb should display container name");
+        breadcrumbText.ShouldNotBeNull();
+        breadcrumbText.ShouldContain("Containers");
+        breadcrumbText.ShouldContain(TestContainerName);
 
         // "Containers" should be a clickable link
         var containersLink = breadcrumbNav.Locator("a", new() { HasText = "Containers" });
