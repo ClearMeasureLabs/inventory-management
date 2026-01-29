@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { ContainerService } from '../../services/container.service';
 import { ContainerResponse } from '../../models/container.model';
@@ -10,7 +11,7 @@ import { EditContainerModalComponent } from '../edit-container-modal/edit-contai
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, AddContainerModalComponent, DeleteContainerModalComponent, EditContainerModalComponent],
+  imports: [CommonModule, RouterModule, AddContainerModalComponent, DeleteContainerModalComponent, EditContainerModalComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })

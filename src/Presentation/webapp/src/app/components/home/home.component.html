@@ -28,7 +28,7 @@
     <tbody>
       @for (container of containers; track container.containerId) {
         <tr>
-          <td>{{ container.containerId }}</td>
+          <td><a [routerLink]="['/containers', container.containerId]">{{ container.containerId }}</a></td>
           <td>{{ container.name }}</td>
           <td>
             <button 

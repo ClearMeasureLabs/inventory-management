@@ -19,6 +19,12 @@ export class ContainerService {
     );
   }
 
+  getById(id: number): Observable<ContainerResponse> {
+    return this.http.get<ContainerResponse>(`${this.apiUrl}/${id}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   create(request: CreateContainerRequest): Observable<ContainerResponse> {
     return this.http.post<ContainerResponse>(this.apiUrl, request).pipe(
       catchError(this.handleError)

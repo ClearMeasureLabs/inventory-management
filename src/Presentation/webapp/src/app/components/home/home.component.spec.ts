@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 
 import { HomeComponent } from './home.component';
@@ -18,6 +19,7 @@ describe('HomeComponent', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideRouter([]),
         ContainerService,
         Title
       ]
@@ -188,12 +190,33 @@ describe('HomeComponent', () => {
 
   it('should have delete container modal component', fakeAsync(() => {
     fixture.detectChanges();
-    
+
     const req = httpMock.expectOne(`${environment.apiUrl}/api/containers`);
     req.flush([]);
     tick();
     fixture.detectChanges();
-    
+
     expect(component.deleteContainerModal).toBeTruthy();
+  }));
+
+  it('should render container ID as link to details page', fakeAsync(() => {
+    const mockContainers = [
+      { containerId: 1, name: 'Container 1', description: 'Test' },
+      { containerId: 2, name: 'Container 2', description: 'Test' }
+    ];
+
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers`);
+    req.flush(mockContainers);
+
+    tick();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const idLinks = compiled.querySelectorAll('td a[href^="/containers/"]');
+    expect(idLinks.length).toBe(2);
+    expect(idLinks[0].getAttribute('href')).toBe('/containers/1');
+    expect(idLinks[1].getAttribute('href')).toBe('/containers/2');
   }));
 });

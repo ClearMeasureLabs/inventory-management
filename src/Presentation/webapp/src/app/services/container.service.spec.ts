@@ -184,6 +184,55 @@ describe('ContainerService', () => {
     });
   });
 
+  describe('getById', () => {
+    it('should return container from API by ID', () => {
+      const mockContainer = { containerId: 1, name: 'Container 1', description: 'Test Description' };
+
+      service.getById(1).subscribe(container => {
+        expect(container).toEqual(mockContainer);
+      });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/1`);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockContainer);
+    });
+
+    it('should call correct endpoint with container ID', () => {
+      const containerId = 42;
+      const mockContainer = { containerId: 42, name: 'Container 42', description: '' };
+
+      service.getById(containerId).subscribe();
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/42`);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockContainer);
+    });
+
+    it('should handle not found error response', () => {
+      service.getById(999).subscribe({
+        next: () => fail('should have failed'),
+        error: (error) => {
+          expect(error.title).toBeTruthy();
+        }
+      });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/999`);
+      req.flush(null, { status: 404, statusText: 'Not Found' });
+    });
+
+    it('should handle server error response', () => {
+      service.getById(1).subscribe({
+        next: () => fail('should have failed'),
+        error: (error) => {
+          expect(error.title).toBe('An unexpected error occurred. Please try again.');
+        }
+      });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/1`);
+      req.flush(null, { status: 500, statusText: 'Server Error' });
+    });
+  });
+
   describe('update', () => {
     it('should update container via PUT', () => {
       const containerId = 1;

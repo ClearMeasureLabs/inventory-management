@@ -34,6 +34,25 @@ public class ContainersController : ControllerBase
     }
 
     /// <summary>
+    /// Gets a container by ID.
+    /// </summary>
+    [HttpGet("{id}")]
+    [ProducesResponseType(typeof(ContainerResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetContainerById(int id, CancellationToken cancellationToken)
+    {
+        var container = await _application.Containers.GetByIdAsync(id, cancellationToken);
+
+        if (container is null)
+        {
+            return NotFound();
+        }
+
+        var response = ContainerResponse.FromDto(container);
+        return Ok(response);
+    }
+
+    /// <summary>
     /// Creates a new container.
     /// </summary>
     [HttpPost]
