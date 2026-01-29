@@ -1,0 +1,36 @@
+@if (isLoading) {
+  <div class="d-flex justify-content-center">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+} @else if (notFound) {
+  <div class="alert alert-danger" role="alert">
+    <h4 class="alert-heading">Container not found</h4>
+    <p>The container you're looking for doesn't exist.</p>
+    <hr>
+    <a routerLink="/" class="btn btn-primary">← Back to Containers</a>
+  </div>
+} @else if (container) {
+  <div class="mb-3">
+    <a routerLink="/" class="btn btn-link ps-0">← Back to Containers</a>
+  </div>
+
+  <h1>{{ container.name }}</h1>
+  <p class="text-muted">{{ container.description }}</p>
+
+  <h2 class="mt-4">Container Items</h2>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Item ID</th>
+        <th>Name</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td colspan="2" class="text-center text-muted">No items in this container</td>
+      </tr>
+    </tbody>
+  </table>
+}
