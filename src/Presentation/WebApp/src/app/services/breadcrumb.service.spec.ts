@@ -22,29 +22,36 @@ describe('BreadcrumbService', () => {
 
   it('should update breadcrumb data', (done) => {
     const testData = { containerName: 'Test Container' };
+    let firstCall = true;
 
     service.getBreadcrumbData().subscribe(data => {
-      if (data.containerName) {
-        expect(data).toEqual(testData);
-        done();
+      if (firstCall) {
+        firstCall = false;
+        return;
       }
+      expect(data).toEqual(testData);
+      done();
     });
 
     service.setBreadcrumbData(testData);
   });
 
   it('should clear breadcrumb data', (done) => {
-    service.setBreadcrumbData({ containerName: 'Test Container' });
-
     let callCount = 0;
     service.getBreadcrumbData().subscribe(data => {
       callCount++;
+      // Skip first emission (initial empty {})
+      if (callCount === 1) return;
+      // Skip second emission (set data)
+      if (callCount === 2) return;
+      // Third emission should be cleared data
       if (callCount === 3) {
         expect(data).toEqual({});
         done();
       }
     });
 
+    service.setBreadcrumbData({ containerName: 'Test Container' });
     service.clearBreadcrumbData();
   });
 });
