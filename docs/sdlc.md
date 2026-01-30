@@ -166,7 +166,7 @@ For features with acceptance tests, run them against the full deployed stack:
 
 This deploys the entire application via Docker and runs Playwright tests.
 
-Update the issue label to `Functional-Validation`.
+Update the issue label to `Code-Review`.
 
 ## Code Review
 
@@ -232,7 +232,7 @@ Examples:
 ### Label Progression
 
 ```
-Conceptual-Definition → UX-Design → Technical-Design → Test-Design → Development → Functional-Validation → Ready-For-Review
+Conceptual-Definition → UX-Design → Technical-Design → Test-Design → Development → Code-Review → Ready-For-Review
 ```
 
 Skip `UX-Design` for backend-only work.
