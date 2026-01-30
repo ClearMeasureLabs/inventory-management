@@ -1,0 +1,37 @@
+---
+description: Enforces the staged SDLC workflow defined in .agents/ for all code changes
+alwaysApply: true
+---
+
+# SDLC Workflow Requirement
+
+**ALWAYS** follow the staged workflow in `.agents/` when making code changes.
+
+## Required Workflow
+
+Before any code modification:
+
+1. **Read the relevant instruction file** from `.agents/` for your current phase
+2. **Follow the process defined** in that instruction file
+3. **Complete the phase outputs** before moving to the next phase
+
+## SDLC Phases
+
+| Phase | When to Use | Instructions File |
+|-------|-------------|-------------------|
+| 1. Issue Creation | New feature/bug request | `.agents/1-issue-creation-instructions.md` |
+| 2. UX Design | User-facing changes | `.agents/2-ux-design-instructions.md` |
+| 3. Technical Design | Architecture decisions | `.agents/3-technical-design-instructions.md` |
+| 4. Test Design | Define test strategy | `.agents/4-test-design-instructions.md` |
+| 5. Development | Implementation | `.agents/5-development-instructions.md` |
+| 6. Code Review | Review changes | `.agents/6-code-review-instructions.md` |
+| 7. Implement Changes | Address review feedback | `.agents/7-implement-changes-instructions.md` |
+| 8. Functional Validation | Final verification | `.agents/8-functional-validation-instructions.md` |
+
+## Rules
+
+- **NEVER** skip directly to coding without an associated GitHub issue
+- **ALWAYS** read the instruction file for your current phase before starting work
+- **Use judgment** on which phases apply—not all changes require all phases
+- Backend-only changes can skip UX Design (phase 2)
+- Simple fixes may skip Technical Design (phase 3)
