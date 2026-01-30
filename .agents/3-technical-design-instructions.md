@@ -4,10 +4,6 @@
 
 Create a detailed technical implementation plan identifying affected components, implementation steps, dependencies, and required tests.
 
-## Trigger
-
-Issue has `Technical-Design` label.
-
 ## Inputs
 
 | Input | Source |
@@ -25,7 +21,7 @@ Issue has `Technical-Design` label.
 4. **Identify dependencies** - Flag any package or SDK changes
 5. **Plan tests** - Specify unit, integration, and Angular tests
 6. **Post design** - Add as issue comment
-7. **Update label** - Remove `Technical-Design`, Add `Test-Design` (or `Development` if skipping test design) to signal next phase
+7. **Update label** - Remove `Technical-Design`, Add `Test-Design` to signal next phase
 
 ## Output Template
 

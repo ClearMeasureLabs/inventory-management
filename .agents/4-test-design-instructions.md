@@ -4,10 +4,6 @@
 
 Design end-to-end acceptance tests that validate user-facing features in a fully deployed environment.
 
-## Trigger
-
-Issue has `Test-Design` label.
-
 ## Skip Conditions
 
 **SKIP this phase** and proceed directly to Development when:

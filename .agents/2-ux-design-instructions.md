@@ -4,10 +4,6 @@
 
 Design user experience for user-facing features, documenting user flows, UI components, and accessibility requirements.
 
-## Trigger
-
-Issue has `UX-Design` label.
-
 ## Skip Conditions
 
 **SKIP this phase** and proceed directly to Technical Design when:

@@ -4,10 +4,6 @@
 
 Implement the feature or fix according to the technical design, following architecture rules and testing requirements.
 
-## Trigger
-
-Issue has `Development` label.
-
 ## Prerequisites
 
 **MUST complete before starting:**

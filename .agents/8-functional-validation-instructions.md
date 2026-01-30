@@ -4,10 +4,6 @@
 
 Validate the implementation in a fully deployed environment by running acceptance tests against the complete application stack.
 
-## Trigger
-
-Issue has `Functional-Validation` label.
-
 ## Prerequisites
 
 **MUST be true before starting:**
