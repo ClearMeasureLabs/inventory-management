@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { Title } from '@angular/platform-browser';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 
 import { ContainerDetailsComponent } from './container-details.component';
@@ -132,5 +132,237 @@ describe('ContainerDetailsComponent', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     const backLink = compiled.querySelector('a[routerLink="/"]');
     expect(backLink).toBeNull();
+  }));
+
+  it('should show edit and delete buttons when container loaded', fakeAsync(() => {
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/1`);
+    req.flush({ containerId: 1, name: 'Test Container', description: 'Test Description' });
+
+    tick();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const editButton = compiled.querySelector('button[aria-label="Edit container"]');
+    const deleteButton = compiled.querySelector('button[aria-label="Delete container"]');
+
+    expect(editButton).toBeTruthy();
+    expect(deleteButton).toBeTruthy();
+  }));
+
+  it('should enter edit mode when edit button clicked', fakeAsync(() => {
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/1`);
+    req.flush({ containerId: 1, name: 'Test Container', description: 'Test Description' });
+
+    tick();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const editButton = compiled.querySelector('button[aria-label="Edit container"]') as HTMLButtonElement;
+    editButton.click();
+
+    fixture.detectChanges();
+
+    expect(component.isEditMode).toBeTrue();
+    expect(component.editName).toBe('Test Container');
+    expect(component.editDescription).toBe('Test Description');
+
+    const nameInput = compiled.querySelector('input.form-control-lg') as HTMLInputElement;
+    const descriptionTextarea = compiled.querySelector('textarea') as HTMLTextAreaElement;
+
+    expect(nameInput).toBeTruthy();
+    expect(descriptionTextarea).toBeTruthy();
+  }));
+
+  it('should show save and cancel buttons in edit mode', fakeAsync(() => {
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/1`);
+    req.flush({ containerId: 1, name: 'Test Container', description: 'Test Description' });
+
+    tick();
+    fixture.detectChanges();
+
+    component.enterEditMode();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const saveButton = compiled.querySelector('button[aria-label="Save changes"]');
+    const cancelButton = compiled.querySelector('button[aria-label="Cancel editing"]');
+
+    expect(saveButton).toBeTruthy();
+    expect(cancelButton).toBeTruthy();
+
+    const editButton = compiled.querySelector('button[aria-label="Edit container"]');
+    const deleteButton = compiled.querySelector('button[aria-label="Delete container"]');
+
+    expect(editButton).toBeNull();
+    expect(deleteButton).toBeNull();
+  }));
+
+  it('should save changes and exit edit mode on save', fakeAsync(() => {
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/1`);
+    req.flush({ containerId: 1, name: 'Test Container', description: 'Test Description' });
+
+    tick();
+    fixture.detectChanges();
+
+    component.enterEditMode();
+    component.editName = 'Updated Container';
+    component.editDescription = 'Updated Description';
+
+    component.saveChanges();
+
+    const updateReq = httpMock.expectOne(`${environment.apiUrl}/api/containers/1`);
+    expect(updateReq.request.method).toBe('PUT');
+    expect(updateReq.request.body).toEqual({
+      name: 'Updated Container',
+      description: 'Updated Description'
+    });
+
+    updateReq.flush({ containerId: 1, name: 'Updated Container', description: 'Updated Description' });
+
+    tick();
+    fixture.detectChanges();
+
+    expect(component.isEditMode).toBeFalse();
+    expect(component.container?.name).toBe('Updated Container');
+    expect(component.container?.description).toBe('Updated Description');
+  }));
+
+  it('should cancel changes and exit edit mode on cancel', fakeAsync(() => {
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/1`);
+    req.flush({ containerId: 1, name: 'Test Container', description: 'Test Description' });
+
+    tick();
+    fixture.detectChanges();
+
+    component.enterEditMode();
+    component.editName = 'Modified Name';
+    component.editDescription = 'Modified Description';
+
+    component.cancelEdit();
+    fixture.detectChanges();
+
+    expect(component.isEditMode).toBeFalse();
+    expect(component.container?.name).toBe('Test Container');
+    expect(component.container?.description).toBe('Test Description');
+  }));
+
+  it('should show validation error for empty name', fakeAsync(() => {
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/1`);
+    req.flush({ containerId: 1, name: 'Test Container', description: 'Test Description' });
+
+    tick();
+    fixture.detectChanges();
+
+    component.enterEditMode();
+    component.editName = '';
+    component.saveChanges();
+
+    fixture.detectChanges();
+
+    expect(component.hasNameError()).toBeTrue();
+    expect(component.getNameErrors()).toContain('Name is required');
+    expect(component.isEditMode).toBeTrue();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('Name is required');
+  }));
+
+  it('should open delete modal when delete button clicked', fakeAsync(() => {
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/1`);
+    req.flush({ containerId: 1, name: 'Test Container', description: 'Test Description' });
+
+    tick();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const deleteButton = compiled.querySelector('button[aria-label="Delete container"]') as HTMLButtonElement;
+    deleteButton.click();
+
+    fixture.detectChanges();
+
+    expect(component.isDeleteModalVisible).toBeTrue();
+
+    const modal = compiled.querySelector('#deleteContainerModal');
+    expect(modal).toBeTruthy();
+  }));
+
+  it('should close delete modal when cancel clicked', fakeAsync(() => {
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/1`);
+    req.flush({ containerId: 1, name: 'Test Container', description: 'Test Description' });
+
+    tick();
+    fixture.detectChanges();
+
+    component.openDeleteModal();
+    fixture.detectChanges();
+
+    expect(component.isDeleteModalVisible).toBeTrue();
+
+    component.closeDeleteModal();
+    fixture.detectChanges();
+
+    expect(component.isDeleteModalVisible).toBeFalse();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const modal = compiled.querySelector('#deleteContainerModal');
+    expect(modal).toBeNull();
+  }));
+
+  it('should delete container and navigate to home on confirm', fakeAsync(() => {
+    const router = TestBed.inject(Router);
+    spyOn(router, 'navigate');
+
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/1`);
+    req.flush({ containerId: 1, name: 'Test Container', description: 'Test Description' });
+
+    tick();
+    fixture.detectChanges();
+
+    component.openDeleteModal();
+    component.confirmDelete();
+
+    const deleteReq = httpMock.expectOne(`${environment.apiUrl}/api/containers/1`);
+    expect(deleteReq.request.method).toBe('DELETE');
+
+    deleteReq.flush(null);
+
+    tick();
+
+    expect(router.navigate).toHaveBeenCalledWith(['/']);
+  }));
+
+  it('should not show edit/delete buttons when container not found', fakeAsync(() => {
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/1`);
+    req.flush(null, { status: 404, statusText: 'Not Found' });
+
+    tick();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const editButton = compiled.querySelector('button[aria-label="Edit container"]');
+    const deleteButton = compiled.querySelector('button[aria-label="Delete container"]');
+
+    expect(editButton).toBeNull();
+    expect(deleteButton).toBeNull();
   }));
 });

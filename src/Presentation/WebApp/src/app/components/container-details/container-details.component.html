@@ -12,8 +12,102 @@
     <a routerLink="/" class="btn btn-primary">← Back to Containers</a>
   </div>
 } @else if (container) {
-  <h1>{{ container.name }}</h1>
-  <p class="text-muted">{{ container.description }}</p>
+  <!-- Header with name and action buttons -->
+  <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+    @if (!isEditMode) {
+      <h1>{{ container.name }}</h1>
+      <div>
+        <button
+          class="btn btn-outline-primary me-2"
+          type="button"
+          (click)="enterEditMode()"
+          aria-label="Edit container">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+          </svg>
+          Edit
+        </button>
+        <button
+          class="btn btn-outline-danger"
+          type="button"
+          (click)="openDeleteModal()"
+          aria-label="Delete container">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+            <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+          </svg>
+          Delete
+        </button>
+      </div>
+    } @else {
+      <div class="flex-grow-1 me-3">
+        <input
+          type="text"
+          class="form-control form-control-lg"
+          [class.is-invalid]="hasNameError()"
+          [(ngModel)]="editName"
+          placeholder="Container name"
+          required
+          aria-label="Container name"
+          [attr.aria-describedby]="hasNameError() ? 'nameError' : null" />
+        @if (hasNameError()) {
+          <div id="nameError" class="invalid-feedback" style="display: block;">
+            {{ getNameErrors().join(', ') }}
+          </div>
+        }
+      </div>
+      <div>
+        <button
+          class="btn btn-primary me-2"
+          type="button"
+          (click)="saveChanges()"
+          [disabled]="isSaving"
+          aria-label="Save changes">
+          @if (isSaving) {
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            <span>Saving...</span>
+          } @else {
+            <span>Save</span>
+          }
+        </button>
+        <button
+          class="btn btn-secondary"
+          type="button"
+          (click)="cancelEdit()"
+          [disabled]="isSaving"
+          aria-label="Cancel editing">
+          Cancel
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- Description -->
+  @if (!isEditMode) {
+    <p class="text-muted">{{ container.description }}</p>
+  } @else {
+    <div class="mb-3">
+      <textarea
+        class="form-control"
+        [class.is-invalid]="hasDescriptionError()"
+        [(ngModel)]="editDescription"
+        placeholder="Container description (optional)"
+        rows="3"
+        aria-label="Container description"
+        [attr.aria-describedby]="hasDescriptionError() ? 'descriptionError' : null"></textarea>
+      @if (hasDescriptionError()) {
+        <div id="descriptionError" class="invalid-feedback" style="display: block;">
+          {{ getDescriptionErrors().join(', ') }}
+        </div>
+      }
+    </div>
+
+    @if (generalError) {
+      <div class="alert alert-danger" role="alert">
+        {{ generalError }}
+      </div>
+    }
+  }
 
   <h2 class="mt-4">Container Items</h2>
   <table class="table table-striped">
@@ -29,4 +123,39 @@
       </tr>
     </tbody>
   </table>
+}
+
+<!-- Delete Confirmation Modal -->
+@if (isDeleteModalVisible && container) {
+  <div class="modal fade show" id="deleteContainerModal" tabindex="-1" style="display: block;" aria-labelledby="deleteContainerModalLabel" aria-modal="true" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteContainerModalLabel">Delete Container</h5>
+          <button type="button" class="btn-close" (click)="closeDeleteModal()" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete the container <strong>{{ container.name }}</strong>?</p>
+          <p class="text-muted">This action cannot be undone.</p>
+          @if (generalError) {
+            <div class="alert alert-danger" role="alert">
+              {{ generalError }}
+            </div>
+          }
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeDeleteModal()">Cancel</button>
+          <button type="button" class="btn btn-danger" (click)="confirmDelete()" [disabled]="isDeleting">
+            @if (isDeleting) {
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              <span>Deleting...</span>
+            } @else {
+              <span>Delete</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade show"></div>
 }
