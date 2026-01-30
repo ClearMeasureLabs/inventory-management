@@ -17,16 +17,72 @@
     <h1>Containers</h1>
     <button class="btn btn-primary" type="button" (click)="openAddModal()">Add Container</button>
   </div>
+
+  <!-- Search/Filter Section -->
+  <div class="mb-3">
+    <label for="containerSearch" class="form-label">Filter by name</label>
+    <div class="input-group" style="max-width: 400px;">
+      <input
+        type="text"
+        class="form-control"
+        id="containerSearch"
+        [(ngModel)]="searchText"
+        placeholder="Search containers..."
+        aria-label="Filter containers by name">
+      @if (searchText) {
+        <button
+          class="btn btn-outline-secondary"
+          type="button"
+          (click)="clearSearch()"
+          aria-label="Clear search">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+          </svg>
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (filteredAndSortedContainers.length === 0 && containers && containers.length > 0) {
+    <div class="alert alert-info" role="alert">
+      No containers found matching "{{ searchText }}"
+    </div>
+  }
+
   <table class="table table-striped">
     <thead>
       <tr>
-        <th>ID</th>
-        <th>Name</th>
+        <th
+          role="button"
+          tabindex="0"
+          (click)="onSort('containerId')"
+          (keydown.enter)="onSort('containerId')"
+          (keydown.space)="onSort('containerId')"
+          [attr.aria-sort]="sortColumn === 'containerId' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'"
+          style="cursor: pointer; user-select: none;">
+          ID
+          @if (sortColumn === 'containerId') {
+            <span aria-hidden="true">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+          }
+        </th>
+        <th
+          role="button"
+          tabindex="0"
+          (click)="onSort('name')"
+          (keydown.enter)="onSort('name')"
+          (keydown.space)="onSort('name')"
+          [attr.aria-sort]="sortColumn === 'name' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'"
+          style="cursor: pointer; user-select: none;">
+          Name
+          @if (sortColumn === 'name') {
+            <span aria-hidden="true">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+          }
+        </th>
         <th>Actions</th>
       </tr>
     </thead>
     <tbody>
-      @for (container of containers; track container.containerId) {
+      @for (container of filteredAndSortedContainers; track container.containerId) {
         <tr>
           <td><a [routerLink]="['/containers', container.containerId]">{{ container.containerId }}</a></td>
           <td>{{ container.name }}</td>
