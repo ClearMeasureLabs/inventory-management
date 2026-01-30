@@ -14,7 +14,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          gh issue edit ${{ github.event.issue.number }} --remove-label "Development-Ready" --add-label "Development" --repo ${{ github.repository }}
+          gh issue edit ${{ github.event.issue.number }} --add-label "Development" --repo ${{ github.repository }}
 
       - name: Checkout repository
         uses: actions/checkout@v4

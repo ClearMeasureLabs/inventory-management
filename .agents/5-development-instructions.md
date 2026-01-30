@@ -24,7 +24,7 @@ Implement the feature or fix according to the technical design, following archit
 
 ## Process
 
-1. **Transition labels** - Remove `Development-Ready`, add `Development`
+1. **Transition labels** - Add `Development`
 2. **Implement code** - Follow technical design steps in order
 3. **Add tests** - Unit, integration, Angular, and acceptance tests as specified
 4. **Validate** - Run `scripts/build_and_test.ps1` and fix all failures

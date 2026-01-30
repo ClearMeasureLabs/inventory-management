@@ -15,7 +15,7 @@ Create a detailed technical implementation plan identifying affected components,
 
 ## Process
 
-1. **Transition labels** - Remove `Technical-Design-Ready`, add `Technical-Design`
+1. **Transition labels** - Add `Technical-Design`
 2. **Analyze requirements** - Review conceptual definition and UX design
 3. **Map affected components** - Identify all files to create or modify
 4. **Plan implementation steps** - Order by dependency, specify exact file paths

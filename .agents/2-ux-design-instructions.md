@@ -22,7 +22,7 @@ Design user experience for user-facing features, documenting user flows, UI comp
 
 ## Process
 
-1. **Transition labels** - Remove `UX-Design-Ready`, add `UX-Design`
+1. **Transition labels** - Add `UX-Design`
 2. **Analyze requirements** - Review the UX field from the conceptual definition
 3. **Design user flow** - Map step-by-step user interactions including error states
 4. **Identify UI components** - List components to create and modify

@@ -21,7 +21,7 @@ Validate the implementation in a fully deployed environment by running acceptanc
 
 ## Process
 
-1. **Transition labels** - Remove `Functional-Validation-Ready`, add `Functional-Validation`
+1. **Transition labels** - Add `Functional-Validation`
 2. **Deploy full stack** - WebAPI, WebApp, SQL Server, Redis, RabbitMQ
 3. **Run acceptance tests:** `.\scripts\acceptance_tests.ps1`
 4. **Diagnose failures** - If tests fail, return to Development
