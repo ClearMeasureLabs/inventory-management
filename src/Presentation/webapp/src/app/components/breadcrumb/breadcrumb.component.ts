@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute, NavigationEnd, RouterModule } from '@angular/router';
-import { filter, Subject, takeUntil, combineLatest } from 'rxjs';
+import { filter, Subject, takeUntil } from 'rxjs';
 import { BreadcrumbService, BreadcrumbData } from '../../services/breadcrumb.service';
 
 interface BreadcrumbItem {
