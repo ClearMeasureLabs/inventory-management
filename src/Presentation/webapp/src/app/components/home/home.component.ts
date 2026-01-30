@@ -24,7 +24,7 @@ export class HomeComponent implements OnInit {
   containers: ContainerResponse[] | null = null;
   isLoading = true;
   searchText: string = '';
-  sortColumn: 'containerId' | 'name' | null = null;
+  sortColumn: 'containerId' | 'name' | null = 'name';
   sortDirection: 'asc' | 'desc' = 'asc';
 
   constructor(

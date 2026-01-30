@@ -221,6 +221,36 @@ describe('HomeComponent', () => {
   }));
 
   // Sorting and Filtering Tests
+  it('should have default sort by name ascending', fakeAsync(() => {
+    const mockContainers = [
+      { containerId: 1, name: 'Charlie', description: '' },
+      { containerId: 2, name: 'Alpha', description: '' },
+      { containerId: 3, name: 'Beta', description: '' }
+    ];
+
+    fixture.detectChanges();
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers`);
+    req.flush(mockContainers);
+    tick();
+    fixture.detectChanges();
+
+    // Default sort should be by name ascending
+    expect(component.sortColumn).toBe('name');
+    expect(component.sortDirection).toBe('asc');
+
+    const sorted = component.filteredAndSortedContainers;
+    expect(sorted[0].name).toBe('Alpha');
+    expect(sorted[1].name).toBe('Beta');
+    expect(sorted[2].name).toBe('Charlie');
+
+    // Verify sort indicator is shown on Name column
+    const compiled = fixture.nativeElement as HTMLElement;
+    const nameHeader = compiled.querySelector('th[aria-sort="ascending"]');
+    expect(nameHeader).toBeTruthy();
+    expect(nameHeader?.textContent).toContain('Name');
+    expect(nameHeader?.textContent).toContain('▲');
+  }));
+
   it('should filter containers by name (case-insensitive)', fakeAsync(() => {
     const mockContainers = [
       { containerId: 1, name: 'Alpha Container', description: '' },
@@ -287,7 +317,7 @@ describe('HomeComponent', () => {
     expect(component.sortDirection).toBe('desc');
   }));
 
-  it('should sort containers by name ascending', fakeAsync(() => {
+  it('should toggle name sort to descending when clicking name header (already default asc)', fakeAsync(() => {
     const mockContainers = [
       { containerId: 1, name: 'Charlie', description: '' },
       { containerId: 2, name: 'Alpha', description: '' },
@@ -299,30 +329,8 @@ describe('HomeComponent', () => {
     req.flush(mockContainers);
     tick();
 
+    // Default is already name ascending, clicking should toggle to descending
     component.onSort('name');
-    fixture.detectChanges();
-
-    const sorted = component.filteredAndSortedContainers;
-    expect(sorted[0].name).toBe('Alpha');
-    expect(sorted[1].name).toBe('Beta');
-    expect(sorted[2].name).toBe('Charlie');
-    expect(component.sortDirection).toBe('asc');
-  }));
-
-  it('should sort containers by name descending', fakeAsync(() => {
-    const mockContainers = [
-      { containerId: 1, name: 'Alpha', description: '' },
-      { containerId: 2, name: 'Beta', description: '' },
-      { containerId: 3, name: 'Charlie', description: '' }
-    ];
-
-    fixture.detectChanges();
-    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers`);
-    req.flush(mockContainers);
-    tick();
-
-    component.onSort('name'); // First click: ascending
-    component.onSort('name'); // Second click: descending
     fixture.detectChanges();
 
     const sorted = component.filteredAndSortedContainers;
@@ -330,6 +338,30 @@ describe('HomeComponent', () => {
     expect(sorted[1].name).toBe('Beta');
     expect(sorted[2].name).toBe('Alpha');
     expect(component.sortDirection).toBe('desc');
+  }));
+
+  it('should toggle back to name ascending after two clicks', fakeAsync(() => {
+    const mockContainers = [
+      { containerId: 1, name: 'Charlie', description: '' },
+      { containerId: 2, name: 'Alpha', description: '' },
+      { containerId: 3, name: 'Beta', description: '' }
+    ];
+
+    fixture.detectChanges();
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers`);
+    req.flush(mockContainers);
+    tick();
+
+    // Default is name ascending
+    component.onSort('name'); // First click: descending
+    component.onSort('name'); // Second click: ascending again
+    fixture.detectChanges();
+
+    const sorted = component.filteredAndSortedContainers;
+    expect(sorted[0].name).toBe('Alpha');
+    expect(sorted[1].name).toBe('Beta');
+    expect(sorted[2].name).toBe('Charlie');
+    expect(component.sortDirection).toBe('asc');
   }));
 
   it('should filter and sort together correctly', fakeAsync(() => {
