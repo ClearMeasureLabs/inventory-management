@@ -167,8 +167,8 @@ public class ContainerDetailsTests : PageTest
         await Page.Locator("#editContainerModal input#containerName").FillAsync("Updated Container Name");
         await Page.Locator("#editContainerModal textarea#containerDescription").FillAsync("Updated description text");
 
-        // Click Save button in modal
-        var saveButton = Page.Locator("#editContainerModal button[type='submit']");
+        // Click Save button in modal (uses type="button" with click handler)
+        var saveButton = Page.Locator("#editContainerModal button.btn-primary");
         await saveButton.ClickAsync();
 
         // Wait for modal to close

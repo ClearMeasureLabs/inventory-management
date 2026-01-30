@@ -202,7 +202,11 @@ public class ContainerSortFilterTests : PageTest
         await searchInput.FillAsync(TestPrefix);
         await Expect(Page.Locator("table tbody tr")).ToHaveCountAsync(3);
 
-        // Act - Click Name column header
+        // Act - First click ID header to change sort column, then click Name header
+        // (Default sort is already name/asc, so clicking Name would toggle to desc)
+        var idHeader = Page.Locator("th").Filter(new() { HasText = "ID" }).First;
+        await idHeader.ClickAsync();
+        
         var nameHeader = Page.Locator("th").Filter(new() { HasText = "Name" }).First;
         await nameHeader.ClickAsync();
 
@@ -233,10 +237,15 @@ public class ContainerSortFilterTests : PageTest
         await searchInput.FillAsync(TestPrefix);
         await Expect(Page.Locator("table tbody tr")).ToHaveCountAsync(3);
 
-        // Act - Click Name header twice
+        // Act - First click ID header to change sort column, then click Name twice
+        // (Default sort is name/asc, clicking Name toggles; to get predictable desc state,
+        // first change column then click Name for asc, then again for desc)
+        var idHeader = Page.Locator("th").Filter(new() { HasText = "ID" }).First;
+        await idHeader.ClickAsync();
+        
         var nameHeader = Page.Locator("th").Filter(new() { HasText = "Name" }).First;
-        await nameHeader.ClickAsync();
-        await nameHeader.ClickAsync();
+        await nameHeader.ClickAsync(); // Now name/asc
+        await nameHeader.ClickAsync(); // Now name/desc
 
         // Assert - Should show descending arrow
         await Expect(nameHeader).ToContainTextAsync("▼");
