@@ -4,6 +4,7 @@ import { Location } from '@angular/common';
 import { provideRouter } from '@angular/router';
 
 import { BreadcrumbComponent } from './breadcrumb.component';
+import { BreadcrumbService } from '../../services/breadcrumb.service';
 import { HomeComponent } from '../home/home.component';
 import { ContainerDetailsComponent } from '../container-details/container-details.component';
 
@@ -105,5 +106,22 @@ describe('BreadcrumbComponent', () => {
     await router.navigate(['/']);
     fixture.detectChanges();
     expect(component.breadcrumbs.length).toBe(1);
+  });
+
+  it('should display container name from service', async () => {
+    const breadcrumbService = TestBed.inject(BreadcrumbService);
+
+    await router.navigate(['/containers/1']);
+    fixture.detectChanges();
+
+    // Initially shows fallback "Container 1"
+    expect(component.breadcrumbs[1].label).toContain('Container');
+
+    // Set container name via service
+    breadcrumbService.setBreadcrumbData({ containerName: 'My Test Container' });
+    fixture.detectChanges();
+
+    // Should now show actual container name
+    expect(component.breadcrumbs[1].label).toBe('My Test Container');
   });
 });

@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute, NavigationEnd, RouterModule } from '@angular/router';
-import { filter, Subject, takeUntil } from 'rxjs';
+import { filter, Subject, takeUntil, combineLatest } from 'rxjs';
+import { BreadcrumbService, BreadcrumbData } from '../../services/breadcrumb.service';
 
 interface BreadcrumbItem {
   label: string;
@@ -19,15 +20,22 @@ interface BreadcrumbItem {
 export class BreadcrumbComponent implements OnInit, OnDestroy {
   breadcrumbs: BreadcrumbItem[] = [];
   private destroy$ = new Subject<void>();
+  private breadcrumbData: BreadcrumbData = {};
 
   constructor(
     private router: Router,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private breadcrumbService: BreadcrumbService
   ) {}
 
   ngOnInit(): void {
-    // Build breadcrumbs on init
-    this.buildBreadcrumbs();
+    // Subscribe to breadcrumb data changes
+    this.breadcrumbService.getBreadcrumbData()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(data => {
+        this.breadcrumbData = data;
+        this.buildBreadcrumbs();
+      });
 
     // Subscribe to router events to rebuild breadcrumbs on navigation
     this.router.events
@@ -38,6 +46,9 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.buildBreadcrumbs();
       });
+
+    // Build breadcrumbs on init
+    this.buildBreadcrumbs();
   }
 
   ngOnDestroy(): void {
@@ -75,13 +86,9 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
   }
 
   private getContainerName(): string {
-    // Try to get container name from route data
-    let route = this.activatedRoute.firstChild;
-    while (route) {
-      if (route.snapshot.data['containerName']) {
-        return route.snapshot.data['containerName'];
-      }
-      route = route.firstChild;
+    // Use container name from breadcrumb service if available
+    if (this.breadcrumbData.containerName) {
+      return this.breadcrumbData.containerName;
     }
 
     // Fallback to extracting ID from URL

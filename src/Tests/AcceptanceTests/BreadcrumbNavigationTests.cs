@@ -81,8 +81,7 @@ public class BreadcrumbNavigationTests : PageTest
         var breadcrumbText = await breadcrumbNav.TextContentAsync();
         breadcrumbText.ShouldNotBeNull();
         breadcrumbText.ShouldContain("Containers");
-        // Breadcrumb shows "Container [id]" format since container name isn't in route data
-        breadcrumbText.ShouldContain($"Container {_testContainerId}");
+        breadcrumbText.ShouldContain(TestContainerName);
 
         // "Containers" should be a clickable link
         var containersLink = breadcrumbNav.Locator("a", new() { HasText = "Containers" });
