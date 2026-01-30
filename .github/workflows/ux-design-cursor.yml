@@ -29,6 +29,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           CURSOR_TOKEN: ${{ secrets.CURSOR_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
           PROMPT=$(cat .agents/2-ux-design-prompt.txt)
+          PROMPT="${PROMPT} The issue number is #${ISSUE_NUMBER}."
           agent --force --api-key "$CURSOR_TOKEN" -p "$PROMPT"
