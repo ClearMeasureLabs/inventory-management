@@ -170,8 +170,8 @@ describe('ContainerDetailsComponent', () => {
     expect(component.editName).toBe('Test Container');
     expect(component.editDescription).toBe('Test Description');
 
-    const nameInput = compiled.querySelector('input.form-control-lg') as HTMLInputElement;
-    const descriptionTextarea = compiled.querySelector('textarea') as HTMLTextAreaElement;
+    const nameInput = compiled.querySelector('input#containerName') as HTMLInputElement;
+    const descriptionTextarea = compiled.querySelector('textarea#containerDescription') as HTMLTextAreaElement;
 
     expect(nameInput).toBeTruthy();
     expect(descriptionTextarea).toBeTruthy();
