@@ -29,7 +29,8 @@ Implement the feature or fix according to the technical design, following archit
 3. **Add tests** - Unit, integration, Angular, and acceptance tests as specified
 4. **Validate** - Run `scripts/build_and_test.ps1` and fix all failures
 5. **Commit and push** - Clear commit messages to feature branch
-6. **Update label** - Add `Functional-Validation-Ready` to signal next phase
+6. **Mark PR ready** - `gh pr ready [PR]` to move from draft to ready for review
+7. **Update label** - Add `Functional-Validation-Ready` to signal next phase
 
 ## Architecture Rules
 
