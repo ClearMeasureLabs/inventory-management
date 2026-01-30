@@ -149,7 +149,7 @@ public class ContainerDetailsTests : PageTest
     }
 
     [Test]
-    public async Task EditContainer_InlineForm_SavesChanges()
+    public async Task EditContainer_Modal_SavesChanges()
     {
         // Arrange
         await Page.GotoAsync($"{TestEnvironment.WebAppUrl}/containers/{_testContainerId}");
@@ -159,32 +159,31 @@ public class ContainerDetailsTests : PageTest
         var editButton = Page.Locator("button[aria-label='Edit container']");
         await editButton.ClickAsync();
 
-        // Verify edit mode is active
-        await Expect(Page.Locator("input.form-control-lg")).ToBeVisibleAsync();
-        await Expect(Page.Locator("textarea")).ToBeVisibleAsync();
+        // Verify modal is visible
+        await Expect(Page.Locator("#editContainerModal")).ToBeVisibleAsync();
+        await Expect(Page.Locator("#editContainerModal")).ToContainTextAsync("Edit Container");
 
-        // Update name and description
-        await Page.Locator("input.form-control-lg").FillAsync("Updated Container Name");
-        await Page.Locator("textarea").FillAsync("Updated description text");
+        // Update name and description in modal
+        await Page.Locator("#editContainerModal input#containerName").FillAsync("Updated Container Name");
+        await Page.Locator("#editContainerModal textarea#containerDescription").FillAsync("Updated description text");
 
-        // Click Save button
-        var saveButton = Page.Locator("button[aria-label='Save changes']");
+        // Click Save button in modal
+        var saveButton = Page.Locator("#editContainerModal button[type='submit']");
         await saveButton.ClickAsync();
 
-        // Assert - Verify changes are saved and view mode is restored
+        // Wait for modal to close
+        await Expect(Page.Locator("#editContainerModal")).Not.ToBeVisibleAsync();
+
+        // Assert - Verify changes are saved
         await Expect(Page.Locator("h1")).ToContainTextAsync("Updated Container Name");
         await Expect(Page.Locator("p.text-muted")).ToContainTextAsync("Updated description text");
 
         // Verify breadcrumb updated
         await Expect(Page.Locator("nav[aria-label='breadcrumb']")).ToContainTextAsync("Updated Container Name");
-
-        // Verify edit/delete buttons are visible again
-        await Expect(Page.Locator("button[aria-label='Edit container']")).ToBeVisibleAsync();
-        await Expect(Page.Locator("button[aria-label='Delete container']")).ToBeVisibleAsync();
     }
 
     [Test]
-    public async Task EditContainer_InlineForm_CancelsChanges()
+    public async Task EditContainer_Modal_CancelsChanges()
     {
         // Arrange
         await Page.GotoAsync($"{TestEnvironment.WebAppUrl}/containers/{_testContainerId}");
@@ -194,21 +193,23 @@ public class ContainerDetailsTests : PageTest
         var editButton = Page.Locator("button[aria-label='Edit container']");
         await editButton.ClickAsync();
 
+        // Verify modal is visible
+        await Expect(Page.Locator("#editContainerModal")).ToBeVisibleAsync();
+
         // Modify fields
-        await Page.Locator("input.form-control-lg").FillAsync("Modified Name");
-        await Page.Locator("textarea").FillAsync("Modified description");
+        await Page.Locator("#editContainerModal input#containerName").FillAsync("Modified Name");
+        await Page.Locator("#editContainerModal textarea#containerDescription").FillAsync("Modified description");
 
         // Click Cancel button
-        var cancelButton = Page.Locator("button[aria-label='Cancel editing']");
+        var cancelButton = Page.Locator("#editContainerModal button.btn-secondary");
         await cancelButton.ClickAsync();
+
+        // Wait for modal to close
+        await Expect(Page.Locator("#editContainerModal")).Not.ToBeVisibleAsync();
 
         // Assert - Verify original values are still displayed
         await Expect(Page.Locator("h1")).ToContainTextAsync("Test Container");
         await Expect(Page.Locator("p.text-muted")).ToContainTextAsync("Test Description");
-
-        // Verify edit/delete buttons are visible
-        await Expect(Page.Locator("button[aria-label='Edit container']")).ToBeVisibleAsync();
-        await Expect(Page.Locator("button[aria-label='Delete container']")).ToBeVisibleAsync();
     }
 
     [Test]
