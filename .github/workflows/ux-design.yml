@@ -26,11 +26,10 @@ jobs:
       - name: Login to GitHub
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: gh auth status
+        run: gh auth login
 
       - name: Run UX Design Agent
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
           CURSOR_TOKEN: ${{ secrets.CURSOR_TOKEN }}
         run: |
           PROMPT=$(cat .agents/2-ux-design-prompt.txt)
