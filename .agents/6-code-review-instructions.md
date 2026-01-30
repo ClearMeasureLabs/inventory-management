@@ -6,7 +6,7 @@ Review pull requests against project standards, architecture rules, and testing 
 
 ## Trigger
 
-- PR marked "Ready for review" (automated via `.github/workflows/pr-review.yml`)
+- PR marked "Ready for review" (automated via `.github/workflows/code-review-cursor.yml`)
 - PR targets `master` branch
 
 ## Inputs
@@ -97,17 +97,19 @@ Review pull requests against project standards, architecture rules, and testing 
 
 ## Decision Actions
 
-**All checks pass:**
-- Post review comment with approval using the output template
-- Add `Approved by Agent` label to PR
-- **STOP** - Do NOT merge the PR
-- **STOP** - Do NOT close the issue
-- Human review and merge required
+**All checks pass (APPROVED):**
+1. Post review comment with approval using the output template
+2. Add `Approved by Agent` label to PR: `gh pr edit [PR] --add-label "Approved by Agent"`
+3. **STOP** - Do NOT use `gh pr review --approve`
+4. **STOP** - Do NOT merge the PR
+5. **STOP** - Do NOT close the issue
+6. Human review and merge required
 
-**Issues found:**
-- Post review comment with specific feedback
-- Convert PR to draft: `gh pr ready --undo [PR]`
-- Do NOT add `Approved by Agent` label
+**Issues found (CHANGES REQUIRED):**
+1. Post review comment with specific feedback
+2. Convert PR to draft: `gh pr ready --undo [PR]`
+3. Do NOT add `Approved by Agent` label
+4. This triggers the Implement Changes agent automatically
 
 ## Rules
 

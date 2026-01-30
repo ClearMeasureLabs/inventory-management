@@ -1,0 +1,35 @@
+name: Code Review Cursor
+
+on:
+  pull_request:
+    types: [ready_for_review]
+
+jobs:
+  code-review-cursor:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run install tools script
+        shell: pwsh
+        run: ./scripts/install_tools.ps1
+
+      - name: Install ripgrep
+        run: sudo apt-get update && sudo apt-get install -y ripgrep
+
+      - name: Install Cursor CLI
+        run: |
+          curl -fsSL https://cursor.com/install | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Run Code Review Cursor Agent
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          CURSOR_TOKEN: ${{ secrets.CURSOR_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          PROMPT=$(cat .agents/6-code-review-prompt.txt)
+          PROMPT="${PROMPT} The PR number is #${PR_NUMBER}."
+          agent --force --api-key "$CURSOR_TOKEN" -p "$PROMPT"

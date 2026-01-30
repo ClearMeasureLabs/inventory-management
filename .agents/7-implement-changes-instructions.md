@@ -6,7 +6,7 @@ Implement requested changes from code review feedback, fix issues, and re-submit
 
 ## Trigger
 
-- PR converted to draft (automated via `.github/workflows/pr-implement-changes.yml`)
+- PR converted to draft (automated via `.github/workflows/code-review-changes-cursor.yml`)
 - PR has review comments with requested changes
 
 ## Inputs
@@ -26,8 +26,8 @@ Implement requested changes from code review feedback, fix issues, and re-submit
 4. **Implement each change** - Locate code, apply fix, verify it works
 5. **Run validation:** `.\scripts\build_and_test.ps1`
 6. **Commit and push** - Single commit with summary of all changes
-7. **Mark PR ready** - `gh pr ready [PR]`
-8. **Post summary comment**
+7. **Post summary comment**
+8. **Mark PR ready for review** - `gh pr ready [PR]` to trigger Code Review agent
 
 ## Output Templates
 
