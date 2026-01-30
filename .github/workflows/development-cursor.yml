@@ -10,11 +10,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Transition labels
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          gh issue edit ${{ github.event.issue.number }} --add-label "Development" --repo ${{ github.repository }}
 
       - name: Checkout repository
         uses: actions/checkout@v4

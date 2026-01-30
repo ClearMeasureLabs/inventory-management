@@ -24,12 +24,12 @@ Design end-to-end acceptance tests that validate user-facing features in a fully
 
 ## Process
 
-1. **Transition labels** - Add `Test-Design`
+1. **Transition labels** - Remove existing labels, add `Test-Design`
 2. **Analyze acceptance criteria** - Map each criterion to testable scenarios
 3. **Design test scenarios** - Cover happy path and key error scenarios
 4. **Plan test data** - Document required data setup
 5. **Post design** - Add as issue comment
-6. **Update label** - Add `Development-Ready` to signal next phase
+6. **Update label** - Remove existing labels, add `Development-Ready` to signal next phase
 
 ## Output Template (Tests Required)
 

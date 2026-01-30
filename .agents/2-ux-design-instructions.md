@@ -22,13 +22,13 @@ Design user experience for user-facing features, documenting user flows, UI comp
 
 ## Process
 
-1. **Transition labels** - Add `UX-Design`
+1. **Transition labels** - Remove existing labels, add `UX-Design`
 2. **Analyze requirements** - Review the UX field from the conceptual definition
 3. **Design user flow** - Map step-by-step user interactions including error states
 4. **Identify UI components** - List components to create and modify
 5. **Document accessibility** - Keyboard navigation, screen readers, color contrast
 6. **Post design** - Add as issue comment
-7. **Update label** - Add `Technical-Design-Ready` to signal next phase
+7. **Update label** - Remove existing labels, add `Technical-Design-Ready` to signal next phase
 
 ## Output Template
 

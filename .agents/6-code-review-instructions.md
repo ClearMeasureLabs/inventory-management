@@ -99,7 +99,7 @@ Review pull requests against project standards, architecture rules, and testing 
 
 **All checks pass (APPROVED):**
 1. Post review comment with approval using the output template
-2. Add `Approved by Agent` label to PR: `gh pr edit [PR] --add-label "Approved by Agent"`
+2. Remove existing labels, add `Approved by Agent` label to PR
 3. **STOP** - Do NOT use `gh pr review --approve`
 4. **STOP** - Do NOT merge the PR
 5. **STOP** - Do NOT close the issue
