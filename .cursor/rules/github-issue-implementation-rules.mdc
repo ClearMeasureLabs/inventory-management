@@ -7,7 +7,7 @@ alwaysApply: true
 
 ## Label Management
 
-**IMPORTANT:** Update the issue label when entering each phase. Remove the previous phase label and add the new one.
+**IMPORTANT:** The label indicates the **current phase**. When completing a phase, remove the current label and add the **next phase's label** to signal the issue is ready for that phase.
 
 ## Getting Started
 
@@ -17,7 +17,7 @@ alwaysApply: true
 
 ## Phase 1: User Experience Design
 
-**On entry:** Update labels from `Conceptual-Definition` → `UX-Design`
+**Trigger:** Issue has `UX-Design` label
 
 Post as issue comment:
 
@@ -29,12 +29,14 @@ Post as issue comment:
 **Accessibility:** [A11y considerations]
 ```
 
+**On completion:** Update labels `UX-Design` → `Technical-Design`
+
 Required for: User-facing features, UI changes, new workflows.
-Skip for: Backend-only changes, infrastructure, refactoring (proceed to Phase 2).
+Skip for: Backend-only changes, infrastructure, refactoring (set `Technical-Design` label directly).
 
 ## Phase 2: Technical Design
 
-**On entry:** Update labels from `UX-Design` → `Technical-Design`
+**Trigger:** Issue has `Technical-Design` label
 
 Post as issue comment:
 
@@ -47,9 +49,11 @@ Post as issue comment:
 **Tests:** [Describe unit, integration, Angular tests needed]
 ```
 
+**On completion:** Update labels `Technical-Design` → `Test-Design` (or `Development` if skipping test design)
+
 ## Phase 3: Acceptance Test Design
 
-**On entry:** Update labels from `Technical-Design` → `Test-Design`
+**Trigger:** Issue has `Test-Design` label
 
 Post as issue comment:
 
@@ -58,33 +62,32 @@ Post as issue comment:
 **Acceptance Tests:** [E2E workflow tests] or None required - [rationale]
 ```
 
+**On completion:** Update labels `Test-Design` → `Development`
+
 Required for: User-facing features, critical workflows, deployed behavior changes.
-Skip for: Backend-only, UI-only, docs, refactoring (proceed to Phase 4).
+Skip for: Backend-only, UI-only, docs, refactoring (set `Development` label directly).
 
 ## Phase 4: Development
 
-**On entry:** Update labels from `Test-Design` → `Development`
+**Trigger:** Issue has `Development` label
 
 1. Implement changes following `architecture-rules.mdc`
 2. Add tests per `automated-testing-rules.mdc`
 3. Run `scripts/build_and_test.ps1` until passing
 4. Commit and push
 
+**On completion:** Update labels `Development` → `Functional-Validation`
+
 **Gate:** `build_and_test.ps1` must pass before proceeding.
 
 ## Phase 5: Functional Validation
 
-**On entry:** Update labels from `Development` → `Functional-Validation`
+**Trigger:** Issue has `Functional-Validation` label
 
 1. Run `scripts/acceptance_tests.ps1` until passing
+2. Verify all tests passed (unit, integration, Angular, acceptance)
+3. Move PR from draft to ready for review
 
-**Gate:** Both test scripts must pass before proceeding.
+**On completion:** Update labels `Functional-Validation` → `Ready-For-Review`
 
-## Phase 6: Review Handoff
-
-**On entry:** Update labels from `Functional-Validation` → `Ready-For-Review`
-
-1. Verify all tests passed (unit, integration, Angular, acceptance)
-2. Move PR from draft to ready for review
-
-**Gate:** All tests must pass before marking ready.
+**Gate:** Both `build_and_test.ps1` and `acceptance_tests.ps1` must pass before marking ready.

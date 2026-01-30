@@ -6,7 +6,7 @@ Design user experience for user-facing features, documenting user flows, UI comp
 
 ## Trigger
 
-Issue has `Conceptual-Definition` label AND involves user-facing changes.
+Issue has `UX-Design` label.
 
 ## Skip Conditions
 
@@ -26,12 +26,12 @@ Issue has `Conceptual-Definition` label AND involves user-facing changes.
 
 ## Process
 
-1. **Update labels** - Remove `Conceptual-Definition`, Add `UX-Design`
-2. **Analyze requirements** - Review the UX field from the conceptual definition
-3. **Design user flow** - Map step-by-step user interactions including error states
-4. **Identify UI components** - List components to create and modify
-5. **Document accessibility** - Keyboard navigation, screen readers, color contrast
-6. **Post design** - Add as issue comment
+1. **Analyze requirements** - Review the UX field from the conceptual definition
+2. **Design user flow** - Map step-by-step user interactions including error states
+3. **Identify UI components** - List components to create and modify
+4. **Document accessibility** - Keyboard navigation, screen readers, color contrast
+5. **Post design** - Add as issue comment
+6. **Update label** - Remove `UX-Design`, Add `Technical-Design` to signal next phase
 
 ## Output Template
 
@@ -67,4 +67,4 @@ Issue has `Conceptual-Definition` label AND involves user-facing changes.
 
 ## Next Phase
 
-**Technical Design**
+**Technical Design** - Triggers when issue has `Technical-Design` label

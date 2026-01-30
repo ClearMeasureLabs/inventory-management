@@ -6,8 +6,7 @@ Create a detailed technical implementation plan identifying affected components,
 
 ## Trigger
 
-- Issue has `UX-Design` label (after UX design), OR
-- Issue has `Conceptual-Definition` label (backend-only work that skipped UX)
+Issue has `Technical-Design` label.
 
 ## Inputs
 
@@ -20,13 +19,13 @@ Create a detailed technical implementation plan identifying affected components,
 
 ## Process
 
-1. **Update labels** - Remove `UX-Design` or `Conceptual-Definition`, Add `Technical-Design`
-2. **Analyze requirements** - Review conceptual definition and UX design
-3. **Map affected components** - Identify all files to create or modify
-4. **Plan implementation steps** - Order by dependency, specify exact file paths
-5. **Identify dependencies** - Flag any package or SDK changes
-6. **Plan tests** - Specify unit, integration, and Angular tests
-7. **Post design** - Add as issue comment
+1. **Analyze requirements** - Review conceptual definition and UX design
+2. **Map affected components** - Identify all files to create or modify
+3. **Plan implementation steps** - Order by dependency, specify exact file paths
+4. **Identify dependencies** - Flag any package or SDK changes
+5. **Plan tests** - Specify unit, integration, and Angular tests
+6. **Post design** - Add as issue comment
+7. **Update label** - Remove `Technical-Design`, Add `Test-Design` (or `Development` if skipping test design) to signal next phase
 
 ## Output Template
 
@@ -92,5 +91,5 @@ Features/{Entity}/{Action}{Entity}/
 
 ## Next Phase
 
-- User-facing features: **Test Design**
-- Backend-only (no acceptance tests needed): **Development**
+- User-facing features: **Test Design** (set `Test-Design` label)
+- Backend-only (no acceptance tests needed): **Development** (set `Development` label, skip Test Design)

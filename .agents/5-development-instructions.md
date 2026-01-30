@@ -6,8 +6,7 @@ Implement the feature or fix according to the technical design, following archit
 
 ## Trigger
 
-- Issue has `Test-Design` label, OR
-- Issue has `Technical-Design` label (if test design was skipped)
+Issue has `Development` label.
 
 ## Prerequisites
 
@@ -29,11 +28,11 @@ Implement the feature or fix according to the technical design, following archit
 
 ## Process
 
-1. **Update labels** - Remove `Test-Design` or `Technical-Design`, Add `Development`
-2. **Implement code** - Follow technical design steps in order
-3. **Add tests** - Unit, integration, Angular, and acceptance tests as specified
-4. **Validate** - Run `scripts/build_and_test.ps1` and fix all failures
-5. **Commit and push** - Clear commit messages to feature branch
+1. **Implement code** - Follow technical design steps in order
+2. **Add tests** - Unit, integration, Angular, and acceptance tests as specified
+3. **Validate** - Run `scripts/build_and_test.ps1` and fix all failures
+4. **Commit and push** - Clear commit messages to feature branch
+5. **Update label** - Remove `Development`, Add `Functional-Validation` to signal next phase
 
 ## Architecture Rules
 
@@ -101,4 +100,4 @@ Expected output:
 
 ## Next Phase
 
-**Code Review**
+**Functional Validation** - Triggers when issue has `Functional-Validation` label
