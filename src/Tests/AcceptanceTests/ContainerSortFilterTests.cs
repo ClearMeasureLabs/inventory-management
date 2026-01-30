@@ -12,15 +12,19 @@ public class ContainerSortFilterTests : PageTest
 {
     private readonly List<int> _testContainerIds = new();
 
+    // Unique prefix to isolate test containers from existing data
+    private const string TestPrefix = "SortFilterTest_";
+
     [SetUp]
     public async Task SetUp()
     {
         // Create test containers via API with known names for predictable sorting/filtering
+        // Using a unique prefix to isolate from other test data
         var containers = new[]
         {
-            new { name = "Alpha Container", description = "First test container" },
-            new { name = "Beta Container", description = "Second test container" },
-            new { name = "Gamma", description = "Third test container" }
+            new { name = $"{TestPrefix}Alpha", description = "First test container" },
+            new { name = $"{TestPrefix}Beta", description = "Second test container" },
+            new { name = $"{TestPrefix}Gamma", description = "Third test container" }
         };
 
         foreach (var container in containers)
@@ -59,15 +63,17 @@ public class ContainerSortFilterTests : PageTest
         await Page.GotoAsync(TestEnvironment.WebAppUrl);
         await Expect(Page.Locator("table.table-striped")).ToBeVisibleAsync();
 
-        // Act - Type "Container" in search input
+        // Filter to isolate our test containers first
         var searchInput = Page.Locator("#containerSearch");
-        await searchInput.FillAsync("Container");
+        await searchInput.FillAsync(TestPrefix);
+        await Expect(Page.Locator("table tbody tr")).ToHaveCountAsync(3);
 
-        // Assert - Only containers with "Container" in name should be visible
-        await Expect(Page.Locator("table tbody tr")).ToHaveCountAsync(2);
-        await Expect(Page.Locator("table tbody")).ToContainTextAsync("Alpha Container");
-        await Expect(Page.Locator("table tbody")).ToContainTextAsync("Beta Container");
-        await Expect(Page.Locator("table tbody")).Not.ToContainTextAsync("Gamma");
+        // Act - Filter further for "Alpha"
+        await searchInput.FillAsync($"{TestPrefix}Alpha");
+
+        // Assert - Only Alpha container should be visible
+        await Expect(Page.Locator("table tbody tr")).ToHaveCountAsync(1);
+        await Expect(Page.Locator("table tbody")).ToContainTextAsync($"{TestPrefix}Alpha");
     }
 
     [Test]
@@ -77,13 +83,13 @@ public class ContainerSortFilterTests : PageTest
         await Page.GotoAsync(TestEnvironment.WebAppUrl);
         await Expect(Page.Locator("table.table-striped")).ToBeVisibleAsync();
 
-        // Act - Type lowercase search term
+        // Act - Type lowercase search term (case-insensitive should match)
         var searchInput = Page.Locator("#containerSearch");
-        await searchInput.FillAsync("alpha");
+        await searchInput.FillAsync("sortfiltertest_alpha");
 
-        // Assert - Should match "Alpha Container" despite case difference
+        // Assert - Should match "SortFilterTest_Alpha" despite case difference
         await Expect(Page.Locator("table tbody tr")).ToHaveCountAsync(1);
-        await Expect(Page.Locator("table tbody")).ToContainTextAsync("Alpha Container");
+        await Expect(Page.Locator("table tbody")).ToContainTextAsync($"{TestPrefix}Alpha");
     }
 
     [Test]
@@ -93,17 +99,20 @@ public class ContainerSortFilterTests : PageTest
         await Page.GotoAsync(TestEnvironment.WebAppUrl);
         await Expect(Page.Locator("table.table-striped")).ToBeVisibleAsync();
 
+        // Get initial container count
+        var initialRowCount = await Page.Locator("table tbody tr").CountAsync();
+
         // Apply filter first
         var searchInput = Page.Locator("#containerSearch");
-        await searchInput.FillAsync("Alpha");
+        await searchInput.FillAsync($"{TestPrefix}Alpha");
         await Expect(Page.Locator("table tbody tr")).ToHaveCountAsync(1);
 
         // Act - Click clear button
         var clearButton = Page.Locator("button[aria-label='Clear search']");
         await clearButton.ClickAsync();
 
-        // Assert - All containers should be visible again
-        await Expect(Page.Locator("table tbody tr")).ToHaveCountAsync(3);
+        // Assert - All containers should be visible again (at least the initial count)
+        await Expect(Page.Locator("table tbody tr")).ToHaveCountAsync(initialRowCount);
     }
 
     [Test]
@@ -133,6 +142,11 @@ public class ContainerSortFilterTests : PageTest
         await Page.GotoAsync(TestEnvironment.WebAppUrl);
         await Expect(Page.Locator("table.table-striped")).ToBeVisibleAsync();
 
+        // Filter to isolate our test containers
+        var searchInput = Page.Locator("#containerSearch");
+        await searchInput.FillAsync(TestPrefix);
+        await Expect(Page.Locator("table tbody tr")).ToHaveCountAsync(3);
+
         // Act - Click ID column header
         var idHeader = Page.Locator("th").Filter(new() { HasText = "ID" }).First;
         await idHeader.ClickAsync();
@@ -154,6 +168,11 @@ public class ContainerSortFilterTests : PageTest
         // Arrange
         await Page.GotoAsync(TestEnvironment.WebAppUrl);
         await Expect(Page.Locator("table.table-striped")).ToBeVisibleAsync();
+
+        // Filter to isolate our test containers
+        var searchInput = Page.Locator("#containerSearch");
+        await searchInput.FillAsync(TestPrefix);
+        await Expect(Page.Locator("table tbody tr")).ToHaveCountAsync(3);
 
         // Act - Click ID header twice (first asc, then desc)
         var idHeader = Page.Locator("th").Filter(new() { HasText = "ID" }).First;
@@ -177,6 +196,11 @@ public class ContainerSortFilterTests : PageTest
         // Arrange
         await Page.GotoAsync(TestEnvironment.WebAppUrl);
         await Expect(Page.Locator("table.table-striped")).ToBeVisibleAsync();
+
+        // Filter to isolate our test containers
+        var searchInput = Page.Locator("#containerSearch");
+        await searchInput.FillAsync(TestPrefix);
+        await Expect(Page.Locator("table tbody tr")).ToHaveCountAsync(3);
 
         // Act - Click Name column header
         var nameHeader = Page.Locator("th").Filter(new() { HasText = "Name" }).First;
@@ -203,6 +227,11 @@ public class ContainerSortFilterTests : PageTest
         // Arrange
         await Page.GotoAsync(TestEnvironment.WebAppUrl);
         await Expect(Page.Locator("table.table-striped")).ToBeVisibleAsync();
+
+        // Filter to isolate our test containers
+        var searchInput = Page.Locator("#containerSearch");
+        await searchInput.FillAsync(TestPrefix);
+        await Expect(Page.Locator("table tbody tr")).ToHaveCountAsync(3);
 
         // Act - Click Name header twice
         var nameHeader = Page.Locator("th").Filter(new() { HasText = "Name" }).First;
@@ -235,19 +264,19 @@ public class ContainerSortFilterTests : PageTest
         await Page.GotoAsync(TestEnvironment.WebAppUrl);
         await Expect(Page.Locator("table.table-striped")).ToBeVisibleAsync();
 
-        // Act - Filter by "Container" then sort by ID ascending
+        // Act - Filter by test prefix then sort by ID ascending
         var searchInput = Page.Locator("#containerSearch");
-        await searchInput.FillAsync("Container");
+        await searchInput.FillAsync(TestPrefix);
 
         var idHeader = Page.Locator("th").Filter(new() { HasText = "ID" }).First;
         await idHeader.ClickAsync();
 
         // Assert - Should show only filtered containers, sorted by ID
-        await Expect(Page.Locator("table tbody tr")).ToHaveCountAsync(2);
+        await Expect(Page.Locator("table tbody tr")).ToHaveCountAsync(3);
         
-        // Both rows should contain "Container"
-        await Expect(Page.Locator("table tbody tr").First).ToContainTextAsync("Container");
-        await Expect(Page.Locator("table tbody tr").Last).ToContainTextAsync("Container");
+        // All rows should contain the test prefix
+        await Expect(Page.Locator("table tbody tr").First).ToContainTextAsync(TestPrefix);
+        await Expect(Page.Locator("table tbody tr").Last).ToContainTextAsync(TestPrefix);
 
         // Should be in ID ascending order
         var firstRowId = await Page.Locator("table tbody tr").First.Locator("td").First.TextContentAsync();
@@ -266,6 +295,11 @@ public class ContainerSortFilterTests : PageTest
         // Arrange
         await Page.GotoAsync(TestEnvironment.WebAppUrl);
         await Expect(Page.Locator("table.table-striped")).ToBeVisibleAsync();
+
+        // Filter to isolate our test containers
+        var searchInput = Page.Locator("#containerSearch");
+        await searchInput.FillAsync(TestPrefix);
+        await Expect(Page.Locator("table tbody tr")).ToHaveCountAsync(3);
 
         // Act - Tab to ID header and press Enter
         var idHeader = Page.Locator("th").Filter(new() { HasText = "ID" }).First;
