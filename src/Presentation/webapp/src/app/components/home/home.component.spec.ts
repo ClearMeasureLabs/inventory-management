@@ -219,4 +219,213 @@ describe('HomeComponent', () => {
     expect(idLinks[0].getAttribute('href')).toBe('/containers/1');
     expect(idLinks[1].getAttribute('href')).toBe('/containers/2');
   }));
+
+  // Sorting and Filtering Tests
+  it('should have default sort by name ascending', fakeAsync(() => {
+    const mockContainers = [
+      { containerId: 1, name: 'Charlie', description: '' },
+      { containerId: 2, name: 'Alpha', description: '' },
+      { containerId: 3, name: 'Beta', description: '' }
+    ];
+
+    fixture.detectChanges();
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers`);
+    req.flush(mockContainers);
+    tick();
+    fixture.detectChanges();
+
+    // Default sort should be by name ascending
+    expect(component.sortColumn).toBe('name');
+    expect(component.sortDirection).toBe('asc');
+
+    const sorted = component.filteredAndSortedContainers;
+    expect(sorted[0].name).toBe('Alpha');
+    expect(sorted[1].name).toBe('Beta');
+    expect(sorted[2].name).toBe('Charlie');
+
+    // Verify sort indicator is shown on Name column
+    const compiled = fixture.nativeElement as HTMLElement;
+    const nameHeader = compiled.querySelector('th[aria-sort="ascending"]');
+    expect(nameHeader).toBeTruthy();
+    expect(nameHeader?.textContent).toContain('Name');
+    expect(nameHeader?.textContent).toContain('▲');
+  }));
+
+  it('should filter containers by name (case-insensitive)', fakeAsync(() => {
+    const mockContainers = [
+      { containerId: 1, name: 'Alpha Container', description: '' },
+      { containerId: 2, name: 'Beta Container', description: '' },
+      { containerId: 3, name: 'Gamma', description: '' }
+    ];
+
+    fixture.detectChanges();
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers`);
+    req.flush(mockContainers);
+    tick();
+
+    component.searchText = 'container';
+    fixture.detectChanges();
+
+    const filtered = component.filteredAndSortedContainers;
+    expect(filtered.length).toBe(2);
+    expect(filtered[0].name).toBe('Alpha Container');
+    expect(filtered[1].name).toBe('Beta Container');
+  }));
+
+  it('should sort containers by ID ascending', fakeAsync(() => {
+    const mockContainers = [
+      { containerId: 3, name: 'Container C', description: '' },
+      { containerId: 1, name: 'Container A', description: '' },
+      { containerId: 2, name: 'Container B', description: '' }
+    ];
+
+    fixture.detectChanges();
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers`);
+    req.flush(mockContainers);
+    tick();
+
+    component.onSort('containerId');
+    fixture.detectChanges();
+
+    const sorted = component.filteredAndSortedContainers;
+    expect(sorted[0].containerId).toBe(1);
+    expect(sorted[1].containerId).toBe(2);
+    expect(sorted[2].containerId).toBe(3);
+    expect(component.sortDirection).toBe('asc');
+  }));
+
+  it('should sort containers by ID descending', fakeAsync(() => {
+    const mockContainers = [
+      { containerId: 1, name: 'Container A', description: '' },
+      { containerId: 2, name: 'Container B', description: '' },
+      { containerId: 3, name: 'Container C', description: '' }
+    ];
+
+    fixture.detectChanges();
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers`);
+    req.flush(mockContainers);
+    tick();
+
+    component.onSort('containerId'); // First click: ascending
+    component.onSort('containerId'); // Second click: descending
+    fixture.detectChanges();
+
+    const sorted = component.filteredAndSortedContainers;
+    expect(sorted[0].containerId).toBe(3);
+    expect(sorted[1].containerId).toBe(2);
+    expect(sorted[2].containerId).toBe(1);
+    expect(component.sortDirection).toBe('desc');
+  }));
+
+  it('should toggle name sort to descending when clicking name header (already default asc)', fakeAsync(() => {
+    const mockContainers = [
+      { containerId: 1, name: 'Charlie', description: '' },
+      { containerId: 2, name: 'Alpha', description: '' },
+      { containerId: 3, name: 'Beta', description: '' }
+    ];
+
+    fixture.detectChanges();
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers`);
+    req.flush(mockContainers);
+    tick();
+
+    // Default is already name ascending, clicking should toggle to descending
+    component.onSort('name');
+    fixture.detectChanges();
+
+    const sorted = component.filteredAndSortedContainers;
+    expect(sorted[0].name).toBe('Charlie');
+    expect(sorted[1].name).toBe('Beta');
+    expect(sorted[2].name).toBe('Alpha');
+    expect(component.sortDirection).toBe('desc');
+  }));
+
+  it('should toggle back to name ascending after two clicks', fakeAsync(() => {
+    const mockContainers = [
+      { containerId: 1, name: 'Charlie', description: '' },
+      { containerId: 2, name: 'Alpha', description: '' },
+      { containerId: 3, name: 'Beta', description: '' }
+    ];
+
+    fixture.detectChanges();
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers`);
+    req.flush(mockContainers);
+    tick();
+
+    // Default is name ascending
+    component.onSort('name'); // First click: descending
+    component.onSort('name'); // Second click: ascending again
+    fixture.detectChanges();
+
+    const sorted = component.filteredAndSortedContainers;
+    expect(sorted[0].name).toBe('Alpha');
+    expect(sorted[1].name).toBe('Beta');
+    expect(sorted[2].name).toBe('Charlie');
+    expect(component.sortDirection).toBe('asc');
+  }));
+
+  it('should filter and sort together correctly', fakeAsync(() => {
+    const mockContainers = [
+      { containerId: 5, name: 'Alpha Container', description: '' },
+      { containerId: 3, name: 'Beta Container', description: '' },
+      { containerId: 7, name: 'Gamma', description: '' }
+    ];
+
+    fixture.detectChanges();
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers`);
+    req.flush(mockContainers);
+    tick();
+
+    // Filter by "Container"
+    component.searchText = 'Container';
+    // Sort by ID ascending
+    component.onSort('containerId');
+    fixture.detectChanges();
+
+    const result = component.filteredAndSortedContainers;
+    expect(result.length).toBe(2);
+    expect(result[0].containerId).toBe(3);
+    expect(result[0].name).toBe('Beta Container');
+    expect(result[1].containerId).toBe(5);
+    expect(result[1].name).toBe('Alpha Container');
+  }));
+
+  it('should clear search when clearSearch is called', fakeAsync(() => {
+    const mockContainers = [
+      { containerId: 1, name: 'Alpha', description: '' },
+      { containerId: 2, name: 'Beta', description: '' }
+    ];
+
+    fixture.detectChanges();
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers`);
+    req.flush(mockContainers);
+    tick();
+
+    component.searchText = 'Alpha';
+    expect(component.filteredAndSortedContainers.length).toBe(1);
+
+    component.clearSearch();
+    expect(component.searchText).toBe('');
+    expect(component.filteredAndSortedContainers.length).toBe(2);
+  }));
+
+  it('should show no results message when filter matches nothing', fakeAsync(() => {
+    const mockContainers = [
+      { containerId: 1, name: 'Alpha', description: '' },
+      { containerId: 2, name: 'Beta', description: '' }
+    ];
+
+    fixture.detectChanges();
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers`);
+    req.flush(mockContainers);
+    tick();
+
+    component.searchText = 'Nonexistent';
+    fixture.detectChanges();
+
+    expect(component.filteredAndSortedContainers.length).toBe(0);
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('No containers found matching');
+  }));
 });
