@@ -24,11 +24,12 @@ Design end-to-end acceptance tests that validate user-facing features in a fully
 
 ## Process
 
-1. **Analyze acceptance criteria** - Map each criterion to testable scenarios
-2. **Design test scenarios** - Cover happy path and key error scenarios
-3. **Plan test data** - Document required data setup
-4. **Post design** - Add as issue comment
-5. **Update label** - Remove `Test-Design`, Add `Development` to signal next phase
+1. **Transition labels** - Remove `Test-Design-Ready`, add `Test-Design`
+2. **Analyze acceptance criteria** - Map each criterion to testable scenarios
+3. **Design test scenarios** - Cover happy path and key error scenarios
+4. **Plan test data** - Document required data setup
+5. **Post design** - Add as issue comment
+6. **Update label** - Add `Development-Ready` to signal next phase
 
 ## Output Template (Tests Required)
 
@@ -86,4 +87,4 @@ Run via: `.\scripts\acceptance_tests.ps1`
 
 ## Next Phase
 
-**Development** - Triggers when issue has `Development` label
+**Development** - Triggers when issue has `Development-Ready` label

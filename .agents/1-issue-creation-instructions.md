@@ -22,7 +22,7 @@ User requests a feature, enhancement, or bug fix that requires code changes.
 3. **Draft conceptual definition** - Use the template below
 4. **Get user confirmation** - NEVER create issues without explicit user approval
 5. **Create the issue** - Use `gh` CLI to create the issue
-6. **Update label** - Add `UX-Design` (or `Technical-Design` for backend-only) to signal next phase
+6. **Update label** - Add `UX-Design-Ready` (or `Technical-Design-Ready` for backend-only) to signal next phase
 
 ## Output Template
 
@@ -53,5 +53,5 @@ User requests a feature, enhancement, or bug fix that requires code changes.
 
 ## Next Phase
 
-- User-facing changes: **UX Design** (set `UX-Design` label)
-- Backend-only changes: **Technical Design** (set `Technical-Design` label, skip UX Design)
+- User-facing changes: **UX Design** (set `UX-Design-Ready` label)
+- Backend-only changes: **Technical Design** (set `Technical-Design-Ready` label, skip UX Design)

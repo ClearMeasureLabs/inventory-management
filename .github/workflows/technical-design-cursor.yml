@@ -6,10 +6,16 @@ on:
 
 jobs:
   technical-design-cursor:
-    if: github.event.label.name == 'Technical-Design'
+    if: github.event.label.name == 'Technical-Design-Ready'
     runs-on: ubuntu-latest
 
     steps:
+      - name: Transition labels
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          gh issue edit ${{ github.event.issue.number }} --remove-label "Technical-Design-Ready" --add-label "Technical-Design" --repo ${{ github.repository }}
+
       - name: Checkout repository
         uses: actions/checkout@v4
 

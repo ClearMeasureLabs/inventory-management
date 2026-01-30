@@ -21,12 +21,13 @@ Validate the implementation in a fully deployed environment by running acceptanc
 
 ## Process
 
-1. **Deploy full stack** - WebAPI, WebApp, SQL Server, Redis, RabbitMQ
-2. **Run acceptance tests:** `.\scripts\acceptance_tests.ps1`
-3. **Diagnose failures** - If tests fail, return to Development
-4. **Document results**
-5. **Update label** - Remove `Functional-Validation`, Add `Ready-For-Review` to signal next phase
-6. **Mark PR ready** - `gh pr ready [PR]` to move from draft to ready for review
+1. **Transition labels** - Remove `Functional-Validation-Ready`, add `Functional-Validation`
+2. **Deploy full stack** - WebAPI, WebApp, SQL Server, Redis, RabbitMQ
+3. **Run acceptance tests:** `.\scripts\acceptance_tests.ps1`
+4. **Diagnose failures** - If tests fail, return to Development
+5. **Document results**
+6. **Update label** - Add `Ready-For-Review` to signal next phase
+7. **Mark PR ready** - `gh pr ready [PR]` to move from draft to ready for review
 
 ## Deployed Services
 

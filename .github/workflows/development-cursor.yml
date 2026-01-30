@@ -6,10 +6,16 @@ on:
 
 jobs:
   development-cursor:
-    if: github.event.label.name == 'Development'
+    if: github.event.label.name == 'Development-Ready'
     runs-on: ubuntu-latest
 
     steps:
+      - name: Transition labels
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          gh issue edit ${{ github.event.issue.number }} --remove-label "Development-Ready" --add-label "Development" --repo ${{ github.repository }}
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
