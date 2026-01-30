@@ -38,5 +38,5 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
           PROMPT=$(cat .agents/5-development-prompt.txt)
-          PROMPT="${PROMPT} The issue number is #${ISSUE_NUMBER}."
+          PROMPT="${PROMPT} The issue number is #${ISSUE_NUMBER}. Use branch name format: issues/${ISSUE_NUMBER}/[title-kebab-case]-cursor"
           agent --force --api-key "$CURSOR_TOKEN" -p "$PROMPT"
