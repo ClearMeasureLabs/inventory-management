@@ -26,8 +26,9 @@ Validate the implementation in a fully deployed environment by running acceptanc
 3. **Run acceptance tests:** `.\scripts\acceptance_tests.ps1`
 4. **Diagnose failures** - If tests fail, return to Development
 5. **Document results**
-6. **Update label** - Add `Ready-For-Review` to signal next phase
-7. **Mark PR ready** - `gh pr ready [PR]` to move from draft to ready for review
+6. **Update issue label** - Add `Ready-For-Review` to the issue to signal next phase
+7. **Update PR label** - Add `Approved by Agent` to the PR to signal validation passed
+8. **Mark PR ready** - `gh pr ready [PR]` to move from draft to ready for review
 
 ## Deployed Services
 
