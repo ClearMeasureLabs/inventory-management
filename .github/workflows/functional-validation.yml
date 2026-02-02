@@ -52,6 +52,11 @@ jobs:
         shell: pwsh
         run: ./scripts/install_tools.ps1
 
+      - name: Clean up any stale Docker containers
+        run: |
+          docker compose -f environments/local/docker-compose.yml down --volumes --remove-orphans 2>/dev/null || true
+          docker rm -f sqlserver rabbitmq redis redis-insight 2>/dev/null || true
+
       - name: Start Docker services
         run: |
           docker compose -f environments/local/docker-compose.yml up -d
@@ -83,7 +88,7 @@ jobs:
       - name: Transition label and convert PR to draft on test failure
         if: failure() && steps.get-issue.outputs.issue_number != ''
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           echo "Functional validation failed - converting PR to draft to trigger implement changes agent"
           # Get all current labels and remove them
