@@ -53,15 +53,18 @@ jobs:
         run: ./scripts/install_tools.ps1
 
       - name: Clean up any stale Docker containers
+        working-directory: environments/local
         run: |
-          docker compose -f environments/local/docker-compose.yml down --volumes --remove-orphans 2>/dev/null || true
+          docker compose -p ivan_infra down --volumes --remove-orphans 2>/dev/null || true
           docker rm -f sqlserver rabbitmq redis redis-insight 2>/dev/null || true
 
       - name: Start Docker services
+        working-directory: environments/local
+        shell: pwsh
         run: |
-          docker compose -f environments/local/docker-compose.yml up -d
+          ./provision.ps1
           # Wait for services to be ready
-          sleep 30
+          Start-Sleep -Seconds 30
 
       - name: Run unit and integration tests
         id: unit-integration-tests
@@ -111,5 +114,8 @@ jobs:
 
       - name: Stop Docker services
         if: always()
+        working-directory: environments/local
         run: |
-          docker compose -f environments/local/docker-compose.yml down
+          docker compose -p ivan_infra down --volumes --remove-orphans 2>/dev/null || true
+          docker compose -p ivan_app down --volumes --remove-orphans 2>/dev/null || true
+          docker rm -f sqlserver rabbitmq redis redis-insight webapp webapi 2>/dev/null || true
