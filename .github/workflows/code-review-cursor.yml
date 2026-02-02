@@ -56,7 +56,7 @@ jobs:
       - name: Transition label to Code-Review
         if: steps.get-pr.outputs.pr_found == 'true' && steps.get-issue.outputs.issue_number != ''
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           # Get all current labels and remove them
           CURRENT_LABELS=$(gh issue view ${{ steps.get-issue.outputs.issue_number }} --json labels --jq '.labels[].name' --repo ${{ github.repository }})

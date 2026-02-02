@@ -17,7 +17,7 @@ jobs:
 
       - name: Transition label to Test-Design
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           # Get all current labels and remove them
           CURRENT_LABELS=$(gh issue view ${{ github.event.issue.number }} --json labels --jq '.labels[].name' --repo ${{ github.repository }})
@@ -50,7 +50,7 @@ jobs:
       - name: Transition label to Development-Ready
         if: success()
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           # Get all current labels and remove them
           CURRENT_LABELS=$(gh issue view ${{ github.event.issue.number }} --json labels --jq '.labels[].name' --repo ${{ github.repository }})

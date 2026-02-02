@@ -54,7 +54,7 @@ jobs:
       - name: Transition label to Implementing-Changes
         if: steps.check-trigger.outputs.should_run == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           # Get all current labels and remove them
           CURRENT_LABELS=$(gh issue view ${{ steps.check-trigger.outputs.issue_number }} --json labels --jq '.labels[].name' --repo ${{ github.repository }})
@@ -98,7 +98,7 @@ jobs:
       - name: Handle success - check if PR was marked ready or needs manual attention
         if: success() && steps.check-trigger.outputs.should_run == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           # Check if PR is still in draft (agent couldn't fix the issue)
           IS_DRAFT=$(gh pr view ${{ github.event.pull_request.number }} --json isDraft --jq '.isDraft' --repo ${{ github.repository }})
