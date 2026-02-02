@@ -8,6 +8,10 @@ jobs:
   test-design-cursor:
     if: github.event.label.name == 'Test-Design-Ready'
     runs-on: ubuntu-latest
+    # Prevent concurrent runs on the same issue
+    concurrency:
+      group: test-design-${{ github.event.issue.number }}
+      cancel-in-progress: true
 
     steps:
 
@@ -39,7 +43,24 @@ jobs:
           agent --force --api-key "$CURSOR_TOKEN" -p "$PROMPT"
 
       - name: Transition label to Development-Ready
+        if: success()
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           gh issue edit ${{ github.event.issue.number }} --remove-label "Test-Design" --add-label "Development-Ready" --repo ${{ github.repository }}
+
+      - name: Add Agent-Failed label on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          gh issue edit ${{ github.event.issue.number }} --add-label "Agent-Failed" --repo ${{ github.repository }}
+          gh issue comment ${{ github.event.issue.number }} --body "Test Design agent failed. Check workflow run for details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" --repo ${{ github.repository }}
+
+      - name: Handle cancellation
+        if: cancelled()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          gh issue edit ${{ github.event.issue.number }} --add-label "Agent-Cancelled" --repo ${{ github.repository }}
+          gh issue comment ${{ github.event.issue.number }} --body "Test Design agent was cancelled. Check workflow run for details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" --repo ${{ github.repository }}

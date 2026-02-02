@@ -8,6 +8,10 @@ jobs:
   development-cursor:
     if: github.event.label.name == 'Development-Ready'
     runs-on: ubuntu-latest
+    # Prevent concurrent runs on the same issue
+    concurrency:
+      group: development-${{ github.event.issue.number }}
+      cancel-in-progress: true
 
     steps:
 
@@ -42,8 +46,34 @@ jobs:
           PROMPT="${PROMPT} The issue number is #${ISSUE_NUMBER}. Use branch name format: issues/${ISSUE_NUMBER}/[title-kebab-case]-cursor"
           agent --force --api-key "$CURSOR_TOKEN" -p "$PROMPT"
 
-      - name: Transition label to Code-Review-Ready
+      - name: Transition label on success
+        if: success()
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          gh issue edit ${{ github.event.issue.number }} --remove-label "Development" --add-label "Code-Review-Ready" --repo ${{ github.repository }}
+          # Check current labels to avoid race condition with build-test workflow
+          # The agent marks PR ready, which triggers build-test which may have already transitioned labels
+          CURRENT_LABELS=$(gh issue view ${{ github.event.issue.number }} --json labels --jq '.labels[].name' --repo ${{ github.repository }})
+          
+          # Only set Code-Review-Ready if still in Development state (build-test hasn't started yet)
+          if echo "$CURRENT_LABELS" | grep -q "^Development$"; then
+            gh issue edit ${{ github.event.issue.number }} --remove-label "Development" --add-label "Code-Review-Ready" --repo ${{ github.repository }}
+          else
+            echo "Label already transitioned by another workflow, skipping"
+          fi
+
+      - name: Add Agent-Failed label on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          gh issue edit ${{ github.event.issue.number }} --add-label "Agent-Failed" --repo ${{ github.repository }}
+          gh issue comment ${{ github.event.issue.number }} --body "Development agent failed. Check workflow run for details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" --repo ${{ github.repository }}
+
+      - name: Handle cancellation
+        if: cancelled()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          gh issue edit ${{ github.event.issue.number }} --add-label "Agent-Cancelled" --repo ${{ github.repository }}
+          gh issue comment ${{ github.event.issue.number }} --body "Development agent was cancelled. Check workflow run for details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" --repo ${{ github.repository }}

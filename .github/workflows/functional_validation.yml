@@ -1,0 +1,89 @@
+name: Build and Test Cursor
+
+on:
+  pull_request:
+    types: [ready_for_review]
+
+jobs:
+  functional-validation:
+    runs-on: ubuntu-latest
+    # Prevent concurrent runs on the same PR
+    concurrency:
+      group: build-test-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+
+    steps:
+
+      - name: Get linked issue number
+        id: get-issue
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          # Get linked issue number from PR body (supports Closes, Fixes, Resolves - case insensitive)
+          ISSUE_NUMBER=$(gh pr view ${{ github.event.pull_request.number }} --json body --jq '.body' --repo ${{ github.repository }} | grep -oiP '(closes|fixes|resolves) #\K\d+' | head -1)
+          echo "issue_number=$ISSUE_NUMBER" >> $GITHUB_OUTPUT
+          if [ -z "$ISSUE_NUMBER" ]; then
+            echo "::warning::No linked issue found in PR body. Expected 'Closes #N', 'Fixes #N', or 'Resolves #N'"
+          fi
+
+      - name: Transition label to Build-Test
+        if: steps.get-issue.outputs.issue_number != ''
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          gh issue edit ${{ steps.get-issue.outputs.issue_number }} --remove-label "Code-Review-Ready" --add-label "Build-Test" --repo ${{ github.repository }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run install tools script
+        shell: pwsh
+        run: ./scripts/install_tools.ps1
+
+      - name: Start Docker services
+        run: |
+          docker compose -f environments/local/docker-compose.yml up -d
+          # Wait for services to be ready
+          sleep 30
+
+      - name: Run build and test script
+        id: build-test
+        shell: pwsh
+        run: ./scripts/build_and_test.ps1
+
+      - name: Run acceptance tests
+        id: acceptance-tests
+        shell: pwsh
+        run: ./scripts/acceptance_tests.ps1
+
+      - name: Transition label to Tests-Passed on success
+        if: success() && steps.get-issue.outputs.issue_number != ''
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          gh issue edit ${{ steps.get-issue.outputs.issue_number }} --remove-label "Build-Test" --add-label "Tests-Passed" --repo ${{ github.repository }}
+
+      - name: Transition label and convert PR to draft on test failure
+        if: failure() && steps.get-issue.outputs.issue_number != ''
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          echo "Tests failed - converting PR to draft to trigger implement changes agent"
+          # Set Tests-Failed label so code-review-changes workflow knows this is a test failure
+          gh issue edit ${{ steps.get-issue.outputs.issue_number }} --remove-label "Build-Test" --add-label "Tests-Failed" --repo ${{ github.repository }}
+          # Convert to draft - this triggers the code-review-changes workflow
+          gh pr ready --undo ${{ github.event.pull_request.number }} --repo ${{ github.repository }}
+          gh pr comment ${{ github.event.pull_request.number }} --body "Build/Test failed. Converting to draft to trigger automated fixes. Check workflow run for details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" --repo ${{ github.repository }}
+
+      - name: Handle cancellation
+        if: cancelled() && steps.get-issue.outputs.issue_number != ''
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          gh issue edit ${{ steps.get-issue.outputs.issue_number }} --add-label "Agent-Cancelled" --repo ${{ github.repository }}
+          gh pr comment ${{ github.event.pull_request.number }} --body "Build/Test was cancelled. Check workflow run for details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" --repo ${{ github.repository }}
+
+      - name: Stop Docker services
+        if: always()
+        run: |
+          docker compose -f environments/local/docker-compose.yml down
