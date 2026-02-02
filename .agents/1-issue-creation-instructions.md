@@ -1,4 +1,4 @@
-# Issue Creation Agent
+# Work Item Creation Agent
 
 ## Purpose
 
