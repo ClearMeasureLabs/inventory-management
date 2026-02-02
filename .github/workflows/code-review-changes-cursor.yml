@@ -10,7 +10,7 @@ concurrency:
 
 permissions:
   issues: write
-  contents: read
+  contents: write
   pull-requests: write
 
 jobs:
@@ -72,7 +72,14 @@ jobs:
         if: steps.check-trigger.outputs.should_run == 'true'
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Configure git for push
+        if: steps.check-trigger.outputs.should_run == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Run install tools script
         if: steps.check-trigger.outputs.should_run == 'true'
