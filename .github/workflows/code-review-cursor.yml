@@ -2,12 +2,12 @@ name: Code Review Cursor
 
 on:
   workflow_run:
-    workflows: ["Build and Test Cursor"]
+    workflows: ["Functional Validation"]
     types: [completed]
 
 jobs:
   code-review-cursor:
-    # Only run if build-test workflow succeeded
+    # Only run if functional validation workflow succeeded
     if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
 
