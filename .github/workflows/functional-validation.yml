@@ -48,6 +48,13 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
+      - name: Get project name from config
+        id: get-project
+        run: |
+          PROJECT_NAME=$(jq -r '.Project.Name' environments/global.config.json | tr '[:upper:]' '[:lower:]' | tr ' ' '_')
+          echo "project_name=$PROJECT_NAME" >> $GITHUB_OUTPUT
+          echo "Project name: $PROJECT_NAME"
+
       - name: Run install tools script
         shell: pwsh
         run: ./scripts/install_tools.ps1
@@ -55,7 +62,7 @@ jobs:
       - name: Clean up any stale Docker containers
         working-directory: environments/local
         run: |
-          docker compose -p ivan_infra down --volumes --remove-orphans 2>/dev/null || true
+          docker compose -p ${{ steps.get-project.outputs.project_name }}_infra down --volumes --remove-orphans 2>/dev/null || true
           docker rm -f sqlserver rabbitmq redis redis-insight 2>/dev/null || true
 
       - name: Start Docker services
@@ -116,6 +123,6 @@ jobs:
         if: always()
         working-directory: environments/local
         run: |
-          docker compose -p ivan_infra down --volumes --remove-orphans 2>/dev/null || true
-          docker compose -p ivan_app down --volumes --remove-orphans 2>/dev/null || true
+          docker compose -p ${{ steps.get-project.outputs.project_name }}_infra down --volumes --remove-orphans 2>/dev/null || true
+          docker compose -p ${{ steps.get-project.outputs.project_name }}_app down --volumes --remove-orphans 2>/dev/null || true
           docker rm -f sqlserver rabbitmq redis redis-insight webapp webapi 2>/dev/null || true
