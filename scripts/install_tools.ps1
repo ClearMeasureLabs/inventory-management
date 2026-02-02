@@ -112,15 +112,20 @@ Pop-Location
 
 # Build AcceptanceTests project
 Write-Host "Building AcceptanceTests project..."
-dotnet build "$repoRoot/src/Tests/AcceptanceTests/AcceptanceTests.csproj" --configuration Debug | Out-Null
+dotnet build "$repoRoot/src/Tests/AcceptanceTests/AcceptanceTests.csproj" --configuration Debug
 
-# Install Playwright browsers using npx
-Write-Host "Installing Playwright browsers..."
-npx playwright install chromium
-if ($LASTEXITCODE -ne 0) {
-    Write-Warning "Playwright browser installation may have failed. You may need to install manually with: npx playwright install chromium"
+# Install .NET Playwright browsers
+Write-Host "Installing .NET Playwright browsers..."
+$playwrightScript = "$repoRoot/src/Tests/AcceptanceTests/bin/Debug/net8.0/playwright.ps1"
+if (Test-Path $playwrightScript) {
+    & pwsh $playwrightScript install chromium
+    if ($LASTEXITCODE -ne 0) {
+        Write-Warning "Playwright browser installation may have failed."
+    } else {
+        Write-Host "Playwright browsers installed successfully." -ForegroundColor Green
+    }
 } else {
-    Write-Host "Playwright browsers installed successfully." -ForegroundColor Green
+    Write-Warning "Playwright script not found at $playwrightScript. Browsers may need manual installation."
 }
 
 Write-Host "All tools installed successfully." -ForegroundColor Green
