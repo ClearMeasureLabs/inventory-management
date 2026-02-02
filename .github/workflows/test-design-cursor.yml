@@ -8,10 +8,10 @@ jobs:
   test-design-cursor:
     if: github.event.label.name == 'Test-Design-Ready'
     runs-on: ubuntu-latest
-    # Prevent concurrent runs on the same issue
+    # Queue concurrent runs on the same issue (don't cancel)
     concurrency:
       group: test-design-${{ github.event.issue.number }}
-      cancel-in-progress: true
+      cancel-in-progress: false
 
     steps:
 
