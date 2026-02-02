@@ -29,7 +29,7 @@ jobs:
           
           # Check if issue has Code-Review label (set by code-review workflow)
           HAS_CODE_REVIEW=$(echo "$LABELS" | grep -c "^Code-Review$" || true)
-          # Check if issue has Tests-Failed label (set by build-test workflow)
+          # Check if issue has Tests-Failed label (set by functional validation workflow)
           HAS_TESTS_FAILED=$(echo "$LABELS" | grep -c "^Tests-Failed$" || true)
           
           if [ "$HAS_CODE_REVIEW" != "0" ]; then
@@ -52,9 +52,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          # Remove all workflow labels before adding new one
-          LABELS_TO_REMOVE="UX-Design-Ready,UX-Design,Technical-Design-Ready,Technical-Design,Test-Design-Ready,Test-Design,Development-Ready,Development,Code-Review-Ready,Code-Review,Build-Test,Tests-Passed,Tests-Failed,Implementing-Changes,Agent-Failed,Agent-Cancelled,Manual-Attention-Required"
-          for label in $(echo $LABELS_TO_REMOVE | tr ',' ' '); do
+          # Get all current labels and remove them
+          CURRENT_LABELS=$(gh issue view ${{ steps.check-trigger.outputs.issue_number }} --json labels --jq '.labels[].name' --repo ${{ github.repository }})
+          for label in $CURRENT_LABELS; do
             gh issue edit ${{ steps.check-trigger.outputs.issue_number }} --remove-label "$label" --repo ${{ github.repository }} 2>/dev/null || true
           done
           gh issue edit ${{ steps.check-trigger.outputs.issue_number }} --add-label "Implementing-Changes" --repo ${{ github.repository }}
@@ -101,19 +101,19 @@ jobs:
           
           if [ "$IS_DRAFT" = "true" ]; then
             echo "PR is still in draft - agent could not fully resolve the issues"
-            # Remove all workflow labels before adding new one
-            LABELS_TO_REMOVE="UX-Design-Ready,UX-Design,Technical-Design-Ready,Technical-Design,Test-Design-Ready,Test-Design,Development-Ready,Development,Code-Review-Ready,Code-Review,Build-Test,Tests-Passed,Tests-Failed,Implementing-Changes,Agent-Failed,Agent-Cancelled,Manual-Attention-Required"
-            for label in $(echo $LABELS_TO_REMOVE | tr ',' ' '); do
+            # Get all current labels and remove them
+            CURRENT_LABELS=$(gh issue view ${{ steps.check-trigger.outputs.issue_number }} --json labels --jq '.labels[].name' --repo ${{ github.repository }})
+            for label in $CURRENT_LABELS; do
               gh issue edit ${{ steps.check-trigger.outputs.issue_number }} --remove-label "$label" --repo ${{ github.repository }} 2>/dev/null || true
             done
             gh issue edit ${{ steps.check-trigger.outputs.issue_number }} --add-label "Manual-Attention-Required" --repo ${{ github.repository }}
             gh pr comment ${{ github.event.pull_request.number }} --body "Implement Changes agent completed but could not fully resolve all issues. Manual intervention required." --repo ${{ github.repository }}
           else
             echo "PR was marked ready - agent fixed the issues"
-            # Remove all workflow labels - the PR ready event triggers build-test-cursor
+            # Get all current labels and remove them - the PR ready event triggers functional validation
             # which will run tests and set the appropriate label
-            LABELS_TO_REMOVE="UX-Design-Ready,UX-Design,Technical-Design-Ready,Technical-Design,Test-Design-Ready,Test-Design,Development-Ready,Development,Code-Review-Ready,Code-Review,Build-Test,Tests-Passed,Tests-Failed,Implementing-Changes,Agent-Failed,Agent-Cancelled,Manual-Attention-Required"
-            for label in $(echo $LABELS_TO_REMOVE | tr ',' ' '); do
+            CURRENT_LABELS=$(gh issue view ${{ steps.check-trigger.outputs.issue_number }} --json labels --jq '.labels[].name' --repo ${{ github.repository }})
+            for label in $CURRENT_LABELS; do
               gh issue edit ${{ steps.check-trigger.outputs.issue_number }} --remove-label "$label" --repo ${{ github.repository }} 2>/dev/null || true
             done
           fi

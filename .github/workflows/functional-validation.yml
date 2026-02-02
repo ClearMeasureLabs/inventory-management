@@ -22,17 +22,17 @@ jobs:
             echo "::warning::No linked issue found in PR body. Expected 'Closes #N', 'Fixes #N', or 'Resolves #N'"
           fi
 
-      - name: Transition label to Build-Test
+      - name: Transition label to Functional-Validation
         if: steps.get-issue.outputs.issue_number != ''
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          # Remove all workflow labels before adding new one
-          LABELS_TO_REMOVE="UX-Design-Ready,UX-Design,Technical-Design-Ready,Technical-Design,Test-Design-Ready,Test-Design,Development-Ready,Development,Code-Review-Ready,Code-Review,Build-Test,Tests-Passed,Tests-Failed,Implementing-Changes,Agent-Failed,Agent-Cancelled,Manual-Attention-Required"
-          for label in $(echo $LABELS_TO_REMOVE | tr ',' ' '); do
+          # Get all current labels and remove them
+          CURRENT_LABELS=$(gh issue view ${{ steps.get-issue.outputs.issue_number }} --json labels --jq '.labels[].name' --repo ${{ github.repository }})
+          for label in $CURRENT_LABELS; do
             gh issue edit ${{ steps.get-issue.outputs.issue_number }} --remove-label "$label" --repo ${{ github.repository }} 2>/dev/null || true
           done
-          gh issue edit ${{ steps.get-issue.outputs.issue_number }} --add-label "Build-Test" --repo ${{ github.repository }}
+          gh issue edit ${{ steps.get-issue.outputs.issue_number }} --add-label "Functional-Validation" --repo ${{ github.repository }}
 
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -64,9 +64,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          # Remove all workflow labels before adding new one
-          LABELS_TO_REMOVE="UX-Design-Ready,UX-Design,Technical-Design-Ready,Technical-Design,Test-Design-Ready,Test-Design,Development-Ready,Development,Code-Review-Ready,Code-Review,Build-Test,Tests-Passed,Tests-Failed,Implementing-Changes,Agent-Failed,Agent-Cancelled,Manual-Attention-Required"
-          for label in $(echo $LABELS_TO_REMOVE | tr ',' ' '); do
+          # Get all current labels and remove them
+          CURRENT_LABELS=$(gh issue view ${{ steps.get-issue.outputs.issue_number }} --json labels --jq '.labels[].name' --repo ${{ github.repository }})
+          for label in $CURRENT_LABELS; do
             gh issue edit ${{ steps.get-issue.outputs.issue_number }} --remove-label "$label" --repo ${{ github.repository }} 2>/dev/null || true
           done
           gh issue edit ${{ steps.get-issue.outputs.issue_number }} --add-label "Tests-Passed" --repo ${{ github.repository }}
@@ -76,16 +76,16 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          echo "Tests failed - converting PR to draft to trigger implement changes agent"
-          # Remove all workflow labels before adding new one
-          LABELS_TO_REMOVE="UX-Design-Ready,UX-Design,Technical-Design-Ready,Technical-Design,Test-Design-Ready,Test-Design,Development-Ready,Development,Code-Review-Ready,Code-Review,Build-Test,Tests-Passed,Tests-Failed,Implementing-Changes,Agent-Failed,Agent-Cancelled,Manual-Attention-Required"
-          for label in $(echo $LABELS_TO_REMOVE | tr ',' ' '); do
+          echo "Functional validation failed - converting PR to draft to trigger implement changes agent"
+          # Get all current labels and remove them
+          CURRENT_LABELS=$(gh issue view ${{ steps.get-issue.outputs.issue_number }} --json labels --jq '.labels[].name' --repo ${{ github.repository }})
+          for label in $CURRENT_LABELS; do
             gh issue edit ${{ steps.get-issue.outputs.issue_number }} --remove-label "$label" --repo ${{ github.repository }} 2>/dev/null || true
           done
           gh issue edit ${{ steps.get-issue.outputs.issue_number }} --add-label "Tests-Failed" --repo ${{ github.repository }}
           # Convert to draft - this triggers the code-review-changes workflow
           gh pr ready --undo ${{ github.event.pull_request.number }} --repo ${{ github.repository }}
-          gh pr comment ${{ github.event.pull_request.number }} --body "Build/Test failed. Converting to draft to trigger automated fixes. Check workflow run for details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" --repo ${{ github.repository }}
+          gh pr comment ${{ github.event.pull_request.number }} --body "Functional validation failed. Converting to draft to trigger automated fixes. Check workflow run for details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" --repo ${{ github.repository }}
 
       - name: Handle cancellation
         if: cancelled() && steps.get-issue.outputs.issue_number != ''
@@ -93,7 +93,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           gh issue edit ${{ steps.get-issue.outputs.issue_number }} --add-label "Agent-Cancelled" --repo ${{ github.repository }}
-          gh pr comment ${{ github.event.pull_request.number }} --body "Build/Test was cancelled. Check workflow run for details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" --repo ${{ github.repository }}
+          gh pr comment ${{ github.event.pull_request.number }} --body "Functional validation was cancelled. Check workflow run for details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" --repo ${{ github.repository }}
 
       - name: Stop Docker services
         if: always()
