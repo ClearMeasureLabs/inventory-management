@@ -8,10 +8,6 @@ jobs:
   development-cursor:
     if: github.event.label.name == 'Development-Ready'
     runs-on: ubuntu-latest
-    # Queue concurrent runs on the same issue (don't cancel)
-    concurrency:
-      group: development-${{ github.event.issue.number }}
-      cancel-in-progress: false
 
     steps:
 

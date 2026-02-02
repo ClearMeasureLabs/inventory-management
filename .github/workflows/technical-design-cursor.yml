@@ -8,10 +8,6 @@ jobs:
   technical-design-cursor:
     if: github.event.label.name == 'Technical-Design-Ready'
     runs-on: ubuntu-latest
-    # Queue concurrent runs on the same issue (don't cancel)
-    concurrency:
-      group: technical-design-${{ github.event.issue.number }}
-      cancel-in-progress: false
 
     steps:
 

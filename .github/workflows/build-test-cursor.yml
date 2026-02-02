@@ -7,10 +7,6 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    # Queue concurrent runs on the same PR (don't cancel)
-    concurrency:
-      group: build-test-${{ github.event.pull_request.number }}
-      cancel-in-progress: false
 
     steps:
 
