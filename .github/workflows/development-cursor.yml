@@ -6,7 +6,11 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.issue.number }}
-  cancel-in-progress: true
+  cancel-in-progress: false
+
+permissions:
+  issues: write
+  contents: read
 
 jobs:
   development-cursor:

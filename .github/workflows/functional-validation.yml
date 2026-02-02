@@ -6,7 +6,12 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+  cancel-in-progress: false
+
+permissions:
+  issues: write
+  contents: read
+  pull-requests: write
 
 jobs:
   functional-validation:

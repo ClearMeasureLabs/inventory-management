@@ -7,7 +7,12 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.workflow_run.head_sha }}
-  cancel-in-progress: true
+  cancel-in-progress: false
+
+permissions:
+  issues: write
+  contents: read
+  pull-requests: write
 
 jobs:
   code-review-cursor:
