@@ -52,12 +52,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          # Remove the trigger label and add Implementing-Changes
-          if [ "${{ steps.check-trigger.outputs.trigger_type }}" = "code-review" ]; then
-            gh issue edit ${{ steps.check-trigger.outputs.issue_number }} --remove-label "Code-Review" --add-label "Implementing-Changes" --repo ${{ github.repository }}
-          else
-            gh issue edit ${{ steps.check-trigger.outputs.issue_number }} --remove-label "Tests-Failed" --add-label "Implementing-Changes" --repo ${{ github.repository }}
-          fi
+          # Remove all workflow labels before adding new one
+          LABELS_TO_REMOVE="UX-Design-Ready,UX-Design,Technical-Design-Ready,Technical-Design,Test-Design-Ready,Test-Design,Development-Ready,Development,Code-Review-Ready,Code-Review,Build-Test,Tests-Passed,Tests-Failed,Implementing-Changes,Agent-Failed,Agent-Cancelled,Manual-Attention-Required"
+          for label in $(echo $LABELS_TO_REMOVE | tr ',' ' '); do
+            gh issue edit ${{ steps.check-trigger.outputs.issue_number }} --remove-label "$label" --repo ${{ github.repository }} 2>/dev/null || true
+          done
+          gh issue edit ${{ steps.check-trigger.outputs.issue_number }} --add-label "Implementing-Changes" --repo ${{ github.repository }}
 
       - name: Checkout repository
         if: steps.check-trigger.outputs.should_run == 'true'
@@ -101,14 +101,21 @@ jobs:
           
           if [ "$IS_DRAFT" = "true" ]; then
             echo "PR is still in draft - agent could not fully resolve the issues"
-            # Remove Implementing-Changes and add Manual-Attention-Required
-            gh issue edit ${{ steps.check-trigger.outputs.issue_number }} --remove-label "Implementing-Changes" --add-label "Manual-Attention-Required" --repo ${{ github.repository }}
+            # Remove all workflow labels before adding new one
+            LABELS_TO_REMOVE="UX-Design-Ready,UX-Design,Technical-Design-Ready,Technical-Design,Test-Design-Ready,Test-Design,Development-Ready,Development,Code-Review-Ready,Code-Review,Build-Test,Tests-Passed,Tests-Failed,Implementing-Changes,Agent-Failed,Agent-Cancelled,Manual-Attention-Required"
+            for label in $(echo $LABELS_TO_REMOVE | tr ',' ' '); do
+              gh issue edit ${{ steps.check-trigger.outputs.issue_number }} --remove-label "$label" --repo ${{ github.repository }} 2>/dev/null || true
+            done
+            gh issue edit ${{ steps.check-trigger.outputs.issue_number }} --add-label "Manual-Attention-Required" --repo ${{ github.repository }}
             gh pr comment ${{ github.event.pull_request.number }} --body "Implement Changes agent completed but could not fully resolve all issues. Manual intervention required." --repo ${{ github.repository }}
           else
             echo "PR was marked ready - agent fixed the issues"
-            # Remove Implementing-Changes label - the PR ready event triggers build-test-cursor
-            # which will run tests and if they pass, trigger code-review-cursor
-            gh issue edit ${{ steps.check-trigger.outputs.issue_number }} --remove-label "Implementing-Changes" --repo ${{ github.repository }}
+            # Remove all workflow labels - the PR ready event triggers build-test-cursor
+            # which will run tests and set the appropriate label
+            LABELS_TO_REMOVE="UX-Design-Ready,UX-Design,Technical-Design-Ready,Technical-Design,Test-Design-Ready,Test-Design,Development-Ready,Development,Code-Review-Ready,Code-Review,Build-Test,Tests-Passed,Tests-Failed,Implementing-Changes,Agent-Failed,Agent-Cancelled,Manual-Attention-Required"
+            for label in $(echo $LABELS_TO_REMOVE | tr ',' ' '); do
+              gh issue edit ${{ steps.check-trigger.outputs.issue_number }} --remove-label "$label" --repo ${{ github.repository }} 2>/dev/null || true
+            done
           fi
 
       - name: Add Agent-Failed label on failure

@@ -15,7 +15,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          gh issue edit ${{ github.event.issue.number }} --remove-label "Development-Ready" --add-label "Development" --repo ${{ github.repository }}
+          # Remove all workflow labels before adding new one
+          LABELS_TO_REMOVE="UX-Design-Ready,UX-Design,Technical-Design-Ready,Technical-Design,Test-Design-Ready,Test-Design,Development-Ready,Development,Code-Review-Ready,Code-Review,Build-Test,Tests-Passed,Tests-Failed,Implementing-Changes,Agent-Failed,Agent-Cancelled,Manual-Attention-Required"
+          for label in $(echo $LABELS_TO_REMOVE | tr ',' ' '); do
+            gh issue edit ${{ github.event.issue.number }} --remove-label "$label" --repo ${{ github.repository }} 2>/dev/null || true
+          done
+          gh issue edit ${{ github.event.issue.number }} --add-label "Development" --repo ${{ github.repository }}
 
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -48,12 +53,16 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           # Check current labels to avoid race condition with build-test workflow
-          # The agent marks PR ready, which triggers build-test which may have already transitioned labels
           CURRENT_LABELS=$(gh issue view ${{ github.event.issue.number }} --json labels --jq '.labels[].name' --repo ${{ github.repository }})
           
           # Only set Code-Review-Ready if still in Development state (build-test hasn't started yet)
           if echo "$CURRENT_LABELS" | grep -q "^Development$"; then
-            gh issue edit ${{ github.event.issue.number }} --remove-label "Development" --add-label "Code-Review-Ready" --repo ${{ github.repository }}
+            # Remove all workflow labels before adding new one
+            LABELS_TO_REMOVE="UX-Design-Ready,UX-Design,Technical-Design-Ready,Technical-Design,Test-Design-Ready,Test-Design,Development-Ready,Development,Code-Review-Ready,Code-Review,Build-Test,Tests-Passed,Tests-Failed,Implementing-Changes,Agent-Failed,Agent-Cancelled,Manual-Attention-Required"
+            for label in $(echo $LABELS_TO_REMOVE | tr ',' ' '); do
+              gh issue edit ${{ github.event.issue.number }} --remove-label "$label" --repo ${{ github.repository }} 2>/dev/null || true
+            done
+            gh issue edit ${{ github.event.issue.number }} --add-label "Code-Review-Ready" --repo ${{ github.repository }}
           else
             echo "Label already transitioned by another workflow, skipping"
           fi
