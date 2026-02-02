@@ -1,0 +1,23 @@
+.breadcrumb-nav {
+  background-color: #f8f9fa;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.breadcrumb {
+  font-size: 0.875rem;
+
+  a {
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .breadcrumb-item {
+    &.active {
+      color: #6c757d;
+    }
+  }
+}
