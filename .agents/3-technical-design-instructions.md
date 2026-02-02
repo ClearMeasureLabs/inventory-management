@@ -15,14 +15,12 @@ Create a detailed technical implementation plan identifying affected components,
 
 ## Process
 
-1. **Transition labels** - Remove existing labels, add `Technical-Design`
-2. **Analyze requirements** - Review conceptual definition and UX design
-3. **Map affected components** - Identify all files to create or modify
-4. **Plan implementation steps** - Order by dependency, specify exact file paths
-5. **Identify dependencies** - Flag any package or SDK changes
-6. **Plan tests** - Specify unit, integration, and Angular tests
-7. **Post design** - Add as issue comment
-8. **Update label** - Remove existing labels, add `Test-Design-Ready` to signal next phase
+1. **Analyze requirements** - Review conceptual definition and UX design
+2. **Map affected components** - Identify all files to create or modify
+3. **Plan implementation steps** - Order by dependency, specify exact file paths
+4. **Identify dependencies** - Flag any package or SDK changes
+5. **Plan tests** - Specify unit, integration, and Angular tests
+6. **Post design** - Add as issue comment
 
 ## Output Template
 

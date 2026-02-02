@@ -24,13 +24,11 @@ Implement the feature or fix according to the technical design, following archit
 
 ## Process
 
-1. **Transition labels** - Remove existing labels, add `Development`
-2. **Implement code** - Follow technical design steps in order
-3. **Add tests** - Unit, integration, Angular, and acceptance tests as specified
-4. **Validate** - Run `scripts/build_and_test.ps1` and fix all failures
-5. **Commit and push** - Clear commit messages to feature branch
-6. **Mark PR ready** - `gh pr ready [PR]` to move from draft to ready for review
-7. **Update label** - Remove existing labels, add `Code-Review-Ready` to signal next phase
+1. **Implement code** - Follow technical design steps in order
+2. **Add tests** - Unit, integration, Angular, and acceptance tests as specified
+3. **Validate** - Run `scripts/build_and_test.ps1` and fix all failures
+4. **Commit and push** - Clear commit messages to feature branch
+5. **Mark PR ready** - `gh pr ready [PR]` to move from draft to ready for review
 
 ## Architecture Rules
 

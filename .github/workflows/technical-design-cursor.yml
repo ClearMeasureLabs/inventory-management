@@ -11,6 +11,12 @@ jobs:
 
     steps:
 
+      - name: Transition label to Technical-Design
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          gh issue edit ${{ github.event.issue.number }} --remove-label "Technical-Design-Ready" --add-label "Technical-Design" --repo ${{ github.repository }}
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -31,3 +37,9 @@ jobs:
           PROMPT=$(cat .agents/3-technical-design-prompt.txt)
           PROMPT="${PROMPT} The issue number is #${ISSUE_NUMBER}."
           agent --force --api-key "$CURSOR_TOKEN" -p "$PROMPT"
+
+      - name: Transition label to Test-Design-Ready
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          gh issue edit ${{ github.event.issue.number }} --remove-label "Technical-Design" --add-label "Test-Design-Ready" --repo ${{ github.repository }}

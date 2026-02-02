@@ -99,11 +99,10 @@ Review pull requests against project standards, architecture rules, and testing 
 
 **All checks pass (APPROVED):**
 1. Post review comment with approval using the output template
-2. Remove existing labels, add `Approved by Agent` label to PR
-3. **STOP** - Do NOT use `gh pr review --approve`
-4. **STOP** - Do NOT merge the PR
-5. **STOP** - Do NOT close the issue
-6. Human review and merge required
+2. **STOP** - Do NOT use `gh pr review --approve`
+3. **STOP** - Do NOT merge the PR
+4. **STOP** - Do NOT close the issue
+5. Human review and merge required
 
 **Issues found (CHANGES REQUIRED):**
 1. Post review comment with specific feedback

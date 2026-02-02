@@ -11,6 +11,12 @@ jobs:
 
     steps:
 
+      - name: Transition label to UX-Design
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          gh issue edit ${{ github.event.issue.number }} --remove-label "UX-Design-Ready" --add-label "UX-Design" --repo ${{ github.repository }}
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -31,3 +37,9 @@ jobs:
           PROMPT=$(cat .agents/2-ux-design-prompt.txt)
           PROMPT="${PROMPT} The issue number is #${ISSUE_NUMBER}."
           agent --force --api-key "$CURSOR_TOKEN" -p "$PROMPT"
+
+      - name: Transition label to Technical-Design-Ready
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          gh issue edit ${{ github.event.issue.number }} --remove-label "UX-Design" --add-label "Technical-Design-Ready" --repo ${{ github.repository }}

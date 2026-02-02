@@ -9,11 +9,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Transition labels
+
+      - name: Transition label to Code-Review
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          gh issue edit ${{ github.event.issue.number }} --add-label "Code-Review" --repo ${{ github.repository }}
+          # Get linked issue number from PR body
+          ISSUE_NUMBER=$(gh pr view ${{ github.event.pull_request.number }} --json body --jq '.body' --repo ${{ github.repository }} | grep -oP 'Closes #\K\d+' | head -1)
+          if [ -n "$ISSUE_NUMBER" ]; then
+            gh issue edit $ISSUE_NUMBER --remove-label "Code-Review-Ready" --add-label "Code-Review" --repo ${{ github.repository }}
+          fi
 
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -39,3 +44,18 @@ jobs:
           PROMPT=$(cat .agents/6-code-review-prompt.txt)
           PROMPT="${PROMPT} The PR number is #${PR_NUMBER}."
           agent --force --api-key "$CURSOR_TOKEN" -p "$PROMPT"
+
+      - name: Add Approved by Agent label if PR still ready for review
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          # Check if PR is still ready for review (not converted to draft)
+          # Agent converts PR to draft with 'gh pr ready --undo' when requesting changes
+          IS_DRAFT=$(gh pr view ${{ github.event.pull_request.number }} --json isDraft --jq '.isDraft' --repo ${{ github.repository }})
+          if [ "$IS_DRAFT" = "false" ]; then
+            echo "PR is still ready for review - agent approved"
+            gh pr edit ${{ github.event.pull_request.number }} --add-label "Approved by Agent" --repo ${{ github.repository }}
+          else
+            echo "PR was converted to draft - agent requested changes"
+          fi
