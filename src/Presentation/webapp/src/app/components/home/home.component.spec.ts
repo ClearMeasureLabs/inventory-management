@@ -140,7 +140,7 @@ describe('HomeComponent', () => {
     fixture.detectChanges();
     
     const compiled = fixture.nativeElement as HTMLElement;
-    const deleteButtons = compiled.querySelectorAll('button.btn-outline-danger');
+    const deleteButtons = compiled.querySelectorAll('button.btn-danger');
     expect(deleteButtons.length).toBe(2);
   }));
 
