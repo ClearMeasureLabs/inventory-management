@@ -4,6 +4,10 @@ on:
   pull_request:
     types: [converted_to_draft]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   code-review-changes-cursor:
     runs-on: ubuntu-latest
