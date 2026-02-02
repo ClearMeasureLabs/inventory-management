@@ -2,26 +2,26 @@
 
 ## Purpose
 
-Review pull requests against project standards, architecture rules, and testing requirements. Approve or request changes.
+Review merge requests against project standards, architecture rules, and testing requirements. Approve or request changes.
 
 ## Trigger
 
-- PR marked "Ready for review" (automated via `.github/workflows/code-review-cursor.yml`)
-- PR targets `master` branch
+- Merge request marked "Ready for review" (automated via `.github/workflows/code-review-cursor.yml`)
+- Merge request targets default branch
 
 ## Inputs
 
 | Input | Source |
 |-------|--------|
-| PR diff | GitHub PR |
-| Linked issue | PR body ("Closes #N") |
-| Conceptual definition | GitHub issue |
-| Technical design | GitHub issue comment |
-| PR template checklist | `.github/PULL_REQUEST_TEMPLATE.md` |
+| Merge request diff | Merge request |
+| Linked work item | Merge request description (linked to and completes work item #N) |
+| Conceptual definition | Work item |
+| Technical design | Work item comment |
+| Merge request template checklist | `.github/PULL_REQUEST_TEMPLATE.md` |
 
 ## Process
 
-1. **Fetch linked issue** - Extract issue number, read requirements and technical design
+1. **Fetch linked work item** - Extract work item number, read requirements and technical design
 2. **Check documentation** - Determine if README updates are needed
 3. **Review against checklist** - Evaluate all categories below
 4. **Post review comment** - Use the output template
@@ -60,7 +60,7 @@ Review pull requests against project standards, architecture rules, and testing 
 ### Requirements
 | Check | Criteria |
 |-------|----------|
-| Acceptance criteria | All criteria from issue addressed |
+| Acceptance criteria | All criteria from work item addressed |
 | Technical design | Implementation matches design |
 | Edge cases | Validation rules handled |
 
@@ -99,30 +99,30 @@ Review pull requests against project standards, architecture rules, and testing 
 
 **All checks pass (APPROVED):**
 1. Post review comment with approval using the output template
-2. **STOP** - Do NOT use `gh pr review --approve`
-3. **STOP** - Do NOT merge the PR
-4. **STOP** - Do NOT close the issue
+2. **STOP** - Do NOT use platform CLI to approve
+3. **STOP** - Do NOT merge the merge request
+4. **STOP** - Do NOT close the work item
 5. Human review and merge required
 
 **Issues found (CHANGES REQUIRED):**
 1. Post review comment with specific feedback
-2. Convert PR to draft: `gh pr ready --undo [PR]`
+2. Convert merge request to draft using platform CLI
 3. Do NOT add `Approved by Agent` label
 4. This triggers the Implement Changes agent automatically
 
 ## Rules
 
-1. **ALWAYS** read the linked issue before reviewing
+1. **ALWAYS** read the linked work item before reviewing
 2. **ALWAYS** be specific - "Rename `GetData` to `GetContainerById` in `ContainersController.cs:45`" NOT "Fix the naming"
 3. **ALWAYS** check all layers (Domain, Application, Infrastructure, Presentation)
 4. **ALWAYS** verify tests were added, not just that they pass
 5. **NEVER** approve with open issues
 6. **NEVER** use vague feedback
-7. **NEVER** merge PRs - human review and merge required
-8. **NEVER** close issues - they will be auto-closed when PR is merged by human
-9. **NEVER** use `gh pr review --approve` or `gh pr merge`
+7. **NEVER** merge merge requests - human review and merge required
+8. **NEVER** close work items - they will be auto-closed when merge request is merged by human
+9. **NEVER** use platform CLI to approve or merge
 
 ## Next Phase
 
-- **Approved by Agent:** PR awaits human review and merge
+- **Approved by Agent:** Merge request awaits human review and merge
 - **Changes requested:** **Implement Changes Agent**

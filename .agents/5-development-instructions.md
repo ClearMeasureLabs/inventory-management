@@ -10,17 +10,17 @@ Implement the feature or fix according to the technical design, following archit
 
 1. **Docker running:** `docker info`
 2. **Feature branch created:** `issues/[number]/[title-kebab-case]`
-3. **Draft PR exists:** `gh pr create --draft --title "[Title]" --body "Closes #[number]"`
+3. **Draft merge request exists:** Use platform CLI to create draft merge request with title and description linked to and completes work item #[number]
 4. **Tools installed:** `.\scripts\install_tools.ps1`
 
 ## Inputs
 
 | Input | Source |
 |-------|--------|
-| Conceptual definition | GitHub issue |
-| Technical design | GitHub issue comment |
-| UX design | GitHub issue comment (if applicable) |
-| Test design | GitHub issue comment (if applicable) |
+| Conceptual definition | Work item |
+| Technical design | Work item comment |
+| UX design | Work item comment (if applicable) |
+| Test design | Work item comment (if applicable) |
 
 ## Process
 
@@ -28,7 +28,7 @@ Implement the feature or fix according to the technical design, following archit
 2. **Add tests** - Unit, integration, Angular, and acceptance tests as specified
 3. **Validate** - Run `scripts/build_and_test.ps1` and fix all failures
 4. **Commit and push** - Clear commit messages to feature branch
-5. **Mark PR ready** - `gh pr ready [PR]` to move from draft to ready for review
+5. **Mark merge request ready** - Use platform CLI to move from draft to ready for review
 
 ## Architecture Rules
 
@@ -96,4 +96,4 @@ Expected output:
 
 ## Next Phase
 
-**Code Review** - Triggers when issue has `Code-Review-Ready` label
+**Code Review** - Triggers when work item has `Code-Review-Ready` label

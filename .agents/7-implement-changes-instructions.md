@@ -2,32 +2,32 @@
 
 ## Purpose
 
-Implement requested changes from code review feedback, fix issues, and re-submit the PR.
+Implement requested changes from code review feedback, fix issues, and re-submit the merge request.
 
 ## Trigger
 
-- PR converted to draft (automated via `.github/workflows/code-review-changes-cursor.yml`)
-- PR has review comments with requested changes
+- Merge request converted to draft (automated via `.github/workflows/code-review-changes-cursor.yml`)
+- Merge request has review comments with requested changes
 
 ## Inputs
 
 | Input | Source |
 |-------|--------|
-| Review comments | GitHub PR |
-| Linked issue | PR body ("Closes #N") |
-| Original requirements | GitHub issue |
-| Technical design | GitHub issue comment |
+| Review comments | Merge request |
+| Linked work item | Merge request description (linked to and completes work item #N) |
+| Original requirements | Work item |
+| Technical design | Work item comment |
 
 ## Process
 
 1. **Post starting comment:** "Starting automated implementation of requested changes..."
-2. **Fetch linked issue** - Read requirements and technical design
+2. **Fetch linked work item** - Read requirements and technical design
 3. **Read review comments** - Extract files, line numbers, and requested changes
 4. **Implement each change** - Locate code, apply fix, verify it works
 5. **Run validation:** `.\scripts\build_and_test.ps1`
 6. **Commit and push** - Single commit with summary of all changes
 7. **Post summary comment**
-8. **Mark PR ready for review** - `gh pr ready [PR]` to trigger Code Review agent
+8. **Mark merge request ready for review** - Use platform CLI to trigger Code Review agent
 
 ## Output Templates
 
@@ -71,7 +71,7 @@ Address review feedback: [summary]
 1. [Step]
 2. [Step]
 
-**Status:** PR remains in draft for manual attention.
+**Status:** Merge request remains in draft for manual attention.
 ```
 
 ## Rules
@@ -81,7 +81,7 @@ Address review feedback: [summary]
 3. **ALWAYS** run `build_and_test.ps1` before pushing
 4. **ALWAYS** use a single commit for all changes in one implementation cycle
 5. **ALWAYS** document unresolvable issues with clear explanation and suggested manual steps
-6. **NEVER** mark PR ready if significant issues remain unresolved
+6. **NEVER** mark merge request ready if significant issues remain unresolved
 7. **NEVER** introduce new issues - fixes MUST NOT break other functionality
 
 ## Flow
@@ -90,7 +90,7 @@ Address review feedback: [summary]
 Review Requests Changes
         │
         ▼
-   PR → Draft (triggers this agent)
+   Merge Request → Draft (triggers this agent)
         │
         ▼
    Implement Changes
@@ -110,5 +110,5 @@ Review Requests Changes
 Returns to **Code Review Agent** for re-evaluation.
 
 Cycle continues until:
-- PR approved (all checks pass), OR
+- Merge request approved (all checks pass), OR
 - Manual intervention required (unresolvable issues documented)

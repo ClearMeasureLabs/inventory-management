@@ -8,8 +8,8 @@ Create a detailed technical implementation plan identifying affected components,
 
 | Input | Source |
 |-------|--------|
-| Conceptual definition | GitHub issue |
-| UX design | GitHub issue comment (if applicable) |
+| Conceptual definition | Work item |
+| UX design | Work item comment (if applicable) |
 | Architecture rules | `.cursor/rules/architecture-rules.mdc` |
 | Testing rules | `.cursor/rules/automated-testing-rules.mdc` |
 
@@ -20,7 +20,7 @@ Create a detailed technical implementation plan identifying affected components,
 3. **Plan implementation steps** - Order by dependency, specify exact file paths
 4. **Identify dependencies** - Flag any package or SDK changes
 5. **Plan tests** - Specify unit, integration, and Angular tests
-6. **Post design** - Add as issue comment
+6. **Post design** - Add as work item comment
 
 ## Output Template
 

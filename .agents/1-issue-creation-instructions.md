@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Transform user requests into GitHub issues with complete conceptual definitions.
+Transform user requests into work items with complete conceptual definitions.
 
 ## Trigger
 
@@ -13,15 +13,15 @@ User requests a feature, enhancement, or bug fix that requires code changes.
 | Input | Source |
 |-------|--------|
 | User request | Conversation |
-| Codebase context | Repository |
+| Codebase context | Codebase |
 
 ## Process
 
 1. **Analyze the request** - Extract goal, UX requirements, authorization needs, and validation rules
 2. **Identify gaps** - Ask targeted follow-up questions for critical missing information only
 3. **Draft conceptual definition** - Use the template below
-4. **Get user confirmation** - NEVER create issues without explicit user approval
-5. **Create the issue** - Use `gh` CLI to create the issue
+4. **Get user confirmation** - NEVER create work items without explicit user approval
+5. **Create the work item** - Use platform CLI to create the work item
 6. **Update label** - Remove existing labels, add `UX-Design-Ready` (or `Technical-Design-Ready` for backend-only) to signal next phase
 
 ## Output Template
@@ -44,12 +44,12 @@ User requests a feature, enhancement, or bug fix that requires code changes.
 
 ## Rules
 
-1. **NEVER** create issues without user confirmation
+1. **NEVER** create work items without user confirmation
 2. **ALWAYS** extract maximum information from the initial request before asking questions
 3. **NEVER** ask more than 3 follow-up questions - batch related questions together
 4. **ALWAYS** include all five template fields (Goal, UX, Authorization, Validation, Acceptance Criteria)
 5. **ALWAYS** make acceptance criteria specific and testable
-6. **ALWAYS** use `gh` CLI for GitHub operations
+6. **ALWAYS** use platform CLI for work item operations
 
 ## Next Phase
 

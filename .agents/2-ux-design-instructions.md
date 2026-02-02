@@ -16,7 +16,7 @@ Design user experience for user-facing features, documenting user flows, UI comp
 
 | Input | Source |
 |-------|--------|
-| Conceptual definition | GitHub issue |
+| Conceptual definition | Work item |
 | Existing UI patterns | `src/Presentation/WebApp/` |
 | Current components | `src/app/components/` |
 
@@ -26,7 +26,7 @@ Design user experience for user-facing features, documenting user flows, UI comp
 2. **Design user flow** - Map step-by-step user interactions including error states
 3. **Identify UI components** - List components to create and modify
 4. **Document accessibility** - Keyboard navigation, screen readers, color contrast
-5. **Post design** - Add as issue comment
+5. **Post design** - Add as work item comment
 
 ## Output Template
 
@@ -62,4 +62,4 @@ Design user experience for user-facing features, documenting user flows, UI comp
 
 ## Next Phase
 
-**Technical Design** - Triggers when issue has `Technical-Design-Ready` label
+**Technical Design** - Triggers when work item has `Technical-Design-Ready` label

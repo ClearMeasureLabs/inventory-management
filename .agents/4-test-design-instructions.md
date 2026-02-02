@@ -17,9 +17,9 @@ Design end-to-end acceptance tests that validate user-facing features in a fully
 
 | Input | Source |
 |-------|--------|
-| Conceptual definition | GitHub issue |
-| UX design | GitHub issue comment |
-| Technical design | GitHub issue comment |
+| Conceptual definition | Work item |
+| UX design | Work item comment |
+| Technical design | Work item comment |
 | Existing tests | `src/Tests/AcceptanceTests/` |
 
 ## Process
@@ -27,7 +27,7 @@ Design end-to-end acceptance tests that validate user-facing features in a fully
 1. **Analyze acceptance criteria** - Map each criterion to testable scenarios
 2. **Design test scenarios** - Cover happy path and key error scenarios
 3. **Plan test data** - Document required data setup
-4. **Post design** - Add as issue comment
+4. **Post design** - Add as work item comment
 
 ## Output Template (Tests Required)
 
@@ -85,4 +85,4 @@ Run via: `.\scripts\acceptance_tests.ps1`
 
 ## Next Phase
 
-**Development** - Triggers when issue has `Development-Ready` label
+**Development** - Triggers when work item has `Development-Ready` label
