@@ -31,7 +31,7 @@
         aria-label="Filter containers by name">
       @if (searchText) {
         <button
-          class="btn btn-outline-secondary"
+          class="btn btn-secondary"
           type="button"
           (click)="clearSearch()"
           aria-label="Clear search">
@@ -88,7 +88,7 @@
           <td>{{ container.name }}</td>
           <td>
             <button 
-              class="btn btn-outline-primary btn-sm me-1" 
+              class="btn btn-primary btn-sm me-1" 
               type="button" 
               (click)="openEditModal(container)"
               title="Edit container"
@@ -98,7 +98,7 @@
               </svg>
             </button>
             <button 
-              class="btn btn-outline-danger btn-sm" 
+              class="btn btn-danger btn-sm" 
               type="button" 
               (click)="openDeleteModal(container)"
               title="Delete container"
