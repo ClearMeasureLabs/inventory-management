@@ -275,4 +275,41 @@ describe('ContainerDetailsComponent', () => {
     expect(editButton).toBeNull();
     expect(deleteButton).toBeNull();
   }));
+
+  // Button class tests for WorkItem #136
+  it('should render Edit button with btn-primary class', fakeAsync(() => {
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/1`);
+    req.flush({ containerId: 1, name: 'Test Container', description: 'Test Description' });
+
+    tick();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const editButton = compiled.querySelector('button[aria-label="Edit container"]');
+    expect(editButton).toBeTruthy();
+    expect(editButton?.classList.contains('btn-primary')).toBeTrue();
+    
+    // Verify no outline variant
+    expect(editButton?.classList.contains('btn-outline-primary')).toBeFalse();
+  }));
+
+  it('should render Delete button with btn-danger class', fakeAsync(() => {
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/1`);
+    req.flush({ containerId: 1, name: 'Test Container', description: 'Test Description' });
+
+    tick();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const deleteButton = compiled.querySelector('button[aria-label="Delete container"]');
+    expect(deleteButton).toBeTruthy();
+    expect(deleteButton?.classList.contains('btn-danger')).toBeTrue();
+    
+    // Verify no outline variant
+    expect(deleteButton?.classList.contains('btn-outline-danger')).toBeFalse();
+  }));
 });
