@@ -52,7 +52,7 @@ Ivan is a full-stack inventory management application that tracks containers and
 4. **Build and run tests**
 
    ```powershell
-   .\scripts\build_and_test.ps1
+   .\scripts\private_build.ps1
    ```
 
 ### Running the Application
@@ -89,7 +89,7 @@ Migrations are generated in `src/Infrastructure/SQLServer/Migrations/`. The migr
 | Script | Description |
 |--------|-------------|
 | `scripts\install_tools.ps1` | Install EF Core tools and Angular dependencies |
-| `scripts\build_and_test.ps1` | Build Angular app, build solution, and run all tests |
+| `scripts\private_build.ps1` | Build Angular app, build solution, and run all tests |
 | `scripts\add_migration.ps1 -MigrationName <name>` | Add a new EF Core migration |
 | `environments\local\provision.ps1` | Start local infrastructure via Docker |
 
@@ -229,7 +229,7 @@ npm test -- --watch=false --browsers=ChromeHeadless
 ### Run All Tests
 
 ```powershell
-.\scripts\build_and_test.ps1
+.\scripts\private_build.ps1
 ```
 
 This runs all test suites: .NET unit tests, .NET integration tests, and Angular component tests.
