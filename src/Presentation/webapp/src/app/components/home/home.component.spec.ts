@@ -140,7 +140,7 @@ describe('HomeComponent', () => {
     fixture.detectChanges();
     
     const compiled = fixture.nativeElement as HTMLElement;
-    const deleteButtons = compiled.querySelectorAll('button.btn-outline-danger');
+    const deleteButtons = compiled.querySelectorAll('button.btn-danger');
     expect(deleteButtons.length).toBe(2);
   }));
 
@@ -427,5 +427,57 @@ describe('HomeComponent', () => {
 
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.textContent).toContain('No containers found matching');
+  }));
+
+  it('should render Edit buttons with btn-primary class', fakeAsync(() => {
+    const mockContainers = [
+      { containerId: 1, name: 'Container 1', description: '' },
+      { containerId: 2, name: 'Container 2', description: '' }
+    ];
+
+    fixture.detectChanges();
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers`);
+    req.flush(mockContainers);
+    tick();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const editButtons = compiled.querySelectorAll('button.btn-primary.btn-sm');
+    expect(editButtons.length).toBe(2);
+  }));
+
+  it('should render Delete buttons with btn-danger class', fakeAsync(() => {
+    const mockContainers = [
+      { containerId: 1, name: 'Container 1', description: '' },
+      { containerId: 2, name: 'Container 2', description: '' }
+    ];
+
+    fixture.detectChanges();
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers`);
+    req.flush(mockContainers);
+    tick();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const deleteButtons = compiled.querySelectorAll('button.btn-danger.btn-sm');
+    expect(deleteButtons.length).toBe(2);
+  }));
+
+  it('should render Clear search button with btn-secondary class', fakeAsync(() => {
+    const mockContainers = [
+      { containerId: 1, name: 'Container 1', description: '' }
+    ];
+
+    fixture.detectChanges();
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers`);
+    req.flush(mockContainers);
+    tick();
+
+    component.searchText = 'test';
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const clearButton = compiled.querySelector('button.btn-secondary[aria-label="Clear search"]');
+    expect(clearButton).toBeTruthy();
   }));
 });

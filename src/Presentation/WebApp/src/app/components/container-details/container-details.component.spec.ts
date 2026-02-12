@@ -275,4 +275,32 @@ describe('ContainerDetailsComponent', () => {
     expect(editButton).toBeNull();
     expect(deleteButton).toBeNull();
   }));
+
+  it('should render Edit button with btn-primary class', fakeAsync(() => {
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/1`);
+    req.flush({ containerId: 1, name: 'Test Container', description: 'Test Description' });
+
+    tick();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const editButton = compiled.querySelector('button.btn-primary[aria-label="Edit container"]');
+    expect(editButton).toBeTruthy();
+  }));
+
+  it('should render Delete button with btn-danger class', fakeAsync(() => {
+    fixture.detectChanges();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/containers/1`);
+    req.flush({ containerId: 1, name: 'Test Container', description: 'Test Description' });
+
+    tick();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const deleteButton = compiled.querySelector('button.btn-danger[aria-label="Delete container"]');
+    expect(deleteButton).toBeTruthy();
+  }));
 });
