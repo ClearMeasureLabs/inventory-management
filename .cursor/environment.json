@@ -1,5 +1,0 @@
-{
-  "snapshot": "snapshot-20260124-dc0f3074-7246-4b5b-880f-a65c702edb54",
-  "terminals": [],
-  "start": "gh auth login --with-token"
-}
