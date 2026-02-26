@@ -7,8 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 var basePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new DirectoryNotFoundException("Assembly Location");
 
-builder.Configuration.GetConfiguration(basePath)
-    .AddJsonFile("appsettings.json", optional: false);
+builder.Configuration.GetConfiguration(basePath);
 
 // Add services to the container.
 builder.Services.AddControllers();

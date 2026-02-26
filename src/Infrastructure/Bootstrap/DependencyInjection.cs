@@ -28,8 +28,9 @@ public static class DependencyInjection
     {
         builder
             .SetBasePath(basePath)
-            .AddJsonFile(Path.Combine("config", "local.config.json"), optional: false, reloadOnChange: true)
-            .AddJsonFile(Path.Combine("config", "global.config.json"), optional: false, reloadOnChange: true)
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .AddJsonFile(Path.Combine("config", "global.config.json"), optional: true, reloadOnChange: true)
+            .AddJsonFile(Path.Combine("config", "local.config.json"), optional: true, reloadOnChange: true)
             .AddEnvironmentVariables();
 
         return builder;
