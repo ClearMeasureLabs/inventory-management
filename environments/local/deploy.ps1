@@ -17,6 +17,20 @@ $projectName = $globalConfig.Project.Name.ToLower().Replace(" ", "_")
 # Read the local configuration
 $localConfig = Get-Content -Path "local.config.json" -Raw | ConvertFrom-Json
 
+# Load secrets from .env file (if not already set via environment variables)
+$envFile = Join-Path $PSScriptRoot ".env"
+if (Test-Path $envFile) {
+    Get-Content $envFile | ForEach-Object {
+        if ($_ -match '^\s*([^#][^=]+)=(.*)$') {
+            $key = $matches[1].Trim()
+            $value = $matches[2].Trim()
+            if (-not (Test-Path "env:$key")) {
+                Set-Item -Path "env:$key" -Value $value
+            }
+        }
+    }
+}
+
 # Define infrastructure container names
 $infraContainers = @("sqlserver", "rabbitmq", "redis", "redis-insight")
 
@@ -57,17 +71,13 @@ if ($missingContainers.Count -gt 0) {
     Write-Host "All infrastructure containers are running." -ForegroundColor Green
 }
 
-# Set environment variables for docker compose
+# Set environment variables for docker compose (secrets come from .env, non-secrets use defaults)
 $env:SQL_DATABASE = $globalConfig.SqlServer.Database
-$env:SQL_SA_PASSWORD = $localConfig.SqlServer.Password
-$env:SQL_USER = $localConfig.SqlServer.User
-$env:SQL_PORT = $localConfig.SqlServer.Port
-$env:RABBITMQ_USER = $localConfig.RabbitMQ.User
-$env:RABBITMQ_PASSWORD = $localConfig.RabbitMQ.Password
-$env:RABBITMQ_PORT = $localConfig.RabbitMQ.Port
-$env:REDIS_PORT = $localConfig.Redis.Port
-$env:WEBAPI_PORT = "5000"
-$env:WEBAPP_PORT = "4200"
+$env:SQL_PORT = if ($env:SQL_PORT) { $env:SQL_PORT } else { "1433" }
+$env:RABBITMQ_PORT = if ($env:RABBITMQ_PORT) { $env:RABBITMQ_PORT } else { "5672" }
+$env:REDIS_PORT = if ($env:REDIS_PORT) { $env:REDIS_PORT } else { "6379" }
+$env:WEBAPI_PORT = if ($env:WEBAPI_PORT) { $env:WEBAPI_PORT } else { "5000" }
+$env:WEBAPP_PORT = if ($env:WEBAPP_PORT) { $env:WEBAPP_PORT } else { "4200" }
 
 # Disable BuildKit to avoid transient build issues
 $env:DOCKER_BUILDKIT = "0"
